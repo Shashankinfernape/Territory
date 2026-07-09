@@ -60,6 +60,15 @@ class UserInDB(BaseModel):
     kyc_details: Optional[KYCDetails] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+    def to_insert_dict(self) -> dict:
+        """Return a dict safe for MongoDB insertion.
+
+        Excludes the ``_id`` key entirely when it is None so MongoDB can
+        auto-generate the ObjectId.  Passing ``_id: None`` causes a
+        WriteError because MongoDB rejects null _id values.
+        """
+        return self.model_dump(by_alias=True, exclude_none=True)
+
 
 class UserResponse(BaseModel):
     id: str
@@ -80,6 +89,7 @@ class PropertyCreate(BaseModel):
     type: str  # Agricultural Land, Flat Plot, Farm Land, Residential Plot, Commercial Plot
     keywords: List[str] = []
     description: Optional[str] = None
+    documents: List[dict] = [] # list of {"type": str, "url": str}
     # Extra details for better search
     soil_type: Optional[str] = None        # Red, Black, Alluvial, Laterite
     water_source: Optional[str] = None     # Borewell, Canal, River, Rainfed, None
@@ -114,7 +124,7 @@ class PropertyUpdate(BaseModel):
 class PropertyInDB(PropertyCreate):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     seller_id: str
-    status: str = "ACTIVE"
+    status: str = "PENDING_VERIFICATION"
     view_count: int = 0
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -125,7 +135,7 @@ class PropertyInDB(PropertyCreate):
         auto-generate the ObjectId.  Passing ``_id: None`` causes a
         WriteError because MongoDB rejects null _id values.
         """
-        return self.dict(by_alias=True, exclude_none=True)
+        return self.model_dump(by_alias=True, exclude_none=True)
 
 
 class PropertyResponse(PropertyCreate):

@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Form, UploadFile, File
+import os
+import shutil
+import uuid
 from typing import List, Optional
 from database import get_db
 from models import PropertyCreate, PropertyInDB, PropertyResponse, PropertyUpdate
@@ -22,6 +25,7 @@ def _doc_to_response(document) -> PropertyResponse:
         type=document["type"],
         keywords=document.get("keywords", []),
         description=document.get("description"),
+        documents=document.get("documents", []),
         status=document["status"],
         view_count=document.get("view_count", 0),
         soil_type=document.get("soil_type"),
@@ -100,14 +104,77 @@ async def get_properties(
 
 @router.post("/", response_model=PropertyResponse)
 async def create_property(
-    property_data: PropertyCreate,
+    city: str = Form(...),
+    district: str = Form(""),
+    state: str = Form("Tamil Nadu"),
+    area: float = Form(...),
+    area_unit: str = Form(...),
+    price: float = Form(...),
+    type: str = Form(...),
+    keywords: str = Form(""),
+    description: str = Form(None),
+    soil_type: str = Form(None),
+    water_source: str = Form(None),
+    road_access: str = Form(None),
+    fencing: str = Form(None),
+    electricity: bool = Form(False),
+    irrigation: bool = Form(False),
+    nearby_town: str = Form(None),
+    distance_from_town_km: float = Form(None),
+    doc_types: List[str] = Form(...),
+    files: List[UploadFile] = File(...),
     db=Depends(get_db),
     current_user=Depends(get_current_user),
 ):
     if current_user["role"] != "SELLER":
         raise HTTPException(status_code=403, detail="Only sellers can list properties")
 
-    new_property = PropertyInDB(**property_data.dict(), seller_id=str(current_user["_id"]))
+    if len(doc_types) != len(files) or len(files) == 0:
+        raise HTTPException(status_code=400, detail="All document types must have a corresponding file.")
+
+    # Process and save documents
+    documents = []
+    os.makedirs("uploads/documents", exist_ok=True)
+    for dtype, file in zip(doc_types, files):
+        if not file.filename:
+            raise HTTPException(status_code=400, detail="Empty file submitted.")
+        
+        ext = file.filename.split('.')[-1]
+        unique_filename = f"{uuid.uuid4().hex}.{ext}"
+        filepath = os.path.join("uploads/documents", unique_filename)
+        
+        with open(filepath, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        documents.append({"type": dtype, "url": f"/{filepath.replace(os.sep, '/')}"})
+
+    keyword_list = [k.strip() for k in keywords.split(",")] if keywords else []
+
+    property_data = {
+        "city": city,
+        "district": district,
+        "state": state,
+        "area": area,
+        "area_unit": area_unit,
+        "price": price,
+        "type": type,
+        "keywords": keyword_list,
+        "description": description,
+        "soil_type": soil_type,
+        "water_source": water_source,
+        "road_access": road_access,
+        "fencing": fencing,
+        "electricity": electricity,
+        "irrigation": irrigation,
+        "nearby_town": nearby_town,
+        "distance_from_town_km": distance_from_town_km,
+        "documents": documents
+    }
+    
+    # Remove None values
+    property_data = {k: v for k, v in property_data.items() if v is not None}
+
+    new_property = PropertyInDB(**property_data, seller_id=str(current_user["_id"]))
     # to_insert_dict() excludes _id: None so MongoDB auto-generates the ObjectId.
     result = await db.properties.insert_one(new_property.to_insert_dict())
 
@@ -145,12 +212,27 @@ async def get_property_by_id(property_id: str, db=Depends(get_db)):
     return _doc_to_response(document)
 
 
+import json
+
 @router.put("/{property_id}", response_model=PropertyResponse)
 async def update_property(
     property_id: str,
-    # Fix: use validated PropertyUpdate instead of raw dict to prevent
-    # tampering with protected fields (seller_id, status, view_count, etc.)
-    property_data: PropertyUpdate,
+    city: str = Form(None),
+    district: str = Form(None),
+    state: str = Form(None),
+    price: float = Form(None),
+    description: str = Form(None),
+    soil_type: str = Form(None),
+    water_source: str = Form(None),
+    road_access: str = Form(None),
+    fencing: str = Form(None),
+    electricity: bool = Form(None),
+    irrigation: bool = Form(None),
+    nearby_town: str = Form(None),
+    distance_from_town_km: float = Form(None),
+    retained_documents: str = Form("[]"), # JSON array of document objects to keep
+    doc_types: List[str] = Form([]),
+    files: List[UploadFile] = File([]),
     db=Depends(get_db),
     current_user=Depends(get_current_user),
 ):
@@ -167,8 +249,48 @@ async def update_property(
     if existing["seller_id"] != str(current_user["_id"]) and current_user["role"] != "ADMIN":
         raise HTTPException(status_code=403, detail="Not your property")
 
-    # Only push fields that were explicitly provided (exclude unset None values).
-    update_fields = property_data.dict(exclude_none=True)
+    update_fields = {}
+    if city is not None: update_fields["city"] = city
+    if district is not None: update_fields["district"] = district
+    if state is not None: update_fields["state"] = state
+    if price is not None: update_fields["price"] = price
+    if description is not None: update_fields["description"] = description
+    if soil_type is not None: update_fields["soil_type"] = soil_type
+    if water_source is not None: update_fields["water_source"] = water_source
+    if road_access is not None: update_fields["road_access"] = road_access
+    if fencing is not None: update_fields["fencing"] = fencing
+    if electricity is not None: update_fields["electricity"] = electricity
+    if irrigation is not None: update_fields["irrigation"] = irrigation
+    if nearby_town is not None: update_fields["nearby_town"] = nearby_town
+    if distance_from_town_km is not None: update_fields["distance_from_town_km"] = distance_from_town_km
+
+    # Process documents
+    documents = []
+    try:
+        retained = json.loads(retained_documents)
+        if isinstance(retained, list):
+            documents.extend(retained)
+    except:
+        pass
+
+    if len(doc_types) != len(files):
+        raise HTTPException(status_code=400, detail="Mismatched documents and files.")
+
+    if len(files) > 0 and files[0].filename:
+        os.makedirs("uploads/documents", exist_ok=True)
+        for dtype, file in zip(doc_types, files):
+            if file.filename:
+                ext = file.filename.split('.')[-1]
+                unique_filename = f"{uuid.uuid4().hex}.{ext}"
+                filepath = os.path.join("uploads/documents", unique_filename)
+                
+                with open(filepath, "wb") as buffer:
+                    shutil.copyfileobj(file.file, buffer)
+                    
+                documents.append({"type": dtype, "url": f"/{filepath.replace(os.sep, '/')}"})
+                
+    update_fields["documents"] = documents
+
     if not update_fields:
         raise HTTPException(status_code=400, detail="No valid fields to update")
 

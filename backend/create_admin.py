@@ -21,13 +21,13 @@ here would require wrapping everything in asyncio.run(), which works but adds
 unnecessary complexity for a simple one-shot CLI script.
 """
 import os
-from passlib.context import CryptContext
+import bcrypt
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
 load_dotenv()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 
 def create_admin() -> None:
@@ -55,7 +55,7 @@ def create_admin() -> None:
 
     admin_user = {
         "phone_number": phone_number,
-        "password_hash": pwd_context.hash(password),
+        "password_hash": bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
         "role": "ADMIN",
         "full_name": "System Administrator",
     }

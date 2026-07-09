@@ -46,27 +46,44 @@ export default function UploadProperty() {
     setLoading(true);
     setError('');
 
+    // Validate docs
+    for (let i = 0; i < docs.length; i++) {
+      if (!docs[i].file) {
+        setError(`Please attach a file for ${docs[i].type} or remove it.`);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const keywordList = keywords.split(',').map(k => k.trim()).filter(k => k);
+      const formData = new FormData();
+      formData.append('city', city);
+      formData.append('district', district);
+      formData.append('state', state);
+      formData.append('type', type);
+      formData.append('area', area);
+      formData.append('area_unit', areaUnit);
+      formData.append('price', price);
+      
+      if (description) formData.append('description', description);
+      if (keywordList.length > 0) formData.append('keywords', keywordList.join(','));
+      if (soilType) formData.append('soil_type', soilType);
+      if (waterSource) formData.append('water_source', waterSource);
+      if (roadAccess) formData.append('road_access', roadAccess);
+      if (fencing) formData.append('fencing', fencing);
+      formData.append('electricity', electricity.toString());
+      formData.append('irrigation', irrigation.toString());
+      if (nearbyTown) formData.append('nearby_town', nearbyTown);
+      if (distFromTown) formData.append('distance_from_town_km', distFromTown);
 
-      await api.post('/properties/', {
-        city,
-        district,
-        state,
-        type,
-        area: parseFloat(area),
-        area_unit: areaUnit,
-        price: parseFloat(price),
-        description: description || undefined,
-        keywords: keywordList,
-        soil_type: soilType || undefined,
-        water_source: waterSource || undefined,
-        road_access: roadAccess || undefined,
-        fencing: fencing || undefined,
-        electricity,
-        irrigation,
-        nearby_town: nearbyTown || undefined,
-        distance_from_town_km: distFromTown ? parseFloat(distFromTown) : undefined,
+      docs.forEach(doc => {
+        formData.append('doc_types', doc.type);
+        formData.append('files', doc.file as File);
+      });
+
+      await api.post('/properties/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       navigate('/dashboard/seller');
@@ -234,7 +251,7 @@ export default function UploadProperty() {
           {/* --- DOCUMENTS --- */}
           <div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2 border-b pb-2">📄 Upload Documents</h3>
-            <p className="text-sm text-gray-500 mb-4">Buyers will only see these after paying the ₹500 unlock fee.</p>
+            <p className="text-sm text-gray-500 mb-4">Please upload all necessary documents. All files are mandatory for verification.</p>
 
             <div className="space-y-4">
               {docs.map((doc, index) => (
@@ -251,7 +268,16 @@ export default function UploadProperty() {
                     <option>Parent Document</option>
                     <option>Other</option>
                   </select>
-                  <input type="file" className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-emerald-600 cursor-pointer" />
+                  <input type="file" required onChange={(e) => {
+                    const newDocs = [...docs];
+                    newDocs[index].file = e.target.files ? e.target.files[0] : null;
+                    setDocs(newDocs);
+                  }} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-emerald-600 cursor-pointer" />
+                  {docs.length > 1 && (
+                    <button type="button" onClick={() => setDocs(docs.filter((_, i) => i !== index))} className="text-red-500 hover:text-red-700 p-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

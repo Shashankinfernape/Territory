@@ -2,8 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/auth/Login';
-import RegisterBuyer from './pages/auth/RegisterBuyer';
-import RegisterSeller from './pages/auth/RegisterSeller';
+import Contact from './pages/Contact';
+import Help from './pages/Help';
 import Home from './pages/buyer/Home';
 import PropertyDetails from './pages/buyer/PropertyDetails';
 import SellerDashboard from './pages/seller/Dashboard';
@@ -23,8 +23,8 @@ function App() {
           <Route index element={<Home />} />
           <Route path="property/:id" element={<PropertyDetails />} />
           <Route path="login" element={<Login />} />
-          <Route path="register/buyer" element={<RegisterBuyer />} />
-          <Route path="register/seller" element={<RegisterSeller />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="help" element={<Help />} />
 
           {/* Protected: Buyer */}
           <Route path="dashboard/buyer" element={
