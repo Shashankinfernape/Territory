@@ -8,6 +8,8 @@ export default function SecureViewer() {
   const { propertyId, docIndex } = useParams<{ propertyId: string; docIndex: string }>();
   const navigate = useNavigate();
   const userPhone = localStorage.getItem('user_phone') ?? 'PROPIT USER';
+  const role = localStorage.getItem('user_role');
+  const dashboardPath = role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer');
 
   const [state, setState] = useState<ViewerState>('loading');
   const [docUrl, setDocUrl] = useState<string | null>(null);
@@ -112,10 +114,10 @@ export default function SecureViewer() {
   // Redirect unauthorized buyers back to their dashboard
   useEffect(() => {
     if (state === 'unauthorized') {
-      const timer = setTimeout(() => navigate('/dashboard/buyer'), 2500);
+      const timer = setTimeout(() => navigate(dashboardPath), 2500);
       return () => clearTimeout(timer);
     }
-  }, [state, navigate]);
+  }, [state, navigate, dashboardPath]);
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col fixed inset-0 z-[100]">
@@ -130,7 +132,7 @@ export default function SecureViewer() {
             CONFIDENTIAL &mdash; DO NOT COPY
           </span>
           <Link
-            to="/dashboard/buyer"
+            to={dashboardPath}
             className="text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors border border-gray-700 text-sm"
           >
             Close
@@ -178,7 +180,7 @@ export default function SecureViewer() {
             </div>
             <h2 className="text-xl font-bold text-yellow-400 mb-2">Document Not Found</h2>
             <p className="text-gray-400 text-sm">This document could not be loaded.</p>
-            <Link to="/dashboard/buyer" className="mt-4 inline-block text-green-400 hover:underline text-sm">
+            <Link to={dashboardPath} className="mt-4 inline-block text-green-400 hover:underline text-sm">
               Back to Dashboard
             </Link>
           </div>

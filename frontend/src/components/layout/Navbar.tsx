@@ -93,7 +93,7 @@ export default function Navbar() {
               Browse
             </Link>
             {loggedIn && (
-              <Link to={role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/buyer'} className={`nav-menu-link${isActive('/dashboard') ? ' active' : ''}`}>
+              <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} className={`nav-menu-link${isActive('/dashboard') ? ' active' : ''}`}>
                 Dashboard
               </Link>
             )}
@@ -182,7 +182,7 @@ export default function Navbar() {
                         onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
                         onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>Admin Panel</Link>
                     ) : (
-                      <Link to="/dashboard/buyer" onClick={() => setDropdownOpen(false)}
+                      <Link to={role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer'} onClick={() => setDropdownOpen(false)}
                         style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
                         onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
                         onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>My Dashboard</Link>

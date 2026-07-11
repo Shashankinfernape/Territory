@@ -51,6 +51,7 @@ export default function Login() {
       localStorage.setItem('user_phone', phone_number);
       window.dispatchEvent(new Event('storage'));
       if (userRole === 'ADMIN') navigate('/dashboard/admin');
+      else if (userRole === 'SELLER') navigate('/dashboard/seller');
       else navigate('/dashboard/buyer');
     } catch (err: any) {
       console.error(err);
