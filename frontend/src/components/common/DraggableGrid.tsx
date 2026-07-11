@@ -152,13 +152,15 @@ export default function DraggableGrid<T>({
 
         if (draggedIndex !== null && hoveredIndex !== null && !isDragged) {
           const rects = initialRectsRef.current;
-          if (rects[index] && rects[index - 1] && rects[index + 1]) {
-            if (draggedIndex < hoveredIndex && index > draggedIndex && index <= hoveredIndex) {
-              // Shift left/up to the position of index - 1
+          if (draggedIndex < hoveredIndex && index > draggedIndex && index <= hoveredIndex) {
+            // Shift left/up to the position of index - 1
+            if (rects[index] && rects[index - 1]) {
               shiftX = rects[index - 1].left - rects[index].left;
               shiftY = rects[index - 1].top - rects[index].top;
-            } else if (draggedIndex > hoveredIndex && index >= hoveredIndex && index < draggedIndex) {
-              // Shift right/down to the position of index + 1
+            }
+          } else if (draggedIndex > hoveredIndex && index >= hoveredIndex && index < draggedIndex) {
+            // Shift right/down to the position of index + 1
+            if (rects[index] && rects[index + 1]) {
               shiftX = rects[index + 1].left - rects[index].left;
               shiftY = rects[index + 1].top - rects[index].top;
             }

@@ -282,9 +282,25 @@ export default function AdminDashboard() {
                         </button>
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                          <button onClick={() => handleEditProperty(p.id)} style={{ background: 'none', border: 'none', color: '#007aff', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Edit</button>
-                          <button onClick={() => handleDeleteProperty(p.id)} style={{ background: 'none', border: 'none', color: '#ff3b30', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>
+                        <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'center' }}>
+                          {p.status === 'PENDING_VERIFICATION' && (
+                            <>
+                              <button
+                                onClick={() => handleVerify(p.id, 'ACTIVE')}
+                                style={{ background: 'none', border: 'none', color: '#1a6b45', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}
+                              >
+                                Accept
+                              </button>
+                              <button
+                                onClick={() => handleVerify(p.id, 'REJECTED')}
+                                style={{ background: 'none', border: 'none', color: '#ff3b30', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
+                          <button onClick={() => handleEditProperty(p.id)} style={{ background: 'none', border: 'none', color: '#007aff', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>Edit</button>
+                          <button onClick={() => handleDeleteProperty(p.id)} style={{ background: 'none', border: 'none', color: '#ff3b30', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>Delete</button>
                         </div>
                       </td>
                     </tr>

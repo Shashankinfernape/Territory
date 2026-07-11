@@ -90,17 +90,108 @@ export default function PropertyDetails() {
                 boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px'
               }}>
                 <div style={{
-                  position: 'absolute', inset: 0,
+                  position: 'absolute',
+                  inset: 0,
                   backgroundImage: `url(${activeImage})`,
-                  backgroundSize: 'cover', backgroundPosition: 'center',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
                   filter: 'brightness(0.9)',
                   transition: 'background-image 0.25s ease'
                 }} />
+
+                {/* Left/Right Carousel Controls */}
+                {galleryImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveImageIndex(prev => (prev === 0 ? galleryImages.length - 1 : prev - 1));
+                      }}
+                      style={{
+                        position: 'absolute',
+                        left: '1.25rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '50%',
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        border: '1.5px solid rgba(0, 0, 0, 0.05)',
+                        backdropFilter: 'blur(8px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        zIndex: 20,
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
+                        transition: 'all 0.15s ease',
+                        color: '#101010'
+                      }}
+                      onMouseEnter={el => {
+                        el.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
+                        el.currentTarget.style.background = '#ffffff';
+                      }}
+                      onMouseLeave={el => {
+                        el.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+                        el.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                      }}
+                      title="Previous Image"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveImageIndex(prev => (prev === galleryImages.length - 1 ? 0 : prev + 1));
+                      }}
+                      style={{
+                        position: 'absolute',
+                        right: '1.25rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '50%',
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        border: '1.5px solid rgba(0, 0, 0, 0.05)',
+                        backdropFilter: 'blur(8px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        zIndex: 20,
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
+                        transition: 'all 0.15s ease',
+                        color: '#101010'
+                      }}
+                      onMouseEnter={el => {
+                        el.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
+                        el.currentTarget.style.background = '#ffffff';
+                      }}
+                      onMouseLeave={el => {
+                        el.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+                        el.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                      }}
+                      title="Next Image"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+
                 <div style={{
                   position: 'absolute', inset: 0,
                   display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
                   padding: '2rem', background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)',
-                  color: '#ffffff'
+                  color: '#ffffff',
+                  pointerEvents: 'none' // allow clicking buttons behind the overlay text if needed
                 }}>
                   <span className="badge-active" style={{ alignSelf: 'flex-start', marginBottom: '0.75rem' }}>
                     {prop.type}

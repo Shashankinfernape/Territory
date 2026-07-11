@@ -54,12 +54,12 @@ function GalleryItemThumbnail({
         position: 'relative',
         height: '90px',
         borderRadius: '6px',
-        border: isDragging ? '2px dashed #101010' : '1px solid #e5e7eb',
+        border: isDragging ? '2.5px solid #101010' : '1px solid #e5e7eb',
         overflow: 'hidden',
-        cursor: 'grab',
-        background: isDragging ? 'rgba(16, 16, 16, 0.05)' : '#f4f4f4',
-        boxShadow: isDragging ? 'none' : 'rgba(36, 36, 36, 0.04) 0px 2px 4px 0px',
-        opacity: isDragging ? 0.35 : 1,
+        cursor: 'grabbing',
+        background: '#f4f4f4',
+        boxShadow: 'rgba(36, 36, 36, 0.08) 0px 4px 12px 0px',
+        opacity: 1,
         width: '100%',
         transition: 'all 0.25s ease'
       }}
@@ -164,13 +164,42 @@ export default function EditProperty() {
     setNewDocs(updated);
   };
   // Image upload handler
-  const handleImagesSelected = (files: File[]) => {
+  const handleImagesSelected = async (files: File[]) => {
     const imageFiles = files.filter(f => f.type.startsWith('image/'));
-    const newItems: GalleryItem[] = imageFiles.map((file, i) => ({
-      id: `new-${Date.now()}-${i}`,
-      file
-    }));
-    setGalleryItems(prev => [...prev, ...newItems]);
+    const validated: File[] = [];
+    let hasPortrait = false;
+
+    for (const file of imageFiles) {
+      const isLandscape = await new Promise<boolean>((resolve) => {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(img.src);
+          // Strictly width > height to reject portrait and square layouts
+          resolve(img.width > img.height);
+        };
+        img.onerror = () => {
+          resolve(false);
+        };
+      });
+      if (isLandscape) {
+        validated.push(file);
+      } else {
+        hasPortrait = true;
+      }
+    }
+
+    if (hasPortrait) {
+      setError('Portrait images are not allowed. Please upload landscape photos only.');
+    }
+
+    if (validated.length > 0) {
+      const newItems: GalleryItem[] = validated.map((file, i) => ({
+        id: `new-${Date.now()}-${i}`,
+        file
+      }));
+      setGalleryItems(prev => [...prev, ...newItems]);
+    }
   };
 
   const handleRemoveGalleryItem = (index: number) => {
@@ -397,7 +426,7 @@ export default function EditProperty() {
 
                 <FileDropzone
                   label="Add Deed Documents"
-                  helperText="Drag & drop new deed documents or click to browse"
+                  helperText="Click or drag to upload • PDF or JPG"
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                   multiple
                   onFilesSelected={handleDocsSelected}
@@ -447,7 +476,7 @@ export default function EditProperty() {
 
                 <FileDropzone
                   label="Add Gallery Photos"
-                  helperText="Drag & drop new photos (JPG, PNG) or click to browse"
+                  helperText="Click or drag to upload • Landscape only"
                   accept="image/*"
                   multiple
                   isImageDropzone
