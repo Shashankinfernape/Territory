@@ -45,9 +45,11 @@ def create_admin() -> None:
 
     # Check if admin user exists in Firebase Auth
     firebase_user = None
+    uid = None
     try:
         firebase_user = auth.get_user_by_email(email)
         print(f"Admin already exists in Firebase Auth (UID: {firebase_user.uid}).")
+        uid = firebase_user.uid
     except auth.UserNotFoundError:
         # Create user in Firebase Auth
         try:
@@ -58,6 +60,7 @@ def create_admin() -> None:
                 display_name="System Administrator",
             )
             print(f"Admin user created in Firebase Auth (UID: {firebase_user.uid}).")
+            uid = firebase_user.uid
         except Exception as e:
             # Try without phone number in case of formatting or duplicate phone issues
             try:
@@ -67,17 +70,20 @@ def create_admin() -> None:
                     display_name="System Administrator",
                 )
                 print(f"Admin user created in Firebase Auth without phone number (UID: {firebase_user.uid}).")
+                uid = firebase_user.uid
             except Exception as ex:
                 print(f"Error creating admin in Firebase Auth: {ex}")
                 client.close()
                 return
+    except Exception as e:
+        print(f"\n[Warning] Firebase Auth communication failed: {e}")
+        print("Proceeding to sync default Admin account directly to MongoDB...")
+        uid = "jX2SisGiSsf0O3LqCNwH1W6dGw52"
 
-    if not firebase_user:
-        print("Failed to resolve or create Firebase Admin user.")
+    if not uid:
+        print("Failed to resolve or create Admin user UID.")
         client.close()
         return
-
-    uid = firebase_user.uid
 
     # Sync to MongoDB
     existing = db.users.find_one({"_id": uid})

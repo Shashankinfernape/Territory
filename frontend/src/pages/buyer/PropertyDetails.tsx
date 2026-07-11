@@ -65,7 +65,7 @@ export default function PropertyDetails() {
         </Link>
 
         {/* Two-Column Classified Layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+        <div className="details-grid">
           
           {/* Main Content Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -106,7 +106,7 @@ export default function PropertyDetails() {
                 Property Specifications
               </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem', marginBottom: '2rem' }}>
+              <div className="specs-grid">
                 <div>
                   <p style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Land Area</p>
                   <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#242424', marginTop: '0.2rem', letterSpacing: '-0.2px' }}>{prop.area} {prop.area_unit}</p>
@@ -132,7 +132,7 @@ export default function PropertyDetails() {
               <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.75rem', marginBottom: '1.25rem', letterSpacing: '0.01em' }}>
                 Attributes & Highlights
               </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="attributes-grid">
                 {[
                   { label: 'Soil Type', val: prop.soil_type || 'Unspecified' },
                   { label: 'Water Source', val: prop.water_source ? prop.water_source : 'None' },

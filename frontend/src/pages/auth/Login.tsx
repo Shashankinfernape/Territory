@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api, setToken } from '../../lib/api';
 import { auth } from '../../lib/firebase';
 import {
@@ -11,7 +11,18 @@ import {
 type Step = 'login' | 'register' | 'forgot-password';
 
 export default function Login() {
-  const [step, setStep] = useState<Step>('login');
+  const location = useLocation();
+  const initialStep = (location.state as any)?.mode === 'register' ? 'register' : 'login';
+  const [step, setStep] = useState<Step>(initialStep);
+
+  useEffect(() => {
+    const mode = (location.state as any)?.mode;
+    if (mode === 'register') {
+      setStep('register');
+    } else {
+      setStep('login');
+    }
+  }, [location.state]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -94,12 +105,13 @@ export default function Login() {
   return (
     <div className="login-split">
       <div className="fade-in" style={{
-        width: '100%', maxWidth: '400px',
+        width: '100%', maxWidth: step === 'register' ? '500px' : '400px',
         background: '#ffffff',
         border: '1px solid #e5e7eb',
         borderRadius: '12px',
         padding: '2.25rem',
-        boxShadow: 'rgba(36,36,36,0.05) 0px 4px 8px 0px'
+        boxShadow: 'rgba(36,36,36,0.05) 0px 4px 8px 0px',
+        transition: 'max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
       }}>
 
         {/* Brand mark */}
@@ -164,13 +176,13 @@ export default function Login() {
             <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', marginBottom: '0.3rem', letterSpacing: '0.01em' }}>Create account</h2>
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem', letterSpacing: '-0.2px' }}>Purchase and list verified land directly.</p>
 
-            <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              <div>{label('Full name')}<input id="reg-name" className="form-input" type="text" required placeholder="Your full name" value={regName} onChange={e => setRegName(e.target.value)} /></div>
-              <div>{label('Email address')}<input id="reg-email" className="form-input" type="email" required placeholder="you@example.com" value={regEmail} onChange={e => setRegEmail(e.target.value)} /></div>
+            <form onSubmit={handleRegister} className="register-grid">
+              <div className="grid-col-span-2">{label('Email address')}<input id="reg-email" className="form-input" type="email" required placeholder="you@example.com" value={regEmail} onChange={e => setRegEmail(e.target.value)} /></div>
+              <div>{label('Full name')}<input id="reg-name" className="form-input" type="text" required placeholder="Your name" value={regName} onChange={e => setRegName(e.target.value)} /></div>
               <div>{label('Phone number')}<input id="reg-phone" className="form-input" type="tel" required placeholder="10-digit number" value={regPhone} onChange={e => setRegPhone(e.target.value)} /></div>
               <div>{label('Password')}<input id="reg-password" className="form-input" type="password" required placeholder="Min 6 characters" value={regPassword} onChange={e => setRegPassword(e.target.value)} /></div>
-              <div>{label('Confirm password')}<input id="reg-confirm" className="form-input" type="password" required placeholder="Repeat your password" value={regConfirm} onChange={e => setRegConfirm(e.target.value)} /></div>
-              <button id="register-submit" type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', marginTop: '0.25rem' }}>
+              <div>{label('Confirm password')}<input id="reg-confirm" className="form-input" type="password" required placeholder="Repeat password" value={regConfirm} onChange={e => setRegConfirm(e.target.value)} /></div>
+              <button id="register-submit" type="submit" disabled={loading} className="btn-primary grid-col-span-2" style={{ width: '100%', marginTop: '0.5rem' }}>
                 {loading ? 'Creating account…' : 'Create account'}
               </button>
             </form>

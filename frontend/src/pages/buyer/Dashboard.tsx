@@ -59,12 +59,9 @@ function BuyPanel() {
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {unlockedProps.map((prop) => (
-            <div key={prop.id} className="property-card" style={{ display: 'flex', flexDirection: 'row', minHeight: '180px' }}>
-              <div style={{
-                width: '220px', flexShrink: 0,
-                backgroundImage: `url(${PROPERTY_IMAGES[prop.type] ?? PROPERTY_IMAGES.default})`,
-                backgroundSize: 'cover', backgroundPosition: 'center',
-                borderRight: '1px solid rgba(15,23,42,0.06)'
+            <div key={prop.id} className="property-card dashboard-card">
+              <div className="dashboard-card-img" style={{
+                backgroundImage: `url(${PROPERTY_IMAGES[prop.type] ?? PROPERTY_IMAGES.default})`
               }} />
               <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
@@ -162,7 +159,7 @@ function SellPanel() {
       </div>
 
       {/* Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className="stats-grid">
         {[
           { label: 'Active Listings', value: properties.length, color: '#0f172a' },
           { label: 'Views Generated', value: totalViews, color: '#0f2042' },

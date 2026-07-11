@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../../lib/api';
 import type { Property } from '../../lib/types';
 
-type Tab = 'overview' | 'users' | 'properties' | 'transactions';
+type Tab = 'overview' | 'users' | 'properties' | 'transactions' | 'trending';
 
 const TAB_LABELS: Record<Tab, string> = {
   overview: 'Overview',
   users: 'Registered Users',
   properties: 'Land Listings',
   transactions: 'Payments History',
+  trending: 'Trending Listings',
 };
 
 interface User {
@@ -130,72 +131,325 @@ export default function AdminDashboard() {
     </div>
   );
 
-  const tabBtnStyle = (tab: Tab) => ({
-    padding: '1rem 0.5rem',
-    borderBottom: activeTab === tab ? '2px solid #b8963e' : '2px solid transparent',
-    color: activeTab === tab ? '#b8963e' : 'rgba(15, 23, 42, 0.5)',
-    fontWeight: 600,
-    fontSize: '0.85rem',
-    background: 'none',
-    borderTop: 'none',
-    borderLeft: 'none',
-    borderRight: 'none',
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    transition: 'all 0.15s ease'
-  });
+
 
   return (
-    <div style={{ background: '#faf9f6', minHeight: '100vh', padding: '3rem 1.5rem' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ background: '#faf9f6', minHeight: '100vh', padding: '1rem 1.5rem 3rem' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Admin Control Panel</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Admin Control Panel</h1>
           <span className="badge-premium" style={{ border: '1px solid #ff3b30', color: '#ff3b30', background: 'rgba(255,59,48,0.06)', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', textTransform: 'uppercase' }}>Admin Control</span>
         </div>
 
-        <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(15, 23, 42, 0.08)' }}>
-          <div style={{ display: 'flex', gap: '2rem' }}>
-            {(Object.keys(TAB_LABELS) as Tab[]).map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)} style={tabBtnStyle(tab)}>
-                {TAB_LABELS[tab]}
-                {tab === 'properties' && stats?.pending_properties ? (
-                  <span style={{ marginLeft: '0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 800, background: '#b8963e', color: '#ffffff' }}>
-                    {stats.pending_properties}
-                  </span>
-                ) : null}
-              </button>
-            ))}
-          </div>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', paddingBottom: '0.5rem' }}>
+          {(Object.keys(TAB_LABELS) as Tab[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: '0.45rem 0.85rem',
+                borderRadius: '8px',
+                border: 'none',
+                background: activeTab === tab ? '#101010' : 'transparent',
+                color: activeTab === tab ? '#ffffff' : 'rgba(15, 23, 42, 0.55)',
+                fontWeight: 600,
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                transition: 'all 0.2s ease',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem'
+              }}
+              onMouseEnter={e => {
+                if (activeTab !== tab) {
+                  e.currentTarget.style.background = 'rgba(15, 23, 42, 0.05)';
+                  e.currentTarget.style.color = '#101010';
+                }
+              }}
+              onMouseLeave={e => {
+                if (activeTab !== tab) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'rgba(15, 23, 42, 0.55)';
+                }
+              }}
+            >
+              {TAB_LABELS[tab]}
+              {tab === 'properties' && stats?.pending_properties ? (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.1rem 0.35rem',
+                  borderRadius: '4px',
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  background: activeTab === tab ? '#ffffff' : '#b8963e',
+                  color: activeTab === tab ? '#101010' : '#ffffff',
+                  transition: 'all 0.2s ease'
+                }}>
+                  {stats.pending_properties}
+                </span>
+              ) : null}
+            </button>
+          ))}
         </div>
 
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && stats && (
-          <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
-              {[
-                { label: 'Total Users', value: stats.total_users, color: '#0f172a' },
-                { label: 'Active Properties', value: stats.active_properties, color: '#0f2042' },
-                { label: 'Pending Review', value: stats.pending_properties, color: '#b8963e' },
-              ].map(({ label, value, color }) => (
-                <div key={label} style={{ background: '#ffffff', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(15, 23, 42, 0.06)', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)' }}>
-                  <h3 style={{ fontSize: '0.72rem', fontWeight: 800, color: 'rgba(15,23,42,0.45)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</h3>
-                  <p style={{ marginTop: '0.5rem', fontSize: '2rem', fontWeight: 900, color: color, margin: 0 }}>{value}</p>
+          <div className="admin-overview-grid">
+            {/* Left Column: Stats */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '1.25rem'
+              }}>
+                {[
+                  { label: 'Total Users', value: stats.total_users, color: '#0f172a' },
+                  { label: 'Active Properties', value: stats.active_properties, color: '#0f172a' },
+                  { label: 'Pending Review', value: stats.pending_properties, color: '#b8963e' },
+                  { label: 'Total Transactions', value: stats.total_transactions, color: '#0f172a' },
+                ].map(({ label, value, color }) => (
+                  <div key={label} style={{
+                    background: '#ffffff',
+                    padding: '1.25rem',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(15, 23, 42, 0.06)',
+                    boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    minHeight: '85px'
+                  }}>
+                    <h3 style={{ fontSize: '0.68rem', fontWeight: 800, color: 'rgba(15,23,42,0.45)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>{label}</h3>
+                    <p style={{ marginTop: '0.5rem', fontSize: '1.6rem', fontWeight: 900, color: color, margin: 0, letterSpacing: '-0.5px' }}>{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Platform Revenue Card */}
+              <div style={{
+                background: '#ffffff',
+                padding: '1.25rem 1.5rem',
+                borderRadius: '12px',
+                border: '1px solid rgba(15, 23, 42, 0.06)',
+                boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div>
+                  <h3 style={{ fontSize: '0.68rem', fontWeight: 800, color: 'rgba(15,23,42,0.45)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>Total Platform Revenue</h3>
+                  <p style={{ marginTop: '0.35rem', fontSize: '2rem', fontWeight: 900, color: '#10b981', margin: 0, letterSpacing: '-0.5px' }}>
+                    ₹{(stats.total_revenue ?? 0).toLocaleString('en-IN')}
+                  </p>
                 </div>
-              ))}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-              {[
-                { label: 'Total Transactions', value: stats.total_transactions, color: '#0f172a' },
-                { label: 'Total Revenue', value: `₹${(stats.total_revenue ?? 0).toLocaleString('en-IN')}`, color: '#0f2042' },
-              ].map(({ label, value, color }) => (
-                <div key={label} style={{ background: '#ffffff', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(15, 23, 42, 0.06)', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)' }}>
-                  <h3 style={{ fontSize: '0.72rem', fontWeight: 800, color: 'rgba(15,23,42,0.45)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</h3>
-                  <p style={{ marginTop: '0.5rem', fontSize: '2rem', fontWeight: 900, color: color, margin: 0 }}>{value}</p>
+                <div style={{
+                  background: 'rgba(16, 185, 129, 0.08)',
+                  color: '#10b981',
+                  borderRadius: '50%',
+                  width: '42px',
+                  height: '42px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.25rem',
+                  fontWeight: 800,
+                  fontFamily: 'inherit',
+                  userSelect: 'none'
+                }}>
+                  ₹
                 </div>
-              ))}
+              </div>
             </div>
-          </>
+
+            {/* Right Column: Quick Actions */}
+            <div style={{
+              background: '#ffffff',
+              padding: '1.25rem',
+              borderRadius: '12px',
+              border: '1px solid rgba(15, 23, 42, 0.06)',
+              boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-start',
+              gap: '0.75rem'
+            }}>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0', borderBottom: '1px solid rgba(15, 23, 42, 0.06)', paddingBottom: '0.5rem' }}>Quick Actions</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <button
+                  onClick={() => setActiveTab('properties')}
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid rgba(15, 23, 42, 0.06)',
+                    borderRadius: '6px',
+                    padding: '0.5rem 0.75rem',
+                    textAlign: 'left',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: '#0f172a',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
+                >
+                  Review Land Listings ({stats.pending_properties} pending)
+                </button>
+                <button
+                  onClick={() => setActiveTab('users')}
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid rgba(15, 23, 42, 0.06)',
+                    borderRadius: '6px',
+                    padding: '0.5rem 0.75rem',
+                    textAlign: 'left',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: '#0f172a',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
+                >
+                  Manage Registered Users ({stats.total_users})
+                </button>
+                <button
+                  onClick={() => setActiveTab('trending')}
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid rgba(15, 23, 42, 0.06)',
+                    borderRadius: '6px',
+                    padding: '0.5rem 0.75rem',
+                    textAlign: 'left',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: '#0f172a',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
+                >
+                  View Trending Listings (by views)
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TRENDING TAB */}
+        {activeTab === 'trending' && (
+          <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid rgba(15, 23, 42, 0.06)', overflow: 'hidden', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)' }}>
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(15, 23, 42, 0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h2 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Trending Properties</h2>
+                <p style={{ fontSize: '0.75rem', color: 'rgba(15, 23, 42, 0.5)', marginTop: '0.2rem' }}>Listings ordered by total views count</p>
+              </div>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(15, 23, 42, 0.02)', borderBottom: '1px solid rgba(15, 23, 42, 0.06)' }}>
+                    {['Rank', 'City / Type', 'Seller ID', 'Views Count', 'Status', 'Actions'].map(h => (
+                      <th key={h} style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.72rem', fontWeight: 800, color: 'rgba(15,23,42,0.45)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...properties]
+                    .sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0))
+                    .length === 0 ? (
+                      <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: 'rgba(15,23,42,0.45)' }}>No listings found.</td></tr>
+                    ) : [...properties]
+                      .sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0))
+                      .map((p, index) => (
+                        <tr key={p.id} style={{ borderBottom: '1px solid rgba(15, 23, 42, 0.06)', transition: 'background 0.15s' }}
+                          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(15,23,42,0.015)')}
+                          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                        >
+                          <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', fontWeight: 700, color: index === 0 ? '#b8963e' : index === 1 ? '#64748b' : index === 2 ? '#b45309' : '#0f172a' }}>
+                            #{index + 1}
+                          </td>
+                          <td style={{ padding: '1rem 1.5rem' }}>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{p.city}{p.district ? `, ${p.district}` : ''}</div>
+                            {p.type && <div style={{ fontSize: '0.7rem', color: 'rgba(15,23,42,0.4)' }}>{p.type}</div>}
+                          </td>
+                          <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.5)', fontFamily: 'monospace' }}>
+                            <span style={{ background: '#f1f5f9', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                              {shortId(p.seller_id)}
+                            </span>
+                          </td>
+                          <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a', fontWeight: 800 }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#b8963e' }}>
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                              </svg>
+                              {p.view_count ?? 0}
+                            </span>
+                          </td>
+                          <td style={{ padding: '1rem 1.5rem' }}>
+                            <span className="badge-verified" style={{
+                              border: p.status === 'ACTIVE' ? '1px solid #10b981' : p.status === 'REJECTED' ? '1px solid #ff3b30' : '1px solid #b8963e',
+                              color: p.status === 'ACTIVE' ? '#10b981' : p.status === 'REJECTED' ? '#ff3b30' : '#b8963e',
+                              background: p.status === 'ACTIVE' ? 'rgba(16, 185, 129, 0.04)' : p.status === 'REJECTED' ? 'rgba(255, 59, 48, 0.04)' : 'rgba(184, 150, 62, 0.04)'
+                            }}>{p.status}</span>
+                          </td>
+                          <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button
+                                onClick={() => handleEditProperty(p.id)}
+                                style={{
+                                  background: 'rgba(0, 122, 255, 0.08)',
+                                  border: 'none',
+                                  color: '#007aff',
+                                  fontWeight: 600,
+                                  padding: '0.4rem 0.8rem',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontFamily: 'inherit',
+                                  fontSize: '0.8rem',
+                                  transition: 'all 0.15s ease'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.15)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.08)'}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => setViewDocsFor(p)}
+                                style={{
+                                  background: 'rgba(184, 150, 62, 0.08)',
+                                  border: 'none',
+                                  color: '#b8963e',
+                                  fontWeight: 600,
+                                  padding: '0.4rem 0.8rem',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontFamily: 'inherit',
+                                  fontSize: '0.8rem',
+                                  transition: 'all 0.15s ease'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(184, 150, 62, 0.15)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(184, 150, 62, 0.08)'}
+                              >
+                                Docs
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
 
         {/* USERS TAB */}
@@ -232,7 +486,25 @@ export default function AdminDashboard() {
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
                         {u.role !== 'ADMIN' && (
-                          <button onClick={() => handleDeleteUser(u.id)} style={{ background: 'none', border: 'none', color: '#ff3b30', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>
+                          <button
+                            onClick={() => handleDeleteUser(u.id)}
+                            style={{
+                              background: 'rgba(255, 59, 48, 0.08)',
+                              border: 'none',
+                              color: '#ff3b30',
+                              fontWeight: 600,
+                              padding: '0.4rem 0.8rem',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              fontSize: '0.8rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.15)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.08)'}
+                          >
+                            Delete
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -250,7 +522,7 @@ export default function AdminDashboard() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: 'rgba(15, 23, 42, 0.02)', borderBottom: '1px solid rgba(15, 23, 42, 0.06)' }}>
-                    {['City / Type', 'Seller', 'Status', 'Views', 'Docs', 'Actions'].map(h => (
+                    {['City / Type', 'Seller ID', 'Status', 'Views', 'Docs', 'Actions'].map(h => (
                       <th key={h} style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.72rem', fontWeight: 800, color: 'rgba(15,23,42,0.45)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
                     ))}
                   </tr>
@@ -267,24 +539,80 @@ export default function AdminDashboard() {
                         <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{p.city}{p.district ? `, ${p.district}` : ''}</div>
                         {p.type && <div style={{ fontSize: '0.7rem', color: 'rgba(15,23,42,0.4)' }}>{p.type}</div>}
                       </td>
-                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.5)', fontFamily: 'monospace' }}>{shortId(p.seller_id)}</td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.5)', fontFamily: 'monospace' }}>
+                        <span style={{ background: '#f1f5f9', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                          {shortId(p.seller_id)}
+                        </span>
+                      </td>
                       <td style={{ padding: '1rem 1.5rem' }}>
                         <span className="badge-verified" style={{
-                          border: p.status === 'ACTIVE' ? '1px solid #0f2042' : p.status === 'REJECTED' ? '1px solid #ff3b30' : '1px solid #b8963e',
-                          color: p.status === 'ACTIVE' ? '#0f2042' : p.status === 'REJECTED' ? '#ff3b30' : '#b8963e',
-                          background: p.status === 'ACTIVE' ? 'rgba(15, 32, 66, 0.05)' : p.status === 'REJECTED' ? 'rgba(255,59,48,0.04)' : 'rgba(184,150,62,0.04)'
+                          border: p.status === 'ACTIVE' ? '1px solid #10b981' : p.status === 'REJECTED' ? '1px solid #ff3b30' : '1px solid #b8963e',
+                          color: p.status === 'ACTIVE' ? '#10b981' : p.status === 'REJECTED' ? '#ff3b30' : '#b8963e',
+                          background: p.status === 'ACTIVE' ? 'rgba(16, 185, 129, 0.04)' : p.status === 'REJECTED' ? 'rgba(255, 59, 48, 0.04)' : 'rgba(184, 150, 62, 0.04)'
                         }}>{p.status}</span>
                       </td>
-                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a' }}>{p.view_count}</td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a', fontWeight: 600 }}>{p.view_count}</td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
-                        <button onClick={() => setViewDocsFor(p)} style={{ background: 'none', border: 'none', color: '#b8963e', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>
+                        <button
+                          onClick={() => setViewDocsFor(p)}
+                          style={{
+                            background: 'rgba(184, 150, 62, 0.08)',
+                            border: 'none',
+                            color: '#b8963e',
+                            fontWeight: 600,
+                            padding: '0.4rem 0.8rem',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            fontSize: '0.8rem',
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(184, 150, 62, 0.15)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'rgba(184, 150, 62, 0.08)'}
+                        >
                           {p.documents?.length || 0} Docs
                         </button>
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                          <button onClick={() => handleEditProperty(p.id)} style={{ background: 'none', border: 'none', color: '#007aff', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Edit</button>
-                          <button onClick={() => handleDeleteProperty(p.id)} style={{ background: 'none', border: 'none', color: '#ff3b30', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            onClick={() => handleEditProperty(p.id)}
+                            style={{
+                              background: 'rgba(0, 122, 255, 0.08)',
+                              border: 'none',
+                              color: '#007aff',
+                              fontWeight: 600,
+                              padding: '0.4rem 0.8rem',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              fontSize: '0.8rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.15)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.08)'}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProperty(p.id)}
+                            style={{
+                              background: 'rgba(255, 59, 48, 0.08)',
+                              border: 'none',
+                              color: '#ff3b30',
+                              fontWeight: 600,
+                              padding: '0.4rem 0.8rem',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              fontSize: '0.8rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.15)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.08)'}
+                          >
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -316,16 +644,21 @@ export default function AdminDashboard() {
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a', fontFamily: 'monospace' }}>{tx.buyer_phone}</td>
-                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.7)' }}>
-                        {tx.property_city}{tx.property_district ? `, ${tx.property_district}` : ''}
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15, 23, 42, 0.7)' }}>
+                        <div style={{ fontWeight: 600, color: '#0f172a' }}>{tx.property_city}</div>
+                        {tx.property_district && <div style={{ fontSize: '0.75rem', color: 'rgba(15, 23, 42, 0.4)' }}>{tx.property_district}</div>}
                       </td>
-                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', fontWeight: 700, color: '#b8963e' }}>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>
                         ₹{tx.amount.toLocaleString('en-IN')}
                       </td>
                       <td style={{ padding: '1rem 1.5rem' }}>
-                        <span className="badge-verified" style={{ border: '1px solid #0f2042', color: '#0f2042', background: 'rgba(15, 32, 66, 0.05)' }}>{tx.status}</span>
+                        <span className="badge-verified" style={{
+                          border: tx.status === 'COMPLETED' ? '1px solid #10b981' : '1px solid #b8963e',
+                          color: tx.status === 'COMPLETED' ? '#10b981' : '#b8963e',
+                          background: tx.status === 'COMPLETED' ? 'rgba(16, 185, 129, 0.04)' : 'rgba(184, 150, 62, 0.04)'
+                        }}>{tx.status}</span>
                       </td>
-                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15, 23, 42, 0.4)' }}>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15, 23, 42, 0.5)' }}>
                         {tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-IN') : '-'}
                       </td>
                     </tr>
@@ -354,14 +687,28 @@ export default function AdminDashboard() {
                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.06)', borderRadius: '6px' }}>
                       <div>
                         <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a' }}>{doc.type}</span>
-                        <p style={{ fontSize: '0.7rem', color: 'rgba(15,23,42,0.45)', fontFamily: 'monospace', marginTop: '0.2rem' }}>{doc.url}</p>
+                        <p style={{ fontSize: '0.7rem', color: 'rgba(15,23,42,0.45)', fontFamily: 'monospace', marginTop: '0.2rem', wordBreak: 'break-all' }}>{doc.url}</p>
                       </div>
                       <a
                         href={`${BACKEND_ROOT}${doc.url}`}
                         target="_blank"
                         rel="noreferrer"
                         className="badge-verified"
-                        style={{ textDecoration: 'none', border: '1px solid #0f2042', color: '#0f2042', background: 'rgba(15, 32, 66, 0.05)' }}
+                        style={{
+                          textDecoration: 'none',
+                          border: '1px solid #101010',
+                          color: '#ffffff',
+                          background: '#101010',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          padding: '0.4rem 0.8rem',
+                          borderRadius: '6px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#333333'}
+                        onMouseLeave={e => e.currentTarget.style.background = '#101010'}
                       >
                         Open
                       </a>
@@ -377,14 +724,39 @@ export default function AdminDashboard() {
                   <>
                     <button
                       onClick={() => handleVerify(viewDocsFor.id, 'REJECTED')}
-                      style={{ padding: '0.55rem 1.25rem', borderRadius: '6px', border: '1px solid #ff3b30', background: 'rgba(255,59,48,0.05)', color: '#ff3b30', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{
+                        padding: '0.55rem 1.25rem',
+                        borderRadius: '6px',
+                        border: '1px solid #ff3b30',
+                        background: 'rgba(255,59,48,0.05)',
+                        color: '#ff3b30',
+                        fontWeight: 600,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,59,48,0.1)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,59,48,0.05)'}
                     >
                       Reject
                     </button>
                     <button
                       onClick={() => handleVerify(viewDocsFor.id, 'ACTIVE')}
-                      className="btn-primary"
-                      style={{ padding: '0.55rem 1.25rem', border: 'none', cursor: 'pointer' }}
+                      style={{
+                        padding: '0.55rem 1.25rem',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: '#10b981',
+                        color: '#ffffff',
+                        fontWeight: 600,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#059669'}
+                      onMouseLeave={e => e.currentTarget.style.background = '#10b981'}
                     >
                       Approve &amp; Activate
                     </button>
@@ -394,7 +766,16 @@ export default function AdminDashboard() {
                     Property is already <span style={{ fontWeight: 700, margin: '0 0.25rem', color: '#0f172a' }}>{viewDocsFor.status}</span>.
                     <button
                       onClick={() => handleVerify(viewDocsFor.id, viewDocsFor.status === 'ACTIVE' ? 'REJECTED' : 'ACTIVE')}
-                      style={{ marginLeft: '0.75rem', background: 'none', border: 'none', color: '#b8963e', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}
+                      style={{
+                        marginLeft: '0.75rem',
+                        background: 'none',
+                        border: 'none',
+                        color: '#b8963e',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        fontFamily: 'inherit'
+                      }}
                     >
                       Change to {viewDocsFor.status === 'ACTIVE' ? 'REJECTED' : 'ACTIVE'}
                     </button>

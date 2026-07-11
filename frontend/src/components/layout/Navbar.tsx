@@ -12,6 +12,7 @@ export default function Navbar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,6 +30,11 @@ export default function Navbar() {
     const checkRole = () => setRole(localStorage.getItem('user_role'));
     window.addEventListener('storage', checkRole);
 
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
@@ -39,6 +45,7 @@ export default function Navbar() {
     return () => {
       unsubscribe();
       window.removeEventListener('storage', checkRole);
+      window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
@@ -51,54 +58,66 @@ export default function Navbar() {
     navigate('/');
   };
 
-  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
+  const isActive = (path: string) => location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
 
   return (
-    <nav className="navbar">
-      <div style={{
-        maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem',
-        display: 'flex', alignItems: 'center', height: '60px',
-        justifyContent: 'space-between'
-      }}>
+    <nav className={`navbar${scrolled ? ' scrolled' : ''}`}>
+      <div className="navbar-container">
 
-        {/* Brand */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-          <div style={{
-            width: '28px', height: '28px', borderRadius: '6px',
-            background: '#101010',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
-            </svg>
-          </div>
-          <span style={{
-            fontFamily: "'Poppins', sans-serif",
-            fontSize: '1rem', fontWeight: 600, color: '#101010', letterSpacing: '0.01em'
-          }}>
-            TERRITORY
-          </span>
-        </Link>
-
-        {/* Nav Links + Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-
-          <Link to="/" style={{
-            fontSize: '0.875rem', fontWeight: 500, color: isActive('/') ? '#101010' : '#6b7280',
-            textDecoration: 'none', letterSpacing: '-0.2px',
-            borderBottom: isActive('/') ? '1.5px solid #101010' : '1.5px solid transparent',
-            paddingBottom: '2px', transition: 'color 0.15s ease',
-            marginRight: '0.5rem'
-          }}>
-            Browse
+        {/* Left: Brand */}
+        <div className="navbar-left">
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+            <div style={{
+              width: '28px', height: '28px', borderRadius: '6px',
+              background: '#101010',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
+              </svg>
+            </div>
+            <span className="nav-logo-text" style={{
+              fontFamily: "'Poppins', sans-serif",
+              fontSize: '1rem', fontWeight: 600, color: '#101010', letterSpacing: '0.01em'
+            }}>
+              TERRITORY
+            </span>
           </Link>
+        </div>
 
+        {/* Center: Menu links */}
+        <div className="navbar-center">
+          <div className="nav-menu">
+            <Link to="/" className={`nav-menu-link${isActive('/') && location.pathname === '/' ? ' active' : ''}`}>
+              Browse
+            </Link>
+            {loggedIn && (
+              <Link to={role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/buyer'} className={`nav-menu-link${isActive('/dashboard') ? ' active' : ''}`}>
+                Dashboard
+              </Link>
+            )}
+            {loggedIn && (
+              <Link to="/wishlist" className={`nav-menu-link${isActive('/wishlist') ? ' active' : ''}`}>
+                Wishlist
+              </Link>
+            )}
+            <Link to="/help" className="nav-menu-link">
+              Help
+            </Link>
+            <Link to="/contact" className="nav-menu-link">
+              Contact
+            </Link>
+          </div>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="navbar-right">
           {loggedIn ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>
 
-              {/* Wishlist */}
-              <Link to="/wishlist" title="Wishlist" style={{
+              {/* Wishlist Icon on Mobile */}
+              <Link to="/wishlist" className="nav-link-item" title="Wishlist" style={{
                 width: '32px', height: '32px', borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 border: '1px solid #e5e7eb', textDecoration: 'none',
@@ -112,12 +131,13 @@ export default function Navbar() {
                 </svg>
               </Link>
 
-              {/* Sell */}
-              <Link to="/dashboard/seller" className="btn-olx-sell">
-                + List Land
+              {/* Sell Button */}
+              <Link to="/dashboard/seller" className="btn-pill-dark">
+                <span style={{ marginRight: '0.15rem', fontWeight: 600 }}>+</span>
+                <span className="nav-btn-text">List Land</span>
               </Link>
 
-              {/* Avatar */}
+              {/* User Avatar */}
               <div ref={dropdownRef} style={{ position: 'relative' }}>
                 <button onClick={() => setDropdownOpen(!dropdownOpen)} style={{
                   width: '30px', height: '30px', borderRadius: '50%',
@@ -139,7 +159,7 @@ export default function Navbar() {
                   )}
                 </button>
 
-                {/* Dropdown */}
+                {/* Dropdown menu */}
                 {dropdownOpen && (
                   <div style={{
                     position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: '200px',
@@ -192,19 +212,25 @@ export default function Navbar() {
 
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-              <Link to="/help" style={{ fontSize: '0.875rem', fontWeight: 400, color: '#6b7280', textDecoration: 'none', letterSpacing: '-0.2px', transition: 'color 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#101010'}
-                onMouseLeave={e => e.currentTarget.style.color = '#6b7280'}>Help</Link>
-              <Link to="/contact" style={{ fontSize: '0.875rem', fontWeight: 400, color: '#6b7280', textDecoration: 'none', letterSpacing: '-0.2px', transition: 'color 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#101010'}
-                onMouseLeave={e => e.currentTarget.style.color = '#6b7280'}>Contact</Link>
-              <Link to="/login" id="navbar-login" className="btn-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Link to="/login" state={{ mode: 'login' }} style={{
+                fontSize: '0.875rem', fontWeight: 500, color: '#4b5563',
+                textDecoration: 'none', transition: 'color 0.2s ease'
+              }}
+                onMouseEnter={e => e.currentTarget.style.color = '#111827'}
+                onMouseLeave={e => e.currentTarget.style.color = '#4b5563'}>
                 Sign in
+              </Link>
+              <Link to="/login" state={{ mode: 'register' }} className="btn-pill-dark" style={{ textDecoration: 'none' }}>
+                <span>Get started</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '0.15rem' }}>
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
               </Link>
             </div>
           )}
         </div>
+
       </div>
     </nav>
   );

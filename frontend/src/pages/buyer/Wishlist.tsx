@@ -93,7 +93,7 @@ export default function Wishlist() {
           <Link to="/" className="btn-primary" style={{ textDecoration: 'none' }}>Browse Properties</Link>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
           {properties.map(prop => (
             <div key={prop.id} className="property-card" style={{ display: 'flex', flexDirection: 'column' }}>
               {/* Image */}

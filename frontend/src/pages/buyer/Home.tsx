@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api, getToken } from '../../lib/api';
 import { PROPERTY_IMAGES } from '../../lib/types';
 import { formatPrice } from '../../lib/utils';
+import TextType from '../../components/TextType';
 
 interface Property {
   id: string;
@@ -99,9 +100,16 @@ export default function Home() {
       <div className="hero-cinematic">
         <div className="hero-inner">
 
-          <h1 className="hero-title">
-            Land that's truly<br />yours to own.
-          </h1>
+          <TextType
+            as="h1"
+            className="hero-title"
+            text={"Land that's truly\nyours to own."}
+            typingSpeed={40}
+            pauseDuration={2000}
+            showCursor={true}
+            cursorCharacter="|"
+            loop={false}
+          />
 
           <p className="hero-sub">
             Every plot survey-certified, every seller verified.<br />No middlemen. No hidden fees. Just land.
@@ -137,7 +145,8 @@ export default function Home() {
           </div>
 
           {/* Type tabs — inside hero */}
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.5rem' }}>
+          <div className="fast-filters-container">
+
             {TYPES.map(t => (
               <button
                 key={t}
@@ -161,9 +170,18 @@ export default function Home() {
               </button>
             ))}
           </div>
+          <div className="fast-filters-hint">
+            ← Swipe to see more land types →
+          </div>
 
         </div>
       </div>
+
+
+
+
+
+
 
       {/* ── EXPANDABLE FILTERS ── */}
       {showFilters && (
