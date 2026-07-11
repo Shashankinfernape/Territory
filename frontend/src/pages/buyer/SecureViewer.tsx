@@ -20,6 +20,7 @@ export default function SecureViewer() {
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => e.preventDefault();
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Block Ctrl+P (Print), Ctrl+S (Save), Ctrl+C (Copy), Ctrl+U (View Source)
       if ((e.ctrlKey || e.metaKey) && ['p', 's', 'c', 'u'].includes(e.key.toLowerCase())) {
         e.preventDefault();
       }
@@ -119,69 +120,145 @@ export default function SecureViewer() {
     }
   }, [state, navigate, dashboardPath]);
 
+  // Dynamic diagonal watermark grid pattern using inline SVG background
+  const watermarkSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="350" height="250" viewBox="0 0 350 250">
+      <text x="50%" y="50%" fill="rgba(255, 255, 255, 0.09)" font-size="12" font-family="'Courier New', Courier, monospace" font-weight="bold" text-anchor="middle" transform="rotate(-30 175 125)">
+        CONFIDENTIAL - DO NOT COPY - ${userPhone}
+      </text>
+    </svg>
+  `;
+  const watermarkBg = `url("data:image/svg+xml;utf8,${encodeURIComponent(watermarkSvg)}")`;
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col fixed inset-0 z-[100]">
-      {/* Header */}
-      <div className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex justify-between items-center shadow-lg flex-shrink-0">
-        <div>
-          <h1 className="text-lg font-bold tracking-tight">Secure Document Viewer</h1>
-          <p className="text-xs text-gray-400 font-mono mt-0.5">{docType} &mdash; Property #{propertyId?.slice(-6).toUpperCase()}</p>
+    <div 
+      className="min-h-screen text-white flex flex-col fixed inset-0 z-[100]"
+      style={{ 
+        fontFamily: "'Poppins', sans-serif",
+        backgroundColor: '#0a0d14',
+        backgroundImage: 'radial-gradient(circle at top right, rgba(16, 185, 129, 0.04), transparent 40%)'
+      }}
+    >
+      {/* Premium Glassmorphic Header */}
+      <div 
+        className="px-6 py-4 flex justify-between items-center shadow-2xl flex-shrink-0"
+        style={{
+          background: 'rgba(10, 13, 20, 0.85)',
+          backdropFilter: 'blur(16px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+          zIndex: 50
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div style={{
+            background: 'rgba(16, 185, 129, 0.1)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            borderRadius: '8px',
+            width: '36px',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <svg width="18" height="18" fill="none" stroke="#10b981" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-sm font-bold tracking-tight text-gray-100" style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>
+              Secure Document Vault
+            </h1>
+            <p className="text-xs text-gray-400 font-mono mt-0.5" style={{ margin: 0, color: 'rgba(255, 255, 255, 0.5)' }}>
+              {docType} &mdash; Registry Record #{propertyId?.slice(-6).toUpperCase()}
+            </p>
+          </div>
         </div>
+
         <div className="flex items-center gap-3">
-          <span className="bg-red-950 text-red-300 text-xs px-3 py-1 rounded-full border border-red-800 font-semibold tracking-wide select-none">
-            CONFIDENTIAL &mdash; DO NOT COPY
+          <span 
+            className="text-xs px-3 py-1 rounded-full font-semibold tracking-wide select-none"
+            style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              color: '#f87171',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              fontSize: '0.7rem'
+            }}
+          >
+            CONFIDENTIAL &mdash; WATERMARKED
           </span>
           <Link
             to={dashboardPath}
-            className="text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors border border-gray-700 text-sm"
+            style={{
+              textDecoration: 'none',
+              background: '#ffffff',
+              color: '#0a0d14',
+              padding: '0.5rem 1.25rem',
+              borderRadius: '9999px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           >
-            Close
+            Close Viewer
           </Link>
         </div>
       </div>
 
-      {/* Body */}
+      {/* Body container */}
       <div
-        className="flex-grow flex items-center justify-center p-6 bg-gray-900 overflow-auto relative"
+        className="flex-grow flex items-center justify-center p-6 bg-[#0a0d14] overflow-auto relative"
         style={{ userSelect: 'none', WebkitTouchCallout: 'none' }}
       >
-        {/* Invisible overlay blocks right-click saving on images */}
+        {/* Repeating text watermark layer spanning the entire document view area */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-40"
+          style={{ 
+            backgroundImage: watermarkBg,
+            opacity: 1
+          }} 
+        />
+
+        {/* Right-click block overlay on image views ONLY */}
         {isImage && (
-          <div className="absolute inset-0 z-10 cursor-not-allowed" onContextMenu={(e) => e.preventDefault()} />
+          <div className="absolute inset-0 z-30 cursor-not-allowed" onContextMenu={(e) => e.preventDefault()} />
         )}
 
         {state === 'loading' && (
-          <div className="text-center z-20">
+          <div className="text-center z-50">
             <svg className="animate-spin h-10 w-10 text-green-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
-            <p className="text-gray-400 text-sm">Verifying access and loading document&hellip;</p>
+            <p className="text-gray-400 text-sm">Validating vault signature...</p>
           </div>
         )}
 
         {state === 'unauthorized' && (
-          <div className="text-center z-20">
+          <div className="text-center z-50">
             <div className="w-16 h-16 bg-red-950 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-800">
               <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
             <h2 className="text-xl font-bold text-red-400 mb-2">Access Denied</h2>
-            <p className="text-gray-400 text-sm">You need to unlock this property before viewing its documents.</p>
+            <p className="text-gray-400 text-sm">Please unlock this property registry profile first.</p>
             <p className="text-gray-500 text-xs mt-2">Redirecting to dashboard&hellip;</p>
           </div>
         )}
 
         {state === 'error' && (
-          <div className="text-center z-20">
+          <div className="text-center z-50">
             <div className="w-16 h-16 bg-yellow-950 rounded-full flex items-center justify-center mx-auto mb-4 border border-yellow-800">
               <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-yellow-400 mb-2">Document Not Found</h2>
-            <p className="text-gray-400 text-sm">This document could not be loaded.</p>
+            <h2 className="text-xl font-bold text-yellow-400 mb-2">Document Unavailable</h2>
+            <p className="text-gray-400 text-sm font-light">This registry file could not be fetched or verified.</p>
             <Link to={dashboardPath} className="mt-4 inline-block text-green-400 hover:underline text-sm">
               Back to Dashboard
             </Link>
@@ -189,20 +266,13 @@ export default function SecureViewer() {
         )}
 
         {state === 'ready' && docUrl && (
-          <div className="relative z-0 w-full max-w-5xl">
-            {/* Watermark */}
-            <div
-              className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 overflow-hidden select-none"
-              style={{ transform: 'rotate(-30deg)', opacity: 0.07 }}
-            >
-              <span className="text-white text-6xl font-black whitespace-nowrap">
-                TERRITORY VERIFIED &bull; {userPhone}
-              </span>
-            </div>
-
+          <div className="relative z-0 w-full max-w-5xl" style={{ position: 'relative', zIndex: 10 }}>
             {/* Document render */}
             {isImage && (
-              <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
+              <div 
+                className="bg-white rounded-xl shadow-2xl overflow-hidden p-2"
+                style={{ border: '1px solid rgba(255, 255, 255, 0.08)' }}
+              >
                 <img
                   src={docUrl}
                   alt={docType}
@@ -213,9 +283,16 @@ export default function SecureViewer() {
             )}
 
             {isPdf && (
-              <div className="bg-gray-800 rounded-lg shadow-2xl overflow-hidden" style={{ height: '80vh' }}>
+              <div 
+                className="bg-[#1e2230] rounded-xl shadow-2xl overflow-hidden" 
+                style={{ 
+                  height: '80vh',
+                  border: '1px solid rgba(255, 255, 255, 0.08)'
+                }}
+              >
+                {/* Append #toolbar=0&navpanes=0 to hide print/download buttons in built-in PDF viewer */}
                 <iframe
-                  src={docUrl}
+                  src={`${docUrl}#toolbar=0&navpanes=0&view=FitH`}
                   title={docType}
                   className="w-full h-full border-0"
                 />
@@ -223,7 +300,13 @@ export default function SecureViewer() {
             )}
 
             {!isImage && !isPdf && (
-              <div className="bg-gray-800 rounded-lg p-10 text-center shadow-2xl border border-gray-700">
+              <div 
+                className="rounded-xl p-10 text-center shadow-2xl"
+                style={{
+                  background: '#151922',
+                  border: '1px solid rgba(255, 255, 255, 0.06)'
+                }}
+              >
                 <svg className="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
