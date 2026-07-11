@@ -59,12 +59,9 @@ function BuyPanel() {
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {unlockedProps.map((prop) => (
-            <div key={prop.id} className="property-card" style={{ display: 'flex', flexDirection: 'row', minHeight: '180px' }}>
-              <div style={{
-                width: '220px', flexShrink: 0,
-                backgroundImage: `url(${PROPERTY_IMAGES[prop.type] ?? PROPERTY_IMAGES.default})`,
-                backgroundSize: 'cover', backgroundPosition: 'center',
-                borderRight: '1px solid rgba(15,23,42,0.06)'
+            <div key={prop.id} className="property-card dashboard-card">
+              <div className="dashboard-card-img" style={{
+                backgroundImage: `url(${PROPERTY_IMAGES[prop.type] ?? PROPERTY_IMAGES.default})`
               }} />
               <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
@@ -150,7 +147,6 @@ function SellPanel() {
 
   const totalViews = properties.reduce((sum, p) => sum + p.view_count, 0);
   const totalUnlocks = stats?.total_unlocks ?? 0;
-  const totalRevenue = stats?.total_revenue ?? 0;
 
   return (
     <div className="fade-in">
@@ -162,11 +158,11 @@ function SellPanel() {
       </div>
 
       {/* Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className="stats-grid">
         {[
           { label: 'Active Listings', value: properties.length, color: '#0f172a' },
           { label: 'Views Generated', value: totalViews, color: '#0f2042' },
-          { label: 'Unlocks / Payouts', value: `${totalUnlocks} / ₹${totalRevenue.toLocaleString('en-IN')}`, color: '#b8963e' },
+          { label: 'Document Unlocks', value: totalUnlocks, color: '#b8963e' },
         ].map((stat) => (
           <div key={stat.label} style={{
             background: '#ffffff', borderRadius: '12px', padding: '1.25rem 1.5rem',

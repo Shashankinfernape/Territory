@@ -51,8 +51,18 @@ async def mock_unlock_property(
 
     # Check if already unlocked
     existing = await _get_transaction(db, buyer_id, property_id)
+    
+    # Resolve seller details
+    seller = await db.users.find_one({"_id": prop["seller_id"]})
+    owner_name = seller.get("full_name", "Landowner") if seller else "Landowner"
+    owner_phone = seller.get("phone_number", "+91 XXXXX XXXXX") if seller else "+91 XXXXX XXXXX"
+
     if existing:
-        return {"message": "Already unlocked"}
+        return {
+            "message": "Already unlocked",
+            "owner_name": owner_name,
+            "owner_phone": owner_phone
+        }
 
     # Create transaction
     await db.transactions.insert_one({
@@ -63,7 +73,11 @@ async def mock_unlock_property(
         "created_at": datetime.utcnow(),
     })
 
-    return {"message": "Payment successful, property unlocked"}
+    return {
+        "message": "Payment successful, property unlocked",
+        "owner_name": owner_name,
+        "owner_phone": owner_phone
+    }
 
 
 @router.get("/check-unlock/{property_id}")
@@ -79,7 +93,21 @@ async def check_unlock_status(
         raise HTTPException(status_code=400, detail="Invalid property ID")
 
     tx = await _get_transaction(db, str(current_user["_id"]), property_id)
-    return {"unlocked": tx is not None}
+    if tx:
+        prop = await db.properties.find_one({"_id": ObjectId(property_id)})
+        owner_name = "Landowner"
+        owner_phone = "+91 XXXXX XXXXX"
+        if prop:
+            seller = await db.users.find_one({"_id": prop["seller_id"]})
+            if seller:
+                owner_name = seller.get("full_name", "Landowner")
+                owner_phone = seller.get("phone_number", "+91 XXXXX XXXXX")
+        return {
+            "unlocked": True,
+            "owner_name": owner_name,
+            "owner_phone": owner_phone
+        }
+    return {"unlocked": False}
 
 
 @router.get("/document/{property_id}/{doc_index}")
@@ -134,6 +162,7 @@ async def get_document(
     if doc_index < 0 or doc_index >= len(documents):
         raise HTTPException(status_code=404, detail="Document not found")
 
+    import mimetypes
     doc = documents[doc_index]
     # doc["url"] is like "/uploads/documents/abc123.pdf"
     # Strip leading slash and build a path relative to the backend working dir
@@ -141,10 +170,14 @@ async def get_document(
     if not os.path.exists(relative_path):
         raise HTTPException(status_code=404, detail="Document file not found on server")
 
+    mime_type, _ = mimetypes.guess_type(relative_path)
+    if not mime_type:
+        mime_type = "application/octet-stream"
+
     return FileResponse(
         path=relative_path,
         filename=f"{doc.get('type', 'document')}_{doc_index}",
-        media_type="application/octet-stream",
+        media_type=mime_type,
     )
 
 

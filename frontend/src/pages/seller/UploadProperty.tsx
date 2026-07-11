@@ -93,6 +93,8 @@ export default function UploadProperty() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const role = localStorage.getItem('user_role');
+  const dashboardPath = role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/seller';
 
   const handleDocsSelected = (files: File[]) => {
     const newDocs = files.map(file => ({ type: 'Patta', file }));
@@ -182,7 +184,7 @@ export default function UploadProperty() {
       await api.post('/properties', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      navigate('/dashboard/seller');
+      navigate(dashboardPath);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to list property');
     } finally {
@@ -195,7 +197,7 @@ export default function UploadProperty() {
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         
         <div style={{ marginBottom: '1.5rem' }}>
-          <Link to="/dashboard/seller" style={{
+          <Link to={dashboardPath} style={{
             color: '#101010', textDecoration: 'none', fontWeight: 600, fontSize: '0.875rem',
             display: 'inline-flex', alignItems: 'center', gap: '0.3rem'
           }}>
@@ -203,7 +205,7 @@ export default function UploadProperty() {
           </Link>
         </div>
 
-        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '2.5rem', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px' }}>
+        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px' }}>
           <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.5rem', fontWeight: 600, color: '#101010', marginBottom: '2rem', letterSpacing: '0.01em' }}>
             List New Property
           </h2>
@@ -217,7 +219,7 @@ export default function UploadProperty() {
               <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
                 Location Details
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>City / Village</label>
                   <input type="text" required value={city} onChange={e => setCity(e.target.value)} className="form-input" placeholder="e.g. Pollachi" />
@@ -238,7 +240,7 @@ export default function UploadProperty() {
               <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
                 Property Specifications
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Property Type</label>
                   <select value={type} onChange={e => setType(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
@@ -254,7 +256,7 @@ export default function UploadProperty() {
                   <input type="number" required value={price} onChange={e => setPrice(e.target.value)} className="form-input" placeholder="e.g. 1500000" />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Total Area</label>
                   <input type="number" step="0.01" required value={area} onChange={e => setArea(e.target.value)} className="form-input" placeholder="e.g. 2.5" />
@@ -280,7 +282,7 @@ export default function UploadProperty() {
               <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
                 Land Features
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Soil Type</label>
                   <select value={soilType} onChange={e => setSoilType(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
@@ -306,7 +308,7 @@ export default function UploadProperty() {
                   </select>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Road Access</label>
                   <select value={roadAccess} onChange={e => setRoadAccess(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
@@ -330,7 +332,7 @@ export default function UploadProperty() {
                   </select>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Nearest Town</label>
                   <input type="text" value={nearbyTown} onChange={e => setNearbyTown(e.target.value)} className="form-input" placeholder="e.g. Pollachi" />
@@ -360,7 +362,7 @@ export default function UploadProperty() {
             </div>
 
             {/* 5. Documents & Images Side-by-Side */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
               
               {/* Document Dropzone & List */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -451,8 +453,8 @@ export default function UploadProperty() {
 
             {/* Submit Block */}
             <div style={{ paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb', marginTop: '1rem' }}>
-              <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', padding: '1rem', borderRadius: '8px' }}>
-                {loading ? 'Publishing Registry...' : 'SUBMIT PROPERTY FOR VERIFICATION'}
+              <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', padding: '0.9rem 1rem', borderRadius: '8px', fontSize: '0.875rem', letterSpacing: '0.02em', whiteSpace: 'normal', lineHeight: 1.3 }}>
+                {loading ? 'Publishing Registry...' : 'Submit Property for Verification'}
               </button>
             </div>
 

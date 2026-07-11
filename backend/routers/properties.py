@@ -128,7 +128,7 @@ async def create_property(
     db=Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    if current_user["role"] not in ("SELLER", "USER", "ADMIN"):
+    if current_user["role"] not in ("SELLER", "ADMIN"):
         raise HTTPException(status_code=403, detail="Only sellers can list properties")
 
     if len(doc_types) != len(files) or len(files) == 0:
@@ -204,7 +204,7 @@ async def create_property(
 # otherwise FastAPI will interpret "seller" as a property_id path parameter.
 @router.get("/seller/me", response_model=List[PropertyResponse])
 async def get_my_properties(db=Depends(get_db), current_user=Depends(get_current_user)):
-    if current_user["role"] not in ("SELLER", "USER", "ADMIN"):
+    if current_user["role"] not in ("SELLER", "ADMIN"):
         raise HTTPException(status_code=403, detail="Only sellers can view their listings here")
 
     properties = []
@@ -218,7 +218,7 @@ async def get_my_properties(db=Depends(get_db), current_user=Depends(get_current
 @router.get("/seller/me/stats")
 async def get_seller_stats(db=Depends(get_db), current_user=Depends(get_current_user)):
     """Return per-property unlock counts for the authenticated seller."""
-    if current_user["role"] not in ("SELLER", "USER", "ADMIN"):
+    if current_user["role"] not in ("SELLER", "ADMIN"):
         raise HTTPException(status_code=403, detail="Only sellers can view their stats")
 
     seller_id = str(current_user["_id"])
@@ -241,6 +241,62 @@ async def get_seller_stats(db=Depends(get_db), current_user=Depends(get_current_
         "total_unlocks": sum(unlock_map.values()),
         "total_revenue": sum(unlock_map.values()) * 500,
     }
+
+
+# ── RECOMMENDATIONS ─────────────────────────────────────────────────────────
+# IMPORTANT: Must be defined BEFORE /{property_id} to avoid route collision.
+@router.get("/recommendations", response_model=List[PropertyResponse])
+async def get_recommendations(
+    district: Optional[str] = Query(None, description="User's district for location-based recs"),
+    city: Optional[str] = Query(None, description="User's city for location-based recs"),
+    limit: int = Query(8, ge=1, le=20, description="Number of recommendations to return"),
+    db=Depends(get_db),
+):
+    """
+    Smart recommendation engine:
+    1. Location-based: properties matching the user's district or city
+    2. Fallback A: Most popular (highest view_count) ACTIVE listings
+    3. Fallback B: Newest ACTIVE listings (by _id insertion order)
+    """
+    base_filter = {"status": "ACTIVE"}
+    results: list[PropertyResponse] = []
+
+    # ── Step 1: Location-based recommendations ───────────────────────────────
+    if district or city:
+        location_or = []
+        if district:
+            location_or.append({"district": {"$regex": district, "$options": "i"}})
+        if city:
+            location_or.append({"city": {"$regex": city, "$options": "i"}})
+
+        location_query = {**base_filter, "$or": location_or}
+        # Sort by view_count desc so the most popular local listings come first
+        async for doc in db.properties.find(location_query).sort("view_count", -1).limit(limit):
+            results.append(_doc_to_response(doc))
+
+    # ── Step 2: Fill remaining slots with most-viewed listings ───────────────
+    if len(results) < limit:
+        seen_ids = {r.id for r in results}
+        remaining = limit - len(results)
+        async for doc in db.properties.find(base_filter).sort("view_count", -1).limit(limit * 3):
+            if str(doc["_id"]) not in seen_ids and len(results) < limit:
+                results.append(_doc_to_response(doc))
+                seen_ids.add(str(doc["_id"]))
+            if len(results) >= limit:
+                break
+
+    # ── Step 3: Final fallback — newest listings ─────────────────────────────
+    if len(results) < limit:
+        seen_ids = {r.id for r in results}
+        remaining = limit - len(results)
+        async for doc in db.properties.find(base_filter).sort("_id", -1).limit(limit * 2):
+            if str(doc["_id"]) not in seen_ids:
+                results.append(_doc_to_response(doc))
+                seen_ids.add(str(doc["_id"]))
+            if len(results) >= limit:
+                break
+
+    return results[:limit]
 
 
 @router.get("/{property_id}", response_model=PropertyResponse)
@@ -287,7 +343,7 @@ async def update_property(
     db=Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    if current_user["role"] not in ("SELLER", "USER", "ADMIN"):
+    if current_user["role"] not in ("SELLER", "ADMIN"):
         raise HTTPException(status_code=403, detail="Not authorized to edit")
 
     if not ObjectId.is_valid(property_id):

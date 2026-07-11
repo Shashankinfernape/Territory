@@ -20,22 +20,56 @@ export default function PropertyDetails() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
-    api.get<DetailedProperty>(`/properties/${id}`)
-      .then((res) => setProp(res.data))
-      .catch((err) => {
+    const fetchProperty = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const propRes = await api.get<DetailedProperty>(`/properties/${id}`);
+        let propData = propRes.data;
+
+        // If logged in, check if already unlocked
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const checkRes = await api.get(`/payments/check-unlock/${id}`);
+            if (checkRes.data.unlocked) {
+              propData = {
+                ...propData,
+                unlocked: true,
+                owner_name: checkRes.data.owner_name,
+                owner_phone: checkRes.data.owner_phone
+              };
+            }
+          } catch (err) {
+            console.error('Failed to check unlock status', err);
+          }
+        }
+
+        setProp(propData);
+      } catch (err) {
         console.error(err);
         setError('Listing could not be retrieved.');
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperty();
   }, [id]);
 
   const handleMockUnlock = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Please sign in first to unlock owner contact information.');
+      return;
+    }
     setUnlocking(true);
     setError('');
     try {
-      const res = await api.post(`/properties/${id}/unlock`);
+      const res = await api.post('/payments/mock-unlock', { property_id: id });
       setProp(prev => prev ? { ...prev, unlocked: true, owner_name: res.data.owner_name, owner_phone: res.data.owner_phone } : null);
-    } catch {
+    } catch (err: any) {
+      console.error(err);
       setError('Transaction validation failed. Please try again.');
     } finally {
       setUnlocking(false);
@@ -77,7 +111,7 @@ export default function PropertyDetails() {
         </Link>
 
         {/* Two-Column Classified Layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+        <div className="details-grid">
           
           {/* Main Content Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -236,7 +270,7 @@ export default function PropertyDetails() {
                 Property Specifications
               </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem', marginBottom: '2rem' }}>
+              <div className="specs-grid">
                 <div>
                   <p style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Land Area</p>
                   <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#242424', marginTop: '0.2rem', letterSpacing: '-0.2px' }}>{prop.area} {prop.area_unit}</p>
@@ -262,7 +296,7 @@ export default function PropertyDetails() {
               <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.75rem', marginBottom: '1.25rem', letterSpacing: '0.01em' }}>
                 Attributes & Highlights
               </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="attributes-grid">
                 {[
                   { label: 'Soil Type', val: prop.soil_type || 'Unspecified' },
                   { label: 'Water Source', val: prop.water_source ? prop.water_source : 'None' },

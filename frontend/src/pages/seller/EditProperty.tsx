@@ -120,6 +120,8 @@ export default function EditProperty() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const role = localStorage.getItem('user_role');
+  const dashboardPath = role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/seller';
 
   useEffect(() => {
     api.get(`/properties/${id}`)
@@ -254,7 +256,7 @@ export default function EditProperty() {
       await api.put(`/properties/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      navigate('/dashboard/seller');
+      navigate(dashboardPath);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to update property details.');
     } finally {
@@ -273,7 +275,7 @@ export default function EditProperty() {
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         
         <div style={{ marginBottom: '1.5rem' }}>
-          <Link to="/dashboard/seller" style={{
+          <Link to={dashboardPath} style={{
             color: '#101010', textDecoration: 'none', fontWeight: 600, fontSize: '0.875rem',
             display: 'inline-flex', alignItems: 'center', gap: '0.3rem'
           }}>
@@ -281,7 +283,7 @@ export default function EditProperty() {
           </Link>
         </div>
 
-        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '2.5rem', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px' }}>
+        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px' }}>
           <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.5rem', fontWeight: 600, color: '#101010', marginBottom: '2rem', letterSpacing: '0.01em' }}>
             Edit Property Listing
           </h2>
@@ -295,7 +297,7 @@ export default function EditProperty() {
               <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
                 Location Details
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>City / Village</label>
                   <input type="text" required value={city} onChange={e => setCity(e.target.value)} className="form-input" />
@@ -316,7 +318,7 @@ export default function EditProperty() {
               <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
                 Property Specifications
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Asking Price (₹)</label>
                   <input type="number" required value={price} onChange={e => setPrice(e.target.value)} className="form-input" />
@@ -333,7 +335,7 @@ export default function EditProperty() {
               <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
                 Land Features
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Soil Type</label>
                   <select value={soilType} onChange={e => setSoilType(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
@@ -349,7 +351,7 @@ export default function EditProperty() {
                   </select>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Road Access</label>
                   <select value={roadAccess} onChange={e => setRoadAccess(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
@@ -365,7 +367,7 @@ export default function EditProperty() {
                   </select>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Nearest Town</label>
                   <input type="text" value={nearbyTown} onChange={e => setNearbyTown(e.target.value)} className="form-input" />
@@ -389,7 +391,7 @@ export default function EditProperty() {
             </div>
 
             {/* 4. Retained & New Documents & Gallery side-by-side */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
               
               {/* Documents Area */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

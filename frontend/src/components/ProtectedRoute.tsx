@@ -20,8 +20,8 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
       return <>{children}</>;
     }
     
-    // A standard USER can access both BUYER and SELLER routes
-    if (role === 'USER' && (requiredRole === 'BUYER' || requiredRole === 'SELLER')) {
+    // A standard USER can access only BUYER routes
+    if (role === 'USER' && requiredRole === 'BUYER') {
       return <>{children}</>;
     }
 
