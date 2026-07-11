@@ -84,34 +84,39 @@ export default function Navbar() {
         {/* Nav Links + Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
 
-          <Link to="/" style={{
-            fontSize: '0.875rem', fontWeight: 500, color: isActive('/') ? '#101010' : '#6b7280',
-            textDecoration: 'none', letterSpacing: '-0.2px',
-            borderBottom: isActive('/') ? '1.5px solid #101010' : '1.5px solid transparent',
-            paddingBottom: '2px', transition: 'color 0.15s ease'
-          }}>
-            Browse
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Link to="/" style={{
+              fontSize: '0.875rem', fontWeight: 500, color: isActive('/') ? '#101010' : '#6b7280',
+              textDecoration: 'none', letterSpacing: '-0.2px',
+              borderBottom: isActive('/') ? '1.5px solid #101010' : '1.5px solid transparent',
+              paddingBottom: '2px', transition: 'color 0.15s ease'
+            }}>
+              Browse
+            </Link>
 
-          <div style={{ width: '1px', height: '14px', background: '#e5e7eb' }} />
-
-          {loggedIn ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }} ref={dropdownRef}>
-
-              {/* Wishlist */}
+            {/* Wishlist (Heart icon next to Browse) */}
+            {loggedIn && (
               <Link to="/wishlist" title="Wishlist" style={{
                 width: '32px', height: '32px', borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 border: '1px solid #e5e7eb', textDecoration: 'none',
                 background: isActive('/wishlist') ? '#f4f4f4' : 'transparent',
-                transition: 'background 0.15s ease'
+                transition: 'background 0.15s ease',
+                marginLeft: '0.25rem'
               }}>
                 <svg width="14" height="14" viewBox="0 0 24 24"
-                  fill={isActive('/wishlist') ? '#101010' : 'none'}
+                  fill="none"
                   stroke={isActive('/wishlist') ? '#101010' : '#6b7280'} strokeWidth="2">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
               </Link>
+            )}
+          </div>
+
+          <div style={{ width: '1px', height: '14px', background: '#e5e7eb' }} />
+
+          {loggedIn ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }} ref={dropdownRef}>
 
               {/* Sell */}
               <Link to="/dashboard/seller" className="btn-olx-sell">
