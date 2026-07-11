@@ -82,27 +82,28 @@ export default function Navbar() {
         </Link>
 
         {/* Nav Links + Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Link to="/" style={{
-              fontSize: '0.875rem', fontWeight: 500, color: isActive('/') ? '#101010' : '#6b7280',
-              textDecoration: 'none', letterSpacing: '-0.2px',
-              borderBottom: isActive('/') ? '1.5px solid #101010' : '1.5px solid transparent',
-              paddingBottom: '2px', transition: 'color 0.15s ease'
-            }}>
-              Browse
-            </Link>
+          <Link to="/" style={{
+            fontSize: '0.875rem', fontWeight: 500, color: isActive('/') ? '#101010' : '#6b7280',
+            textDecoration: 'none', letterSpacing: '-0.2px',
+            borderBottom: isActive('/') ? '1.5px solid #101010' : '1.5px solid transparent',
+            paddingBottom: '2px', transition: 'color 0.15s ease',
+            marginRight: '0.5rem'
+          }}>
+            Browse
+          </Link>
 
-            {/* Wishlist (Heart icon next to Browse) */}
-            {loggedIn && (
+          {loggedIn ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>
+
+              {/* Wishlist */}
               <Link to="/wishlist" title="Wishlist" style={{
                 width: '32px', height: '32px', borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 border: '1px solid #e5e7eb', textDecoration: 'none',
                 background: isActive('/wishlist') ? '#f4f4f4' : 'transparent',
-                transition: 'background 0.15s ease',
-                marginLeft: '0.25rem'
+                transition: 'background 0.15s ease'
               }}>
                 <svg width="14" height="14" viewBox="0 0 24 24"
                   fill="none"
@@ -110,13 +111,6 @@ export default function Navbar() {
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
               </Link>
-            )}
-          </div>
-
-          <div style={{ width: '1px', height: '14px', background: '#e5e7eb' }} />
-
-          {loggedIn ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }} ref={dropdownRef}>
 
               {/* Sell */}
               <Link to="/dashboard/seller" className="btn-olx-sell">
@@ -124,78 +118,81 @@ export default function Navbar() {
               </Link>
 
               {/* Avatar */}
-              <button onClick={() => setDropdownOpen(!dropdownOpen)} style={{
-                width: '30px', height: '30px', borderRadius: '50%',
-                background: 'transparent', border: '1px solid #e5e7eb',
-                cursor: 'pointer', padding: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                overflow: 'hidden', transition: 'border-color 0.15s ease'
-              }}>
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
-                ) : (
+              <div ref={dropdownRef} style={{ position: 'relative' }}>
+                <button onClick={() => setDropdownOpen(!dropdownOpen)} style={{
+                  width: '30px', height: '30px', borderRadius: '50%',
+                  background: 'transparent', border: '1px solid #e5e7eb',
+                  cursor: 'pointer', padding: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  overflow: 'hidden', transition: 'border-color 0.15s ease'
+                }}>
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
+                  ) : (
+                    <div style={{
+                      width: '100%', height: '100%', background: '#101010',
+                      color: '#ffffff', display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', fontWeight: 600, fontSize: '0.72rem'
+                    }}>
+                      {displayName ? displayName[0].toUpperCase() : 'U'}
+                    </div>
+                  )}
+                </button>
+
+                {/* Dropdown */}
+                {dropdownOpen && (
                   <div style={{
-                    width: '100%', height: '100%', background: '#101010',
-                    color: '#ffffff', display: 'flex', alignItems: 'center',
-                    justifyContent: 'center', fontWeight: 600, fontSize: '0.72rem'
+                    position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: '200px',
+                    background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px',
+                    boxShadow: 'rgba(36,36,36,0.05) 0px 4px 8px 0px', zIndex: 999, padding: '0.3rem'
                   }}>
-                    {displayName ? displayName[0].toUpperCase() : 'U'}
+                    <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid #f4f4f4' }}>
+                      <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#101010' }}>{displayName}</p>
+                      <span style={{
+                        fontSize: '0.6875rem', fontWeight: 500, color: '#6b7280',
+                        marginTop: '0.15rem', display: 'block', letterSpacing: '0.02em', textTransform: 'uppercase'
+                      }}>
+                        {role === 'ADMIN' ? 'Administrator' : 'Member'}
+                      </span>
+                    </div>
+
+                    {role === 'ADMIN' ? (
+                      <Link to="/dashboard/admin" onClick={() => setDropdownOpen(false)}
+                        style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>Admin Panel</Link>
+                    ) : (
+                      <Link to="/dashboard/buyer" onClick={() => setDropdownOpen(false)}
+                        style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>My Dashboard</Link>
+                    )}
+                    <Link to="/help" onClick={() => setDropdownOpen(false)}
+                      style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>Help Center</Link>
+                    <Link to="/contact" onClick={() => setDropdownOpen(false)}
+                      style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>Contact Support</Link>
+
+                    <div style={{ height: '1px', background: '#f4f4f4', margin: '0.3rem 0' }} />
+                    <button id="navbar-logout" onClick={handleLogout} style={{
+                      width: '100%', padding: '0.55rem 0.8rem', background: 'transparent', border: 'none',
+                      color: '#dc2626', fontWeight: 500, fontSize: '0.8125rem',
+                      textAlign: 'left', cursor: 'pointer', borderRadius: '8px', fontFamily: 'inherit'
+                    }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#fef2f2'}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+                      Logout
+                    </button>
                   </div>
                 )}
-              </button>
+              </div>
 
-              {/* Dropdown */}
-              {dropdownOpen && (
-                <div style={{
-                  position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: '200px',
-                  background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px',
-                  boxShadow: 'rgba(36,36,36,0.05) 0px 4px 8px 0px', zIndex: 999, padding: '0.3rem'
-                }}>
-                  <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid #f4f4f4' }}>
-                    <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#101010' }}>{displayName}</p>
-                    <span style={{
-                      fontSize: '0.6875rem', fontWeight: 500, color: '#6b7280',
-                      marginTop: '0.15rem', display: 'block', letterSpacing: '0.02em', textTransform: 'uppercase'
-                    }}>
-                      {role === 'ADMIN' ? 'Administrator' : 'Member'}
-                    </span>
-                  </div>
-
-                  {role === 'ADMIN' ? (
-                    <Link to="/dashboard/admin" onClick={() => setDropdownOpen(false)}
-                      style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>Admin Panel</Link>
-                  ) : (
-                    <Link to="/dashboard/buyer" onClick={() => setDropdownOpen(false)}
-                      style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>My Dashboard</Link>
-                  )}
-                  <Link to="/help" onClick={() => setDropdownOpen(false)}
-                    style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>Help Center</Link>
-                  <Link to="/contact" onClick={() => setDropdownOpen(false)}
-                    style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>Contact Support</Link>
-
-                  <div style={{ height: '1px', background: '#f4f4f4', margin: '0.3rem 0' }} />
-                  <button id="navbar-logout" onClick={handleLogout} style={{
-                    width: '100%', padding: '0.55rem 0.8rem', background: 'transparent', border: 'none',
-                    color: '#dc2626', fontWeight: 500, fontSize: '0.8125rem',
-                    textAlign: 'left', cursor: 'pointer', borderRadius: '8px', fontFamily: 'inherit'
-                  }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#fef2f2'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-                    Logout
-                  </button>
-                </div>
-              )}
             </div>
           ) : (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
               <Link to="/help" style={{ fontSize: '0.875rem', fontWeight: 400, color: '#6b7280', textDecoration: 'none', letterSpacing: '-0.2px', transition: 'color 0.15s' }}
                 onMouseEnter={e => e.currentTarget.style.color = '#101010'}
                 onMouseLeave={e => e.currentTarget.style.color = '#6b7280'}>Help</Link>
@@ -205,7 +202,7 @@ export default function Navbar() {
               <Link to="/login" id="navbar-login" className="btn-header">
                 Sign in
               </Link>
-            </>
+            </div>
           )}
         </div>
       </div>
