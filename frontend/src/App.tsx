@@ -14,6 +14,7 @@ import SecureViewer from './pages/buyer/SecureViewer';
 import AdminDashboard from './pages/admin/Dashboard';
 import Wishlist from './pages/buyer/Wishlist';
 import NotFound from './pages/NotFound';
+import SellGuide from './pages/SellGuide';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="login" element={<Login />} />
           <Route path="contact" element={<Contact />} />
           <Route path="help" element={<Help />} />
+          <Route path="sell-guide" element={<SellGuide />} />
 
           {/* Protected: Unified Dashboard (BUY + SELL) */}
           <Route path="dashboard/buyer" element={

@@ -180,6 +180,25 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                <Link to="/?action=buy" style={{
+                  fontSize: '0.875rem', fontWeight: 500, color: '#4b5563',
+                  textDecoration: 'none', transition: 'color 0.2s ease',
+                  padding: '0.35rem 0.65rem', borderRadius: '8px'
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#101010'; e.currentTarget.style.background = 'rgba(15,23,42,0.05)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = '#4b5563'; e.currentTarget.style.background = 'transparent'; }}>
+                  Buy
+                </Link>
+                <Link to="/sell-guide" style={{
+                  fontSize: '0.875rem', fontWeight: 500, color: '#4b5563',
+                  textDecoration: 'none', transition: 'color 0.2s ease',
+                  padding: '0.35rem 0.65rem', borderRadius: '8px'
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#101010'; e.currentTarget.style.background = 'rgba(15,23,42,0.05)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = '#4b5563'; e.currentTarget.style.background = 'transparent'; }}>
+                  Sell
+                </Link>
+                <div style={{ width: '1px', height: '16px', background: '#e5e7eb' }} />
                 <Link to="/login" state={{ mode: 'login' }} style={{ fontSize: '0.875rem', fontWeight: 500, color: '#4b5563', textDecoration: 'none' }}>Sign in</Link>
                 <Link to="/login" state={{ mode: 'register' }} className="btn-pill-dark" style={{ textDecoration: 'none' }}>
                   <span>Get started</span>
@@ -233,6 +252,9 @@ export default function Navbar() {
                 <button onClick={handleLogout} style={{ width: '100%', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 600, fontSize: '0.9375rem', textAlign: 'left', cursor: 'pointer', borderRadius: '8px', fontFamily: 'inherit' }}>Logout</button>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.5rem' }}>
+                  <Link to="/?action=buy" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0.5rem', color: '#10b981', textDecoration: 'none', fontWeight: 600 }}>Buy Land</Link>
+                  <Link to="/sell-guide" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0.5rem', color: '#0099ff', textDecoration: 'none', fontWeight: 600 }}>Sell Land</Link>
+                  <div style={{ height: '1px', background: '#e5e7eb', margin: '0.25rem 0' }} />
                   <Link to="/login" state={{ mode: 'login' }} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', textAlign: 'center', padding: '0.75rem', color: '#4b5563', textDecoration: 'none', fontWeight: 500, border: '1px solid #e5e7eb', borderRadius: '8px' }}>Sign in</Link>
                   <Link to="/login" state={{ mode: 'register' }} onClick={() => setMobileMenuOpen(false)} className="btn-pill-dark" style={{ width: '100%', display: 'flex', textDecoration: 'none' }}>Get started</Link>
                 </div>

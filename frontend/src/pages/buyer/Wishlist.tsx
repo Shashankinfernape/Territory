@@ -17,7 +17,7 @@ export default function Wishlist() {
       return;
     }
 
-    api.get<Property[]>('/auth/wishlist/details')
+    api.get<Property[]>('/wishlist/properties')
       .then(res => setProperties(res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));

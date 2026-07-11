@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { api, getToken } from '../../lib/api';
 import { getPropertyImageUrl, type Property } from '../../lib/types';
 import { formatPrice } from '../../lib/utils';
@@ -14,6 +14,8 @@ export default function Home() {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const isLoggedIn = !!getToken();
 
+  const location = useLocation();
+  const searchSectionRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterDistrict, setFilterDistrict] = useState('');
@@ -29,6 +31,16 @@ export default function Home() {
     if (!isLoggedIn) return;
     api.get('/auth/wishlist').then(r => setWishlist(r.data.wishlist)).catch(() => {});
   }, [isLoggedIn]);
+
+  // Auto-scroll to search when landing via "Buy" action
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('action') === 'buy') {
+      setTimeout(() => {
+        searchSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 600);
+    }
+  }, [location.search]);
 
   const fetchProperties = useCallback(async () => {
     setLoading(true);
@@ -98,7 +110,7 @@ export default function Home() {
           </p>
 
           {/* Search bar */}
-          <div className="search-bar" style={{ maxWidth: '680px', marginTop: '0.75rem' }}>
+          <div ref={searchSectionRef} id="search-section" className="search-bar" style={{ maxWidth: '680px', marginTop: '0.75rem' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#898989" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginLeft: '0.75rem' }}>
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>

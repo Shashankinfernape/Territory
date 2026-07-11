@@ -147,7 +147,6 @@ function SellPanel() {
 
   const totalViews = properties.reduce((sum, p) => sum + p.view_count, 0);
   const totalUnlocks = stats?.total_unlocks ?? 0;
-  const totalRevenue = stats?.total_revenue ?? 0;
 
   return (
     <div className="fade-in">
@@ -163,7 +162,7 @@ function SellPanel() {
         {[
           { label: 'Active Listings', value: properties.length, color: '#0f172a' },
           { label: 'Views Generated', value: totalViews, color: '#0f2042' },
-          { label: 'Unlocks / Payouts', value: `${totalUnlocks} / ₹${totalRevenue.toLocaleString('en-IN')}`, color: '#b8963e' },
+          { label: 'Document Unlocks', value: totalUnlocks, color: '#b8963e' },
         ].map((stat) => (
           <div key={stat.label} style={{
             background: '#ffffff', borderRadius: '12px', padding: '1.25rem 1.5rem',
