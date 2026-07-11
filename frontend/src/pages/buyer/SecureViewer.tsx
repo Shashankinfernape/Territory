@@ -147,7 +147,7 @@ export default function SecureViewer() {
     >
       {/* Premium Glassmorphic Header */}
       <div 
-        className="px-6 py-4 flex justify-between items-center shadow-2xl flex-shrink-0"
+        className="px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap justify-between items-center shadow-2xl flex-shrink-0 gap-3"
         style={{
           background: 'rgba(10, 13, 20, 0.85)',
           backdropFilter: 'blur(16px)',
@@ -155,34 +155,35 @@ export default function SecureViewer() {
           zIndex: 50
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
             background: 'rgba(16, 185, 129, 0.1)',
             border: '1px solid rgba(16, 185, 129, 0.3)',
             borderRadius: '8px',
-            width: '36px',
-            height: '36px',
+            width: '32px',
+            height: '32px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            flexShrink: 0
           }}>
-            <svg width="18" height="18" fill="none" stroke="#10b981" strokeWidth="2.5" viewBox="0 0 24 24">
+            <svg width="16" height="16" fill="none" stroke="#10b981" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <div>
-            <h1 className="text-sm font-bold tracking-tight text-gray-100" style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>
+          <div style={{ minWidth: 0 }}>
+            <h1 className="font-bold tracking-tight text-gray-100 truncate" style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600 }}>
               Secure Document Vault
             </h1>
-            <p className="text-xs text-gray-400 font-mono mt-0.5" style={{ margin: 0, color: 'rgba(255, 255, 255, 0.5)' }}>
-              {docType} &mdash; Registry Record #{propertyId?.slice(-6).toUpperCase()}
+            <p className="text-gray-400 font-mono mt-0.5 truncate" style={{ margin: 0, color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.65rem' }}>
+              {docType} &mdash; Record #{propertyId?.slice(-6).toUpperCase()}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <span 
-            className="text-xs px-3 py-1 rounded-full font-semibold tracking-wide select-none"
+            className="hidden sm:inline-block text-xs px-3 py-1 rounded-full font-semibold tracking-wide select-none"
             style={{
               background: 'rgba(239, 68, 68, 0.1)',
               color: '#f87171',

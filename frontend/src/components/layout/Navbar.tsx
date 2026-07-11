@@ -12,6 +12,7 @@ export default function Navbar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -38,6 +39,7 @@ export default function Navbar() {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
+        setMobileMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -55,6 +57,7 @@ export default function Navbar() {
     clearToken();
     setLoggedIn(false); setRole(null); setAvatarUrl(null); setDisplayName(null);
     setDropdownOpen(false);
+    setMobileMenuOpen(false);
     navigate('/');
   };
 
@@ -111,124 +114,129 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Right: Actions */}
-        <div className="navbar-right">
-          {loggedIn ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>
-
-              {/* Wishlist Icon on Mobile */}
-              <Link to="/wishlist" className="nav-link-item" title="Wishlist" style={{
-                width: '32px', height: '32px', borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: '1px solid #e5e7eb', textDecoration: 'none',
-                background: isActive('/wishlist') ? '#f4f4f4' : 'transparent',
-                transition: 'background 0.15s ease'
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={isActive('/wishlist') ? '#101010' : '#6b7280'} strokeWidth="2">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-              </Link>
-
-              {/* Sell Button */}
-              {(role === 'SELLER' || role === 'ADMIN') && (
-                <Link to="/dashboard/seller" className="btn-pill-dark">
-                  <span style={{ marginRight: '0.15rem', fontWeight: 600 }}>+</span>
-                  <span className="nav-btn-text">List Land</span>
-                </Link>
-              )}
-
-              {/* User Avatar */}
-              <div ref={dropdownRef} style={{ position: 'relative' }}>
-                <button onClick={() => setDropdownOpen(!dropdownOpen)} style={{
-                  width: '30px', height: '30px', borderRadius: '50%',
-                  background: 'transparent', border: '1px solid #e5e7eb',
-                  cursor: 'pointer', padding: 0,
+        {/* Right: Actions (Desktop & Mobile Unified) */}
+        <div className="navbar-right" ref={dropdownRef}>
+          {/* Desktop Right Actions */}
+          <div className="desktop-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {loggedIn ? (
+              <>
+                <Link to="/wishlist" className="nav-link-item" title="Wishlist" style={{
+                  width: '32px', height: '32px', borderRadius: '50%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  overflow: 'hidden', transition: 'border-color 0.15s ease'
+                  border: '1px solid #e5e7eb', textDecoration: 'none',
+                  background: isActive('/wishlist') ? '#f4f4f4' : 'transparent',
+                  transition: 'background 0.15s ease'
                 }}>
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
-                  ) : (
-                    <div style={{
-                      width: '100%', height: '100%', background: '#101010',
-                      color: '#ffffff', display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', fontWeight: 600, fontSize: '0.72rem'
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isActive('/wishlist') ? '#101010' : '#6b7280'} strokeWidth="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </Link>
+
+                {(role === 'SELLER' || role === 'ADMIN') && (
+                  <Link to="/dashboard/seller" className="btn-pill-dark">
+                    <span style={{ marginRight: '0.15rem', fontWeight: 600 }}>+</span>
+                    <span className="nav-btn-text">List Land</span>
+                  </Link>
+                )}
+
+                <div style={{ position: 'relative' }}>
+                  <button onClick={() => setDropdownOpen(!dropdownOpen)} style={{
+                    width: '30px', height: '30px', borderRadius: '50%',
+                    background: 'transparent', border: '1px solid #e5e7eb',
+                    cursor: 'pointer', padding: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    overflow: 'hidden', transition: 'border-color 0.15s ease'
+                  }}>
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', background: '#101010', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '0.72rem' }}>
+                        {displayName ? displayName[0].toUpperCase() : 'U'}
+                      </div>
+                    )}
+                  </button>
+
+                  {dropdownOpen && (
+                    <div className="desktop-dropdown" style={{
+                      position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: '200px',
+                      background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px',
+                      boxShadow: 'rgba(36,36,36,0.05) 0px 4px 8px 0px', zIndex: 999, padding: '0.3rem'
                     }}>
-                      {displayName ? displayName[0].toUpperCase() : 'U'}
+                      <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid #f4f4f4' }}>
+                        <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#101010' }}>{displayName}</p>
+                        <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#6b7280', marginTop: '0.15rem', display: 'block', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                          {role === 'ADMIN' ? 'Administrator' : 'Member'}
+                        </span>
+                      </div>
+                      <Link to="/" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Home / Browse</Link>
+                      <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>My Dashboard</Link>
+                      <Link to="/help" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Help Center</Link>
+                      <Link to="/contact" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Contact Support</Link>
+                      <div style={{ height: '1px', background: '#f4f4f4', margin: '0.3rem 0' }} />
+                      <button onClick={handleLogout} style={{ width: '100%', padding: '0.55rem 0.8rem', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 500, fontSize: '0.8125rem', textAlign: 'left', cursor: 'pointer', borderRadius: '8px', fontFamily: 'inherit' }}>Logout</button>
                     </div>
                   )}
-                </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Link to="/login" state={{ mode: 'login' }} style={{ fontSize: '0.875rem', fontWeight: 500, color: '#4b5563', textDecoration: 'none' }}>Sign in</Link>
+                <Link to="/login" state={{ mode: 'register' }} className="btn-pill-dark" style={{ textDecoration: 'none' }}>
+                  <span>Get started</span>
+                </Link>
+              </>
+            )}
+          </div>
 
-                {/* Dropdown menu */}
-                {dropdownOpen && (
-                  <div style={{
-                    position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: '200px',
-                    background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px',
-                    boxShadow: 'rgba(36,36,36,0.05) 0px 4px 8px 0px', zIndex: 999, padding: '0.3rem'
-                  }}>
-                    <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid #f4f4f4' }}>
-                      <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#101010' }}>{displayName}</p>
-                      <span style={{
-                        fontSize: '0.6875rem', fontWeight: 500, color: '#6b7280',
-                        marginTop: '0.15rem', display: 'block', letterSpacing: '0.02em', textTransform: 'uppercase'
-                      }}>
-                        {role === 'ADMIN' ? 'Administrator' : 'Member'}
-                      </span>
-                    </div>
+          {/* Mobile Menu Button */}
+          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{
+            background: 'transparent', border: 'none', cursor: 'pointer', display: 'none', alignItems: 'center', justifyContent: 'center', padding: '0.25rem'
+          }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#242424" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              {mobileMenuOpen ? (
+                <path d="M18 6L6 18M6 6l12 12" />
+              ) : (
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
 
-                    {role === 'ADMIN' ? (
-                      <Link to="/dashboard/admin" onClick={() => setDropdownOpen(false)}
-                        style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>Admin Panel</Link>
-                    ) : (
-                      <Link to={role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer'} onClick={() => setDropdownOpen(false)}
-                        style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>My Dashboard</Link>
-                    )}
-                    <Link to="/help" onClick={() => setDropdownOpen(false)}
-                      style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>Help Center</Link>
-                    <Link to="/contact" onClick={() => setDropdownOpen(false)}
-                      style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', fontWeight: 400, borderRadius: '8px' }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f4f4'}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>Contact Support</Link>
-
-                    <div style={{ height: '1px', background: '#f4f4f4', margin: '0.3rem 0' }} />
-                    <button id="navbar-logout" onClick={handleLogout} style={{
-                      width: '100%', padding: '0.55rem 0.8rem', background: 'transparent', border: 'none',
-                      color: '#dc2626', fontWeight: 500, fontSize: '0.8125rem',
-                      textAlign: 'left', cursor: 'pointer', borderRadius: '8px', fontFamily: 'inherit'
-                    }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#fef2f2'}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <Link to="/login" state={{ mode: 'login' }} style={{
-                fontSize: '0.875rem', fontWeight: 500, color: '#4b5563',
-                textDecoration: 'none', transition: 'color 0.2s ease'
-              }}
-                onMouseEnter={e => e.currentTarget.style.color = '#111827'}
-                onMouseLeave={e => e.currentTarget.style.color = '#4b5563'}>
-                Sign in
-              </Link>
-              <Link to="/login" state={{ mode: 'register' }} className="btn-pill-dark" style={{ textDecoration: 'none' }}>
-                <span>Get started</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '0.15rem' }}>
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </Link>
+          {/* Mobile Dropdown Menu */}
+          {mobileMenuOpen && (
+            <div className="mobile-dropdown-menu" style={{
+              position: 'absolute', top: 'calc(100% + 10px)', right: '1.25rem', left: '1.25rem',
+              background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px',
+              boxShadow: 'rgba(36,36,36,0.1) 0px 10px 20px -5px', zIndex: 1000, padding: '0.5rem',
+              display: 'flex', flexDirection: 'column'
+            }}>
+              {loggedIn && (
+                <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid #f4f4f4', marginBottom: '0.25rem' }}>
+                  <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#101010' }}>{displayName}</p>
+                </div>
+              )}
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Home / Browse</Link>
+              {loggedIn && (
+                <>
+                  <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>My Dashboard</Link>
+                  <Link to="/wishlist" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Wishlist</Link>
+                  {(role === 'SELLER' || role === 'ADMIN') && (
+                    <Link to="/dashboard/seller" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#10b981', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 600, borderRadius: '8px' }}>+ List Land</Link>
+                  )}
+                </>
+              )}
+              <Link to="/help" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Help Center</Link>
+              <Link to="/contact" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Contact Support</Link>
+              
+              <div style={{ height: '1px', background: '#e5e7eb', margin: '0.5rem 0' }} />
+              
+              {loggedIn ? (
+                <button onClick={handleLogout} style={{ width: '100%', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 600, fontSize: '0.9375rem', textAlign: 'left', cursor: 'pointer', borderRadius: '8px', fontFamily: 'inherit' }}>Logout</button>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.5rem' }}>
+                  <Link to="/login" state={{ mode: 'login' }} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', textAlign: 'center', padding: '0.75rem', color: '#4b5563', textDecoration: 'none', fontWeight: 500, border: '1px solid #e5e7eb', borderRadius: '8px' }}>Sign in</Link>
+                  <Link to="/login" state={{ mode: 'register' }} onClick={() => setMobileMenuOpen(false)} className="btn-pill-dark" style={{ width: '100%', display: 'flex', textDecoration: 'none' }}>Get started</Link>
+                </div>
+              )}
             </div>
           )}
         </div>

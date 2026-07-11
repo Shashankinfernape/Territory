@@ -628,6 +628,18 @@ body {
   .details-grid {
     grid-template-columns: 1fr;
   }
+
+  .specs-grid, .attributes-grid, .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .desktop-actions {
+    display: none !important;
+  }
+  
+  .mobile-menu-btn {
+    display: flex !important;
+  }
 }
 
 @media (max-width: 640px) {
@@ -742,7 +754,8 @@ body {
   }
 
   .nav-logo-text {
-    display: none !important;
+    display: block !important;
+    font-size: 0.9rem !important;
   }
 
   .nav-link-item {
