@@ -96,7 +96,10 @@ export default function Navbar() {
               Home
             </Link>
             <Link to="/browse" className={`nav-menu-link${isActive('/browse') ? ' active' : ''}`}>
-              Browse
+              Buy
+            </Link>
+            <Link to="/sell-guide" className={`nav-menu-link${isActive('/sell-guide') ? ' active' : ''}`}>
+              Sell
             </Link>
             <Link to="/map" className={`nav-menu-link${isActive('/map') ? ' active' : ''}`}>
               Map View
@@ -235,25 +238,6 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link to="/browse" style={{
-                  fontSize: '0.875rem', fontWeight: 500, color: '#4b5563',
-                  textDecoration: 'none', transition: 'color 0.2s ease',
-                  padding: '0.35rem 0.65rem', borderRadius: '8px'
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.color = '#101010'; e.currentTarget.style.background = 'rgba(15,23,42,0.05)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = '#4b5563'; e.currentTarget.style.background = 'transparent'; }}>
-                  Buy
-                </Link>
-                <Link to="/sell-guide" style={{
-                  fontSize: '0.875rem', fontWeight: 500, color: '#4b5563',
-                  textDecoration: 'none', transition: 'color 0.2s ease',
-                  padding: '0.35rem 0.65rem', borderRadius: '8px'
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.color = '#101010'; e.currentTarget.style.background = 'rgba(15,23,42,0.05)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = '#4b5563'; e.currentTarget.style.background = 'transparent'; }}>
-                  Sell
-                </Link>
-                <div style={{ width: '1px', height: '16px', background: '#e5e7eb' }} />
                 <Link to="/login" state={{ mode: 'login' }} style={{ fontSize: '0.875rem', fontWeight: 500, color: '#4b5563', textDecoration: 'none' }}>Sign in</Link>
                 <Link to="/login" state={{ mode: 'register' }} className="btn-pill-dark" style={{ textDecoration: 'none' }}>
                   <span>Get started</span>
