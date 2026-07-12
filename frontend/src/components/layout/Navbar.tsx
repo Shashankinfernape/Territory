@@ -279,7 +279,7 @@ export default function Navbar() {
             <div className="mobile-dropdown-menu" style={{
               position: 'absolute', top: 'calc(100% + 10px)', right: '1.25rem', left: '1.25rem',
               background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px',
-              boxShadow: 'rgba(36,36,36,0.1) 0px 10px 20px -5px', zIndex: 1000, padding: '0.5rem',
+              boxShadow: 'rgba(36,36,36,0.1) 0px 10px 20px -5px', zIndex: 9999, padding: '0.5rem',
               display: 'flex', flexDirection: 'column'
             }}>
               {loggedIn && (
@@ -289,6 +289,7 @@ export default function Navbar() {
               )}
               <Link to="/" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Home</Link>
               <Link to="/browse" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Browse All</Link>
+              <Link to="/map" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Map Search</Link>
               {loggedIn && (
                 <>
                   <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>My Dashboard</Link>
@@ -330,6 +331,7 @@ export default function Navbar() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.5rem' }}>
                   <Link to="/browse" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0.5rem', color: '#242424', textDecoration: 'none', fontWeight: 500 }}>Buy Land</Link>
+                  <Link to="/map" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0.5rem', color: '#242424', textDecoration: 'none', fontWeight: 500 }}>Map Search</Link>
                   <Link to="/sell-guide" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0.5rem', color: '#242424', textDecoration: 'none', fontWeight: 500 }}>Sell Land</Link>
                   <div style={{ height: '1px', background: '#e5e7eb', margin: '0.25rem 0' }} />
                   <Link to="/login" state={{ mode: 'login' }} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', textAlign: 'center', padding: '0.75rem', color: '#4b5563', textDecoration: 'none', fontWeight: 500, border: '1px solid #e5e7eb', borderRadius: '8px' }}>Sign in</Link>

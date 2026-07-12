@@ -874,6 +874,17 @@ export default function MapSearch() {
             padding: 0.5rem 0.875rem !important;
             flex-wrap: wrap !important;
             overflow-x: visible !important;
+            justify-content: flex-start !important;
+          }
+          .filters-container > .search-pill-wrap {
+            width: 100% !important;
+          }
+          .filters-container > .search-pill-wrap > input {
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .filters-container .filter-divider {
+            display: none !important;
           }
           .split-view-container {
             grid-template-columns: 1fr !important;
@@ -930,8 +941,7 @@ export default function MapSearch() {
         alignItems: 'center',
         gap: '0.5rem',
         zIndex: 1000,
-        overflowX: 'auto',
-        whiteSpace: 'nowrap'
+        overflowX: 'auto'
       }}>
         {/* Search */}
         <div className="search-pill-wrap">
