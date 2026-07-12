@@ -98,9 +98,11 @@ export default function Navbar() {
             <Link to="/browse" className={`nav-menu-link${isActive('/browse') ? ' active' : ''}`}>
               Buy
             </Link>
-            <Link to="/sell-guide" className={`nav-menu-link${isActive('/sell-guide') ? ' active' : ''}`}>
-              Sell
-            </Link>
+            {!loggedIn && (
+              <Link to="/sell-guide" className={`nav-menu-link${isActive('/sell-guide') ? ' active' : ''}`}>
+                Sell
+              </Link>
+            )}
             <Link to="/map" className={`nav-menu-link${isActive('/map') ? ' active' : ''}`}>
               Map View
             </Link>
@@ -143,40 +145,42 @@ export default function Navbar() {
                 </Link>
 
                 {/* Sell Land pill — always visible for logged-in users, goes directly to upload form */}
-                 <Link
-                   to="/dashboard/seller/upload"
-                   style={{
-                     display: 'inline-flex',
-                     alignItems: 'center',
-                     justifyContent: 'center',
-                     gap: '0.25rem',
-                     background: '#ffffff',
-                     color: '#101010',
-                     border: '3.5px solid',
-                     borderTopColor: '#6b7280',
-                     borderRightColor: '#374151',
-                     borderBottomColor: '#101010',
-                     borderLeftColor: '#898989',
-                     borderRadius: '9999px',
-                     height: '32px',
-                     padding: '0 0.85rem',
-                     boxSizing: 'border-box',
-                     fontFamily: "'Inter', sans-serif",
-                     fontSize: '0.74rem',
-                     fontWeight: 900,
-                     textTransform: 'uppercase',
-                     letterSpacing: '0.08em',
-                     textDecoration: 'none',
-                     transition: 'transform 0.1s ease',
-                     outline: 'none',
-                     WebkitTapHighlightColor: 'transparent'
-                   }}
-                   onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
-                   onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-                 >
-                   <span style={{ fontSize: '0.9rem', fontWeight: 900 }}>+</span>
-                   <span>Sell</span>
-                 </Link>
+                {(role === 'SELLER' || role === 'ADMIN') && (
+                  <Link
+                    to="/dashboard/seller/upload"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.25rem',
+                      background: '#ffffff',
+                      color: '#101010',
+                      border: '3.5px solid',
+                      borderTopColor: '#6b7280',
+                      borderRightColor: '#374151',
+                      borderBottomColor: '#101010',
+                      borderLeftColor: '#898989',
+                      borderRadius: '9999px',
+                      height: '32px',
+                      padding: '0 0.85rem',
+                      boxSizing: 'border-box',
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '0.74rem',
+                      fontWeight: 900,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                      textDecoration: 'none',
+                      transition: 'transform 0.1s ease',
+                      outline: 'none',
+                      WebkitTapHighlightColor: 'transparent'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                  >
+                    <span style={{ fontSize: '0.9rem', fontWeight: 900 }}>+</span>
+                    <span>Sell</span>
+                  </Link>
+                )}
 
                 <div style={{ position: 'relative' }}>
                   <div
@@ -298,31 +302,33 @@ export default function Navbar() {
                 <>
                   <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>My Dashboard</Link>
                   <Link to="/wishlist" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Wishlist</Link>
-                  <Link
-                    to="/dashboard/seller/upload"
-                    onClick={() => setMobileMenuOpen(false)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.35rem',
-                      margin: '0.5rem 0.25rem',
-                      padding: '0.65rem 1.25rem',
-                      background: '#ffffff',
-                      color: '#101010',
-                      border: '4px solid #101010',
-                      borderRadius: '9999px',
-                      textDecoration: 'none',
-                      fontSize: '0.85rem',
-                      fontWeight: 900,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.08em',
-                      textAlign: 'center'
-                    }}
-                  >
-                    <span style={{ fontSize: '1rem', fontWeight: 900 }}>+</span>
-                    <span>Sell Land</span>
-                  </Link>
+                  {(role === 'SELLER' || role === 'ADMIN') && (
+                    <Link
+                      to="/dashboard/seller/upload"
+                      onClick={() => setMobileMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.35rem',
+                        margin: '0.5rem 0.25rem',
+                        padding: '0.65rem 1.25rem',
+                        background: '#ffffff',
+                        color: '#101010',
+                        border: '4px solid #101010',
+                        borderRadius: '9999px',
+                        textDecoration: 'none',
+                        fontSize: '0.85rem',
+                        fontWeight: 900,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08em',
+                        textAlign: 'center'
+                      }}
+                    >
+                      <span style={{ fontSize: '1rem', fontWeight: 900 }}>+</span>
+                      <span>Sell Land</span>
+                    </Link>
+                  )}
                 </>
               )}
               <Link to="/help" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Help Center</Link>
