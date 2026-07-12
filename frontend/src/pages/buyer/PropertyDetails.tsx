@@ -99,7 +99,7 @@ export default function PropertyDetails() {
   const activeImage = galleryImages[activeImageIndex] || galleryImages[0];
 
   return (
-    <div className="fade-in" style={{ backgroundColor: '#f4f4f4', minHeight: '100vh', padding: '2rem 1.5rem' }}>
+    <div className="fade-in" style={{ minHeight: '100vh', padding: '2rem 1.5rem' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         
         <Link to="/" style={{

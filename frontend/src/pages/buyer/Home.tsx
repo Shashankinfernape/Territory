@@ -72,7 +72,7 @@ export default function Home() {
   };
 
   return (
-    <div className="fade-in" style={{ backgroundColor: '#f4f4f4', minHeight: '100vh', paddingBottom: '5rem' }}>
+    <div className="fade-in" style={{ minHeight: '100vh', paddingBottom: '5rem' }}>
 
       {/* ── HERO ── */}
       <div className="hero-cinematic">

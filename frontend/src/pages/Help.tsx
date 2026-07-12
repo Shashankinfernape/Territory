@@ -31,7 +31,7 @@ export default function Help() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <div className="fade-in" style={{ minHeight: '80vh', backgroundColor: '#f4f4f4', padding: '4rem 1rem' }}>
+    <div className="fade-in" style={{ minHeight: '80vh', padding: '4rem 1rem' }}>
       <div style={{ maxWidth: '700px', margin: '0 auto' }}>
 
         {/* Header */}

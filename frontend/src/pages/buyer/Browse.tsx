@@ -318,7 +318,7 @@ export default function Browse() {
   const cardProps = { wishlist, togglingId, isLoggedIn, toggleWishlist };
 
   return (
-    <div className="fade-in" style={{ backgroundColor: '#f0f0f0', minHeight: '100vh' }}>
+    <div className="fade-in" style={{ minHeight: '100vh' }}>
 
       {/* ── SEARCH HEADER ── */}
       <div style={{
