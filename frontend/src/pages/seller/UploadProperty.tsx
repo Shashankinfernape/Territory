@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../lib/api';
 import FileDropzone from '../../components/common/FileDropzone';
 import DraggableGrid from '../../components/common/DraggableGrid';
+import TAMIL_NADU_CITY_DIVISIONS from '../../components/common/tamilnadu_city_divisions.json';
 
 interface DocUploadItem {
   type: string;
@@ -68,10 +69,50 @@ function ImageThumbnail({ file, index, isDragging, onRemove }: {
   );
 }
 
+// Official 38 districts of Tamil Nadu
+const TAMIL_NADU_DISTRICTS = [
+  "Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri",
+  "Dindigul", "Erode", "Kallakurichi", "Kancheepuram", "Kanniyakumari", "Karur",
+  "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris",
+  "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivagangai",
+  "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli (Trichy)", "Tirunelveli",
+  "Tirupattur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore",
+  "Viluppuram", "Virudhunagar"
+];
+
+// Helper to normalize spellings across GeoJSON and directory keys
+const normalizeName = (name: string): string => {
+  return name.trim().toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/\(.*\)/g, '')
+    .replace(/h/g, '')
+    .replace(/ee/g, 'i')
+    .replace(/pp/g, 'p')
+    .replace(/tt/g, 't')
+    .replace(/ll/g, 'l')
+    .replace(/ch/g, 'c')
+    .replace(/ai$/g, 'a')
+    .replace(/y/g, 'i');
+};
+
+
 export default function UploadProperty() {
   const [city, setCity] = useState('');
   const [district, setDistrict] = useState('');
+  const [taluk, setTaluk] = useState('');
   const [state, setState] = useState('Tamil Nadu');
+
+  const sortedDistricts = useMemo(() => {
+    return [...TAMIL_NADU_DISTRICTS].sort((a, b) => a.localeCompare(b));
+  }, []);
+
+  const sortedTaluks = useMemo(() => {
+    if (!district) return [];
+    const keys = Object.keys(TAMIL_NADU_CITY_DIVISIONS);
+    const matchedKey = keys.find(k => normalizeName(k) === normalizeName(district)) || district;
+    const divisions = (TAMIL_NADU_CITY_DIVISIONS as any)[matchedKey] || [];
+    return divisions.map((d: any) => d.name).sort((a: string, b: string) => a.localeCompare(b));
+  }, [district]);
   const [price, setPrice] = useState('');
   const [area, setArea] = useState('');
   const [areaUnit, setAreaUnit] = useState('acres');
@@ -153,6 +194,7 @@ export default function UploadProperty() {
     const formData = new FormData();
     formData.append('city', city);
     formData.append('district', district);
+    formData.append('taluk', taluk);
     formData.append('state', state);
     formData.append('price', price);
     formData.append('area', area);
@@ -221,16 +263,54 @@ export default function UploadProperty() {
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>City / Village</label>
-                  <input type="text" required value={city} onChange={e => setCity(e.target.value)} className="form-input" placeholder="e.g. Pollachi" />
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>District</label>
+                  <select
+                    required
+                    value={district}
+                    onChange={e => {
+                      setDistrict(e.target.value);
+                      setTaluk('');
+                    }}
+                    className="form-input"
+                    style={{ width: '100%' }}
+                  >
+                    <option value="">Select District</option>
+                    {sortedDistricts.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>District</label>
-                  <input type="text" required value={district} onChange={e => setDistrict(e.target.value)} className="form-input" placeholder="e.g. Coimbatore" />
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Taluk</label>
+                  <select
+                    required
+                    disabled={!district}
+                    value={taluk}
+                    onChange={e => setTaluk(e.target.value)}
+                    className="form-input"
+                    style={{ width: '100%' }}
+                  >
+                    <option value="">Select Taluk</option>
+                    {sortedTaluks.map((t: string) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>City / Village</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Type city/village name"
+                    value={city}
+                    onChange={e => setCity(e.target.value)}
+                    className="form-input"
+                    style={{ width: '100%' }}
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>State</label>
-                  <input type="text" value={state} onChange={e => setState(e.target.value)} className="form-input" />
+                  <input type="text" value={state} onChange={e => setState(e.target.value)} className="form-input" style={{ width: '100%' }} />
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 /* ── CAL.COM DESIGN SYSTEM — TERRITORY ───────────────────────────────── */
@@ -11,7 +11,7 @@
   --color-paper:      #f4f4f4;
   --color-white:      #ffffff;
   --color-action-blue: #0099ff;
-  --font-heading: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Playfair Display', Georgia, serif;
   --font-body:    'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -173,7 +173,6 @@ body {
 .nav-menu-link:hover {
   color: #111827;
   background: rgba(15, 23, 42, 0.05);
-  transform: translateY(-1px);
 }
 
 .nav-menu-link.active {

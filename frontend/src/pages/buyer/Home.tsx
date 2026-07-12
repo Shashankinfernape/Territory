@@ -59,7 +59,10 @@ export default function Home() {
 
   const toggleWishlist = async (e: React.MouseEvent, id: string) => {
     e.preventDefault(); e.stopPropagation();
-    if (!isLoggedIn) return;
+    if (!isLoggedIn) {
+      window.location.href = '/login';
+      return;
+    }
     setTogglingId(id);
     try {
       const r = await api.post(`/auth/wishlist/${id}`);
@@ -187,19 +190,37 @@ export default function Home() {
                     </div>
                     <span className="badge-active" style={{ position: 'absolute', bottom: '0.85rem', right: '0.85rem', fontSize: '0.75rem' }}>{p.type}</span>
 
-                    {isLoggedIn && (
-                      <button
-                        onClick={e => toggleWishlist(e, p.id)}
-                        disabled={togglingId === p.id}
-                        style={{ position: 'absolute', top: '0.85rem', right: '0.85rem', zIndex: 10, width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.95)', border: '1px solid #e5e7eb', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.15s ease' }}
-                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                    <button
+                      onClick={e => toggleWishlist(e, p.id)}
+                      disabled={togglingId === p.id}
+                      style={{
+                        position: 'absolute', top: '0.85rem', right: '0.85rem', zIndex: 10,
+                        background: 'transparent', border: 'none', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: 0,
+                        transition: 'transform 0.15s ease',
+                        outline: 'none'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      <svg
+                        width="26"
+                        height="26"
+                        viewBox="0 0 24 24"
+                        style={{
+                          filter: 'drop-shadow(0 1.5px 3.5px rgba(0,0,0,0.7))',
+                          transition: 'all 0.15s ease'
+                        }}
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill={wishlist.includes(p.id) ? '#101010' : 'none'} stroke={wishlist.includes(p.id) ? '#101010' : '#6b7280'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                        </svg>
-                      </button>
-                    )}
+                        <path
+                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                          fill={wishlist.includes(p.id) ? '#101010' : 'none'}
+                          stroke="#ffffff"
+                          strokeWidth="2.2"
+                        />
+                      </svg>
+                    </button>
                   </div>
 
                   <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>

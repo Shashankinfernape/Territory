@@ -27,6 +27,7 @@ export interface Property {
   irrigation: boolean;
   nearby_town?: string;
   distance_from_town_km?: number;
+  taluk?: string;
 }
 
 export interface User {

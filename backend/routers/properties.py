@@ -37,6 +37,7 @@ def _doc_to_response(document) -> PropertyResponse:
         nearby_town=document.get("nearby_town"),
         distance_from_town_km=document.get("distance_from_town_km"),
         images=document.get("images", []),
+        taluk=document.get("taluk", ""),
     )
 
 
@@ -45,6 +46,7 @@ async def get_properties(
     type: Optional[str] = Query(None, description="Filter by land type"),
     city: Optional[str] = Query(None, description="Filter by city"),
     district: Optional[str] = Query(None, description="Filter by district"),
+    taluk: Optional[str] = Query(None, description="Filter by taluk"),
     min_area: Optional[float] = Query(None, description="Minimum area"),
     max_area: Optional[float] = Query(None, description="Maximum area"),
     min_price: Optional[float] = Query(None, description="Minimum price"),
@@ -65,6 +67,11 @@ async def get_properties(
         query["city"] = {"$regex": city, "$options": "i"}
     if district:
         query["district"] = {"$regex": district, "$options": "i"}
+    if taluk:
+        query["$or"] = [
+            {"taluk": {"$regex": taluk, "$options": "i"}},
+            {"city": {"$regex": taluk, "$options": "i"}}
+        ]
     if min_area is not None or max_area is not None:
         query["area"] = {}
         if min_area is not None:
@@ -91,6 +98,7 @@ async def get_properties(
         query["$or"] = [
             {"city": {"$regex": search, "$options": "i"}},
             {"district": {"$regex": search, "$options": "i"}},
+            {"taluk": {"$regex": search, "$options": "i"}},
             {"description": {"$regex": search, "$options": "i"}},
             {"keywords": {"$elemMatch": {"$regex": search, "$options": "i"}}},
             {"nearby_town": {"$regex": search, "$options": "i"}},
@@ -122,13 +130,14 @@ async def create_property(
     irrigation: bool = Form(False),
     nearby_town: str = Form(None),
     distance_from_town_km: float = Form(None),
+    taluk: str = Form(""),
     doc_types: List[str] = Form(...),
     files: List[UploadFile] = File(...),
     image_files: List[UploadFile] = File([]),
     db=Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    if current_user["role"] not in ("SELLER", "ADMIN"):
+    if current_user["role"] not in ("SELLER", "USER", "ADMIN"):
         raise HTTPException(status_code=403, detail="Only sellers can list properties")
 
     if len(doc_types) != len(files) or len(files) == 0:
@@ -186,7 +195,8 @@ async def create_property(
         "nearby_town": nearby_town,
         "distance_from_town_km": distance_from_town_km,
         "documents": documents,
-        "images": images
+        "images": images,
+        "taluk": taluk
     }
     
     # Remove None values
@@ -204,7 +214,7 @@ async def create_property(
 # otherwise FastAPI will interpret "seller" as a property_id path parameter.
 @router.get("/seller/me", response_model=List[PropertyResponse])
 async def get_my_properties(db=Depends(get_db), current_user=Depends(get_current_user)):
-    if current_user["role"] not in ("SELLER", "ADMIN"):
+    if current_user["role"] not in ("SELLER", "USER", "ADMIN"):
         raise HTTPException(status_code=403, detail="Only sellers can view their listings here")
 
     properties = []
@@ -218,7 +228,7 @@ async def get_my_properties(db=Depends(get_db), current_user=Depends(get_current
 @router.get("/seller/me/stats")
 async def get_seller_stats(db=Depends(get_db), current_user=Depends(get_current_user)):
     """Return per-property unlock counts for the authenticated seller."""
-    if current_user["role"] not in ("SELLER", "ADMIN"):
+    if current_user["role"] not in ("SELLER", "USER", "ADMIN"):
         raise HTTPException(status_code=403, detail="Only sellers can view their stats")
 
     seller_id = str(current_user["_id"])
@@ -333,6 +343,7 @@ async def update_property(
     irrigation: bool = Form(None),
     nearby_town: str = Form(None),
     distance_from_town_km: float = Form(None),
+    taluk: str = Form(None),
     retained_documents: str = Form("[]"), # JSON array of document objects to keep
     retained_documents_json: Optional[str] = Form(None), # fallback name
     doc_types: List[str] = Form([]),
@@ -343,7 +354,7 @@ async def update_property(
     db=Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    if current_user["role"] not in ("SELLER", "ADMIN"):
+    if current_user["role"] not in ("SELLER", "USER", "ADMIN"):
         raise HTTPException(status_code=403, detail="Not authorized to edit")
 
     if not ObjectId.is_valid(property_id):
@@ -370,6 +381,8 @@ async def update_property(
     if irrigation is not None: update_fields["irrigation"] = irrigation
     if nearby_town is not None: update_fields["nearby_town"] = nearby_town
     if distance_from_town_km is not None: update_fields["distance_from_town_km"] = distance_from_town_km
+    if taluk is not None: update_fields["taluk"] = taluk
+    update_fields["status"] = "ACTIVE"
 
     # Process documents
     documents = []

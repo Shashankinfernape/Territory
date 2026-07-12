@@ -1,4 +1,10 @@
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+
+// Intro Component
+import SplashAnimation from './components/SplashAnimation';
+
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/auth/Login';
@@ -14,53 +20,73 @@ import SecureViewer from './pages/buyer/SecureViewer';
 
 import AdminDashboard from './pages/admin/Dashboard';
 import Wishlist from './pages/buyer/Wishlist';
+import MapSearch from './pages/buyer/MapSearch';
 import NotFound from './pages/NotFound';
 import SellGuide from './pages/SellGuide';
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          {/* Public Routes */}
-          <Route index element={<Home />} />
-          <Route path="browse" element={<Browse />} />
-          <Route path="property/:id" element={<PropertyDetails />} />
-          <Route path="wishlist" element={<Wishlist />} />
-          <Route path="login" element={<Login />} />
-          <Route path="contact" element={<Contact />} />
-          <Route path="help" element={<Help />} />
-          <Route path="sell-guide" element={<SellGuide />} />
+    <AnimatePresence mode="wait">
+      {showSplash ? (
+        /* 1. Play Premium Silver Cinematic Sequence first */
+        <SplashAnimation key="splash" onComplete={() => setShowSplash(false)} />
+      ) : (
+        /* 2. Soft-fade directly into your real application layout and routes */
+        <motion.div
+          key="app-router-root"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="min-h-screen"
+        >
+          <Router>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                {/* Public Routes */}
+                <Route index element={<Home />} />
+                <Route path="browse" element={<Browse />} />
+                <Route path="map" element={<MapSearch />} />
+                <Route path="property/:id" element={<PropertyDetails />} />
+                <Route path="wishlist" element={<Wishlist />} />
+                <Route path="login" element={<Login />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="help" element={<Help />} />
+                <Route path="sell-guide" element={<SellGuide />} />
 
-          {/* Protected: Unified Dashboard (BUY + SELL) */}
-          <Route path="dashboard/buyer" element={
-            <ProtectedRoute requiredRole="BUYER"><UnifiedDashboard /></ProtectedRoute>
-          } />
-          <Route path="dashboard/seller" element={
-            <ProtectedRoute requiredRole="SELLER"><UnifiedDashboard /></ProtectedRoute>
-          } />
-          <Route path="dashboard/seller/upload" element={
-            <ProtectedRoute requiredRole="SELLER"><UploadProperty /></ProtectedRoute>
-          } />
-          <Route path="dashboard/seller/edit/:id" element={
-            <ProtectedRoute requiredRole="SELLER"><EditProperty /></ProtectedRoute>
-          } />
+                {/* Protected: Unified Dashboard (BUY + SELL) */}
+                <Route path="dashboard/buyer" element={
+                  <ProtectedRoute requiredRole="BUYER"><UnifiedDashboard /></ProtectedRoute>
+                } />
+                <Route path="dashboard/seller" element={
+                  <ProtectedRoute><UnifiedDashboard /></ProtectedRoute>
+                } />
+                <Route path="dashboard/seller/upload" element={
+                  <ProtectedRoute><UploadProperty /></ProtectedRoute>
+                } />
+                <Route path="dashboard/seller/edit/:id" element={
+                  <ProtectedRoute><EditProperty /></ProtectedRoute>
+                } />
 
-          {/* Protected: Admin */}
-          <Route path="dashboard/admin" element={
-            <ProtectedRoute requiredRole="ADMIN"><AdminDashboard /></ProtectedRoute>
-          } />
+                {/* Protected: Admin */}
+                <Route path="dashboard/admin" element={
+                  <ProtectedRoute requiredRole="ADMIN"><AdminDashboard /></ProtectedRoute>
+                } />
 
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Route>
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Route>
 
-        {/* Fullscreen Secure Viewer — /viewer/:propertyId/:docIndex */}
-        <Route path="/viewer/:propertyId/:docIndex" element={
-          <ProtectedRoute><SecureViewer /></ProtectedRoute>
-        } />
-      </Routes>
-    </Router>
+              {/* Fullscreen Secure Viewer — /viewer/:propertyId/:docIndex */}
+              <Route path="/viewer/:propertyId/:docIndex" element={
+                <ProtectedRoute><SecureViewer /></ProtectedRoute>
+              } />
+            </Routes>
+          </Router>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

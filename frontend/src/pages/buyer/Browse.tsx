@@ -1,8 +1,33 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api, getToken } from '../../lib/api';
 import { getPropertyImageUrl, type Property } from '../../lib/types';
 import { formatPrice } from '../../lib/utils';
+import TAMIL_NADU_CITY_DIVISIONS from '../../components/common/tamilnadu_city_divisions.json';
+
+const TAMIL_NADU_DISTRICTS = [
+  "Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri",
+  "Dindigul", "Erode", "Kallakurichi", "Kancheepuram", "Kanniyakumari", "Karur",
+  "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris",
+  "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivagangai",
+  "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli (Trichy)", "Tirunelveli",
+  "Tirupattur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore",
+  "Viluppuram", "Virudhunagar"
+];
+
+const normalizeName = (name: string): string => {
+  return name.trim().toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/\(.*\)/g, '')
+    .replace(/h/g, '')
+    .replace(/ee/g, 'i')
+    .replace(/pp/g, 'p')
+    .replace(/tt/g, 't')
+    .replace(/ll/g, 'l')
+    .replace(/ch/g, 'c')
+    .replace(/ai$/g, 'a')
+    .replace(/y/g, 'i');
+};
 
 const TYPES = ['', 'Agricultural Land', 'Farm Land', 'Flat Plot', 'Residential Plot', 'Commercial Plot'];
 const SORT_OPTIONS = [
@@ -13,54 +38,118 @@ const SORT_OPTIONS = [
 ];
 
 function PropertyCard({
-  p, wishlist, togglingId, isLoggedIn, toggleWishlist
+  p, wishlist, togglingId, toggleWishlist
 }: {
   p: Property;
   wishlist: string[];
   togglingId: string | null;
-  isLoggedIn: boolean;
   toggleWishlist: (e: React.MouseEvent, id: string) => void;
 }) {
   return (
-    <div className="property-card">
+    <div className="property-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#ffffff', borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
       <Link to={`/property/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <div className="card-img" style={{ position: 'relative', height: '200px', overflow: 'hidden', background: '#f4f4f4', flexShrink: 0 }}>
-          <img src={getPropertyImageUrl(p)} alt={p.type} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 50%)' }} />
-          <div style={{ position: 'absolute', bottom: '0.75rem', left: '0.75rem', background: 'rgba(255,255,255,0.96)', borderRadius: '6px', padding: '0.3rem 0.7rem', border: '1px solid #e5e7eb' }}>
-            <p style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#101010', lineHeight: 1, margin: 0, fontFamily: "'Poppins', sans-serif" }}>{formatPrice(p.price)}</p>
+        {/* Image Container with overlays */}
+        <div style={{ width: '100%', position: 'relative', aspectRatio: '16/9', background: '#f3f4f6', overflow: 'hidden' }}>
+          <img
+            src={getPropertyImageUrl(p)}
+            alt="land"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+          
+          {/* Status badge */}
+          <div style={{
+            position: 'absolute', top: '0.625rem', left: '0.625rem',
+            background: '#ffffff',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+            borderRadius: '4px', padding: '3px 8px',
+            fontSize: '0.625rem', fontWeight: 800, color: '#111827',
+            letterSpacing: '0.03em', textTransform: 'uppercase'
+          }}>
+            Active
           </div>
-          <span className="badge-active" style={{ position: 'absolute', bottom: '0.75rem', right: '0.75rem', fontSize: '0.7rem' }}>{p.type}</span>
-          {isLoggedIn && (
-            <button
-              onClick={e => toggleWishlist(e, p.id)}
-              disabled={togglingId === p.id}
-              style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', zIndex: 10, width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.95)', border: '1px solid #e5e7eb', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.15s ease' }}
-              onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
-              onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+
+          {/* Wishlist Heart Overlay */}
+          <button
+            onClick={(e) => toggleWishlist(e, p.id)}
+            disabled={togglingId === p.id}
+            style={{
+              position: 'absolute', top: '0.625rem', right: '0.625rem',
+              background: 'transparent',
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 0,
+              transition: 'transform 0.15s ease',
+              outline: 'none',
+              zIndex: 10
+            }}
+            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
+            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              style={{
+                filter: 'drop-shadow(0 1.5px 3.5px rgba(0,0,0,0.7))',
+                transition: 'all 0.15s ease'
+              }}
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill={wishlist.includes(p.id) ? '#101010' : 'none'} stroke={wishlist.includes(p.id) ? '#101010' : '#6b7280'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-            </button>
-          )}
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                fill={wishlist.includes(p.id) ? '#101010' : 'none'}
+                stroke="#ffffff"
+                strokeWidth="2.2"
+              />
+            </svg>
+          </button>
+
+          {/* Zillow style pagination dots */}
+          <div style={{
+            position: 'absolute', bottom: '0.625rem', left: '50%', transform: 'translateX(-50%)',
+            display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.22)', padding: '3px 6px', borderRadius: '99px'
+          }}>
+            {[1, 2, 3, 4, 5].map((dot, i) => (
+              <div key={dot} style={{
+                width: '5px', height: '5px', borderRadius: '50%',
+                background: i === 0 ? '#ffffff' : 'rgba(255,255,255,0.5)'
+              }} />
+            ))}
+          </div>
         </div>
-        <div style={{ padding: '1rem 1.1rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+
+        {/* Details Body */}
+        <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: '#ffffff', minHeight: '85px' }}>
           <div>
-            <h4 style={{ fontSize: '1rem', fontWeight: 600, color: '#101010', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Poppins', sans-serif", margin: 0 }}>
+            {/* Price & Options row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <p style={{ margin: 0, fontSize: '1.0625rem', fontWeight: 800, color: '#111827', fontFamily: "'Poppins', sans-serif" }}>
+                {formatPrice(p.price)}
+              </p>
+              {/* Three dots icon */}
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: 'pointer' }}>
+                <circle cx="12" cy="12" r="1" />
+                <circle cx="19" cy="12" r="1" />
+                <circle cx="5" cy="12" r="1" />
+              </svg>
+            </div>
+
+            {/* Property specs row */}
+            <p style={{ margin: '0.15rem 0 0', fontSize: '0.72rem', color: '#1f2937', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {p.area} {p.area_unit.replace('_', ' ')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> {p.type.replace(' Land', '').replace(' Plot', '')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> <span style={{ color: '#16a34a' }}>Deed</span>
+            </p>
+
+            {/* Address row */}
+            <p style={{ margin: '0.1rem 0 0', fontSize: '0.72rem', color: '#4b5563', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
               {p.city}{p.district ? `, ${p.district}` : ''}
-            </h4>
-            <p style={{ fontSize: '0.8125rem', color: '#6b7280', marginTop: '0.2rem' }}>{p.area} {p.area_unit} · Deed Verified</p>
+            </p>
           </div>
-          <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '0.6rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <span className="badge-verified" style={{ fontSize: '0.7rem' }}>Active</span>
-            {p.water_source && <span style={{ fontSize: '0.75rem', color: '#898989' }}>{p.water_source}</span>}
+
+          {/* Broker/Seller name */}
+          <div style={{ marginTop: '0.28rem' }}>
+            <p style={{ margin: 0, fontSize: '0.6rem', color: '#9ca3af', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              Territory Premium
+            </p>
           </div>
-        </div>
-        <div className="card-action-bar">
-          <span className="btn-secondary" style={{ width: '100%', fontSize: '0.8125rem', padding: '0.5rem 1rem', display: 'flex', justifyContent: 'center' }}>
-            View details &rarr;
-          </span>
         </div>
       </Link>
     </div>
@@ -83,12 +172,30 @@ export default function Browse() {
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [filterType, setFilterType] = useState(searchParams.get('type') || '');
   const [filterDistrict, setFilterDistrict] = useState(searchParams.get('district') || '');
+  const [filterTaluk, setFilterTaluk] = useState(searchParams.get('taluk') || '');
   const [filterMinPrice, setFilterMinPrice] = useState(searchParams.get('min_price') || '');
   const [filterMaxPrice, setFilterMaxPrice] = useState(searchParams.get('max_price') || '');
   const [filterMinArea, setFilterMinArea] = useState(searchParams.get('min_area') || '');
   const [filterMaxArea, setFilterMaxArea] = useState(searchParams.get('max_area') || '');
   const [filterWaterSource, setFilterWaterSource] = useState(searchParams.get('water_source') || '');
   const [filterRoadAccess, setFilterRoadAccess] = useState(searchParams.get('road_access') || '');
+
+  const sortedTaluks = useMemo(() => {
+    if (!filterDistrict) return [];
+    const keys = Object.keys(TAMIL_NADU_CITY_DIVISIONS);
+    const matchedKey = keys.find(k => normalizeName(k) === normalizeName(filterDistrict)) || filterDistrict;
+    const divisions = (TAMIL_NADU_CITY_DIVISIONS as any)[matchedKey] || [];
+    return divisions.map((d: any) => d.name).sort((a: string, b: string) => a.localeCompare(b));
+  }, [filterDistrict]);
+
+  const isFirstMount = useRef(true);
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    setFilterTaluk('');
+  }, [filterDistrict]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -145,6 +252,7 @@ export default function Browse() {
       if (searchTerm) params.search = searchTerm;
       if (filterType) params.type = filterType;
       if (filterDistrict) params.district = filterDistrict;
+      if (filterTaluk) params.taluk = filterTaluk;
       if (filterMinPrice) params.min_price = filterMinPrice;
       if (filterMaxPrice) params.max_price = filterMaxPrice;
       if (filterMinArea) params.min_area = filterMinArea;
@@ -159,7 +267,7 @@ export default function Browse() {
       setProperties(data);
     } catch { /* silent */ }
     finally { setLoading(false); }
-  }, [searchTerm, filterType, filterDistrict, filterMinPrice, filterMaxPrice, filterMinArea, filterMaxArea, filterWaterSource, filterRoadAccess, sortBy]);
+  }, [searchTerm, filterType, filterDistrict, filterTaluk, filterMinPrice, filterMaxPrice, filterMinArea, filterMaxArea, filterWaterSource, filterRoadAccess, sortBy]);
 
   useEffect(() => {
     const t = setTimeout(fetchProperties, 300);
@@ -171,6 +279,7 @@ export default function Browse() {
     if (searchTerm) p.q = searchTerm;
     if (filterType) p.type = filterType;
     if (filterDistrict) p.district = filterDistrict;
+    if (filterTaluk) p.taluk = filterTaluk;
     if (filterMinPrice) p.min_price = filterMinPrice;
     if (filterMaxPrice) p.max_price = filterMaxPrice;
     if (filterMinArea) p.min_area = filterMinArea;
@@ -178,23 +287,26 @@ export default function Browse() {
     if (filterWaterSource) p.water_source = filterWaterSource;
     if (filterRoadAccess) p.road_access = filterRoadAccess;
     setSearchParams(p, { replace: true });
-  }, [searchTerm, filterType, filterDistrict, filterMinPrice, filterMaxPrice, filterMinArea, filterMaxArea, filterWaterSource, filterRoadAccess, setSearchParams]);
+  }, [searchTerm, filterType, filterDistrict, filterTaluk, filterMinPrice, filterMaxPrice, filterMinArea, filterMaxArea, filterWaterSource, filterRoadAccess, setSearchParams]);
 
   const clearFilters = () => {
-    setSearchTerm(''); setFilterType(''); setFilterDistrict('');
+    setSearchTerm(''); setFilterType(''); setFilterDistrict(''); setFilterTaluk('');
     setFilterMinPrice(''); setFilterMaxPrice('');
     setFilterMinArea(''); setFilterMaxArea('');
     setFilterWaterSource(''); setFilterRoadAccess('');
   };
 
-  const hasActive = !!(filterType || filterDistrict || filterMinPrice || filterMaxPrice
+  const hasActive = !!(filterType || filterDistrict || filterTaluk || filterMinPrice || filterMaxPrice
     || filterMinArea || filterMaxArea || filterWaterSource || filterRoadAccess);
 
-  const activeCount = [filterType, filterDistrict, filterMinPrice, filterMaxPrice, filterMinArea, filterMaxArea, filterWaterSource, filterRoadAccess].filter(Boolean).length;
+  const activeCount = [filterType, filterDistrict, filterTaluk, filterMinPrice, filterMaxPrice, filterMinArea, filterMaxArea, filterWaterSource, filterRoadAccess].filter(Boolean).length;
 
   const toggleWishlist = async (e: React.MouseEvent, id: string) => {
     e.preventDefault(); e.stopPropagation();
-    if (!isLoggedIn) return;
+    if (!isLoggedIn) {
+      window.location.href = '/login';
+      return;
+    }
     setTogglingId(id);
     try {
       const r = await api.post(`/auth/wishlist/${id}`);
@@ -297,8 +409,38 @@ export default function Browse() {
               )}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#242424', marginBottom: '0.35rem' }}>District</label>
+                <select
+                  value={filterDistrict}
+                  onChange={e => setFilterDistrict(e.target.value)}
+                  className="form-input"
+                  style={{ fontSize: '0.875rem', background: '#fff', width: '100%' }}
+                >
+                  <option value="">Any District</option>
+                  {TAMIL_NADU_DISTRICTS.map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#242424', marginBottom: '0.35rem' }}>Taluk</label>
+                <select
+                  disabled={!filterDistrict}
+                  value={filterTaluk}
+                  onChange={e => setFilterTaluk(e.target.value)}
+                  className="form-input"
+                  style={{ fontSize: '0.875rem', background: '#fff', width: '100%' }}
+                >
+                  <option value="">Any Taluk</option>
+                  {sortedTaluks.map((t: string) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+
               {[
-                { label: 'District', value: filterDistrict, setter: setFilterDistrict, placeholder: 'Coimbatore', type: 'text' },
                 { label: 'Min Price (₹)', value: filterMinPrice, setter: setFilterMinPrice, placeholder: '0', type: 'number' },
                 { label: 'Max Price (₹)', value: filterMaxPrice, setter: setFilterMaxPrice, placeholder: 'Any', type: 'number' },
                 { label: 'Min Area', value: filterMinArea, setter: setFilterMinArea, placeholder: '0', type: 'number' },

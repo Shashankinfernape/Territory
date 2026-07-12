@@ -98,6 +98,9 @@ export default function Navbar() {
             <Link to="/browse" className={`nav-menu-link${isActive('/browse') ? ' active' : ''}`}>
               Browse
             </Link>
+            <Link to="/map" className={`nav-menu-link${isActive('/map') ? ' active' : ''}`}>
+              Map View
+            </Link>
             {loggedIn && (
               <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} className={`nav-menu-link${isActive('/dashboard') ? ' active' : ''}`}>
                 Dashboard
@@ -128,28 +131,75 @@ export default function Navbar() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   border: '1px solid #e5e7eb', textDecoration: 'none',
                   background: isActive('/wishlist') ? '#f4f4f4' : 'transparent',
-                  transition: 'background 0.15s ease'
+                  transition: 'background 0.15s ease',
+                  boxSizing: 'border-box'
                 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isActive('/wishlist') ? '#101010' : '#6b7280'} strokeWidth="2">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                   </svg>
                 </Link>
 
-                {(role === 'SELLER' || role === 'ADMIN') && (
-                  <Link to="/dashboard/seller" className="btn-pill-dark">
-                    <span style={{ marginRight: '0.15rem', fontWeight: 600 }}>+</span>
-                    <span className="nav-btn-text">List Land</span>
-                  </Link>
-                )}
+                {/* Sell Land pill — always visible for logged-in users, goes directly to upload form */}
+                 <Link
+                   to="/dashboard/seller/upload"
+                   style={{
+                     display: 'inline-flex',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     gap: '0.25rem',
+                     background: '#ffffff',
+                     color: '#101010',
+                     border: '3.5px solid',
+                     borderTopColor: '#6b7280',
+                     borderRightColor: '#374151',
+                     borderBottomColor: '#101010',
+                     borderLeftColor: '#898989',
+                     borderRadius: '9999px',
+                     height: '32px',
+                     padding: '0 0.85rem',
+                     boxSizing: 'border-box',
+                     fontFamily: "'Inter', sans-serif",
+                     fontSize: '0.74rem',
+                     fontWeight: 900,
+                     textTransform: 'uppercase',
+                     letterSpacing: '0.08em',
+                     textDecoration: 'none',
+                     transition: 'transform 0.1s ease',
+                     outline: 'none',
+                     WebkitTapHighlightColor: 'transparent'
+                   }}
+                   onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
+                   onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                 >
+                   <span style={{ fontSize: '0.9rem', fontWeight: 900 }}>+</span>
+                   <span>Sell</span>
+                 </Link>
 
                 <div style={{ position: 'relative' }}>
-                  <button onClick={() => setDropdownOpen(!dropdownOpen)} style={{
-                    width: '30px', height: '30px', borderRadius: '50%',
-                    background: 'transparent', border: '1px solid #e5e7eb',
-                    cursor: 'pointer', padding: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    overflow: 'hidden', transition: 'border-color 0.15s ease'
-                  }}>
+                  <div
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    role="button"
+                    tabIndex={0}
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: 'transparent',
+                      border: '1px solid #e5e7eb',
+                      cursor: 'pointer',
+                      padding: 0,
+                      margin: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                      boxSizing: 'border-box',
+                      transition: 'border-color 0.15s ease',
+                      outline: 'none',
+                      WebkitTapHighlightColor: 'transparent'
+                    }}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setDropdownOpen(!dropdownOpen); }}
+                  >
                     {avatarUrl ? (
                       <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
                     ) : (
@@ -157,7 +207,7 @@ export default function Navbar() {
                         {displayName ? displayName[0].toUpperCase() : 'U'}
                       </div>
                     )}
-                  </button>
+                  </div>
 
                   {dropdownOpen && (
                     <div className="desktop-dropdown" style={{
@@ -243,9 +293,31 @@ export default function Navbar() {
                 <>
                   <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>My Dashboard</Link>
                   <Link to="/wishlist" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Wishlist</Link>
-                  {(role === 'SELLER' || role === 'ADMIN') && (
-                    <Link to="/dashboard/seller" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#10b981', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 600, borderRadius: '8px' }}>+ List Land</Link>
-                  )}
+                  <Link
+                    to="/dashboard/seller/upload"
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.35rem',
+                      margin: '0.5rem 0.25rem',
+                      padding: '0.65rem 1.25rem',
+                      background: '#ffffff',
+                      color: '#101010',
+                      border: '4px solid #101010',
+                      borderRadius: '9999px',
+                      textDecoration: 'none',
+                      fontSize: '0.85rem',
+                      fontWeight: 900,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <span style={{ fontSize: '1rem', fontWeight: 900 }}>+</span>
+                    <span>Sell Land</span>
+                  </Link>
                 </>
               )}
               <Link to="/help" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Help Center</Link>

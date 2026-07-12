@@ -121,6 +121,7 @@ class PropertyCreate(BaseModel):
     irrigation: bool = False
     nearby_town: Optional[str] = None
     distance_from_town_km: Optional[float] = None
+    taluk: Optional[str] = ""
 
 
 class PropertyUpdate(BaseModel):
@@ -142,12 +143,13 @@ class PropertyUpdate(BaseModel):
     irrigation: Optional[bool] = None
     nearby_town: Optional[str] = None
     distance_from_town_km: Optional[float] = None
+    taluk: Optional[str] = None
 
 
 class PropertyInDB(MongoInsertBase, PropertyCreate):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     seller_id: str
-    status: str = "PENDING_VERIFICATION"
+    status: str = "ACTIVE"
     view_count: int = 0
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
