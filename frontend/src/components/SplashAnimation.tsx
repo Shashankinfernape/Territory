@@ -319,8 +319,8 @@ export default function SplashAnimation({ onComplete }: SplashAnimationProps) {
         <motion.div
           data-testid="territory-splash-root"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 0.97 }}
-          transition={{ duration: 0.50, ease: EXPO }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.65, ease: [0.4, 0, 1, 1] }}
           style={{
             position: "fixed", inset: 0, zIndex: 9999,
             display: "flex", flexDirection: "column",
