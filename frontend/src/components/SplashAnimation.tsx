@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import Shuffle from "./bits/Shuffle";
+import RotatingText from "./bits/RotatingText";
 
 interface SplashAnimationProps {
   onComplete?: () => void;
 }
 
 // ── Timing ─────────────────────────────────────────────────────────────────
-const DISPLAY_MS = 3600;
+const DISPLAY_MS = 4000;
 const EXIT_MS    = 520;
 
-// ── App Design System Fonts ─────────────────────────────────────────────────
+// ── App Design System (from index.css @theme) ───────────────────────────────
 const FONT_HEADING = "'Poppins', ui-sans-serif, system-ui, sans-serif";
 const FONT_BODY    = "'Inter', ui-sans-serif, system-ui, sans-serif";
 
-// ── App Colours (from index.css @theme) ────────────────────────────────────
 const INK      = "#101010";
 const GRAPHITE = "#242424";
 const SLATE    = "#6b7280";
@@ -21,10 +22,10 @@ const SILVER   = "#e5e7eb";
 const PAPER    = "#f4f4f4";
 const EMERALD  = "#10b981";
 
-// ── Cubic-bezier (Apple / Linear style) ────────────────────────────────────
+// ── Easing ─────────────────────────────────────────────────────────────────
 const EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-// ── Building bars ───────────────────────────────────────────────────────────
+// ── Building bars (flat 2D, GPU-only) ──────────────────────────────────────
 const BARS = [
   { id: "a", delay: 0.10, h: 64,  w: 32, x: 0   },
   { id: "b", delay: 0.18, h: 104, w: 42, x: 40  },
@@ -35,21 +36,20 @@ const BARS = [
   { id: "g", delay: 0.58, h: 56,  w: 30, x: 318 },
 ];
 
-// ── App motto phrases — reveal sequentially ─────────────────────────────────
-const MOTTO_LINES = [
-  { text: "Find it.",   delay: 0.95 },
-  { text: "Own it.",    delay: 1.22 },
-  { text: "Live it.",   delay: 1.49 },
+// ── Rotating motto phrases ──────────────────────────────────────────────────
+const MOTTO_TEXTS = [
+  "Find your land.",
+  "Own your future.",
+  "Live your legacy.",
+  "Claim your territory.",
 ];
 
-const LETTERS = ["T","E","R","R","I","T","O","R","Y"];
-
-// ── Viewfinder corner brackets ──────────────────────────────────────────────
-const CORNERS = [
-  { top: 0,    left: 0,    borderTop: "2px solid", borderLeft: "2px solid"  },
-  { top: 0,    right: 0,   borderTop: "2px solid", borderRight: "2px solid" },
-  { bottom: 0, left: 0,    borderBottom: "2px solid", borderLeft: "2px solid"  },
-  { bottom: 0, right: 0,   borderBottom: "2px solid", borderRight: "2px solid" },
+// ── Viewfinder corners ──────────────────────────────────────────────────────
+const CORNERS: React.CSSProperties[] = [
+  { top: 0,    left: 0,    borderTop: `2px solid ${EMERALD}`,    borderLeft: `2px solid ${EMERALD}` },
+  { top: 0,    right: 0,   borderTop: `2px solid ${EMERALD}`,    borderRight: `2px solid ${EMERALD}` },
+  { bottom: 0, left: 0,    borderBottom: `2px solid ${EMERALD}`, borderLeft: `2px solid ${EMERALD}` },
+  { bottom: 0, right: 0,   borderBottom: `2px solid ${EMERALD}`, borderRight: `2px solid ${EMERALD}` },
 ];
 
 /* ─── Subcomponents ─────────────────────────────────────────────────────── */
@@ -61,8 +61,7 @@ function Bar({ id, delay, h, w, flagship }: { id: string; delay: number; h: numb
       animate={{ scaleY: 1, opacity: 1 }}
       transition={{ delay, duration: 0.72, ease: EXPO }}
       style={{
-        width: w,
-        height: h,
+        width: w, height: h,
         transformOrigin: "bottom",
         background: flagship
           ? `linear-gradient(180deg, ${GRAPHITE} 0%, ${INK} 100%)`
@@ -72,7 +71,6 @@ function Bar({ id, delay, h, w, flagship }: { id: string; delay: number; h: numb
         position: "relative",
       }}
     >
-      {/* Window lines */}
       <div style={{
         position: "absolute", inset: 0,
         backgroundImage: flagship
@@ -98,28 +96,27 @@ function Bar({ id, delay, h, w, flagship }: { id: string; delay: number; h: numb
 }
 
 function Skyline() {
-  const totalW = 348;
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: EXPO }}
-      style={{ position: "relative", width: totalW, height: 230, margin: "0 auto", willChange: "transform, opacity" }}
+      style={{ position: "relative", width: 348, height: 230, margin: "0 auto", willChange: "transform, opacity" }}
     >
       {BARS.map(b => (
         <div key={b.id} style={{ position: "absolute", left: b.x, bottom: 0, width: b.w, height: b.h }}>
           <Bar {...b} />
         </div>
       ))}
-      {/* Scan line sweeping down the skyline */}
+      {/* Scan line sweeping down over the skyline */}
       <motion.div
         initial={{ top: 0, opacity: 0 }}
-        animate={{ top: "100%", opacity: [0, 0.5, 0] }}
-        transition={{ delay: 0.6, duration: 1.0, ease: "easeInOut" }}
+        animate={{ top: "100%", opacity: [0, 0.7, 0] }}
+        transition={{ delay: 0.65, duration: 1.0, ease: "easeInOut" }}
         style={{
-          position: "absolute", left: 0, right: 0, height: 1.5,
+          position: "absolute", left: 0, right: 0, height: 2,
           background: `linear-gradient(90deg, transparent, ${EMERALD}, transparent)`,
-          willChange: "transform, opacity",
+          willChange: "top, opacity",
         }}
       />
       {/* Ground rule */}
@@ -137,57 +134,85 @@ function Skyline() {
   );
 }
 
-/** Three staggered motto words — reveal one at a time */
-function MottoSequence() {
+/** Rotating motto using RotatingText — fades in at delay via wrapper */
+function MottoRotator() {
   return (
-    <div style={{ display: "flex", gap: 24, justifyContent: "center", alignItems: "baseline", marginTop: 20 }}>
-      {MOTTO_LINES.map(({ text, delay }) => (
-        <motion.span
-          key={text}
-          initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ delay, duration: 0.55, ease: EXPO }}
-          style={{
-            fontFamily: FONT_BODY,
-            fontSize: "clamp(13px, 2.5vw, 16px)",
-            fontWeight: 500,
-            color: SLATE,
-            letterSpacing: "0.02em",
-            willChange: "transform, opacity, filter",
-          }}
-        >
-          {text}
-        </motion.span>
-      ))}
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.9, duration: 0.55, ease: EXPO }}
+      style={{
+        display: "flex", justifyContent: "center", alignItems: "center",
+        marginTop: 18, height: 28,
+        willChange: "transform, opacity",
+      }}
+    >
+      <RotatingText
+        texts={MOTTO_TEXTS}
+        rotationInterval={1300}
+        splitBy="characters"
+        staggerFrom="last"
+        staggerDuration={0.025}
+        initial={{ y: "110%", opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: "-110%", opacity: 0 }}
+        transition={{ type: "spring", damping: 28, stiffness: 380 }}
+        loop={true}
+        auto={true}
+        mainClassName=""
+        elementLevelClassName=""
+        style={{
+          fontFamily: FONT_BODY,
+          fontSize: "clamp(13px, 2.2vw, 15px)",
+          fontWeight: 500,
+          color: SLATE,
+          letterSpacing: "0.01em",
+          overflow: "hidden",
+        }}
+      />
+    </motion.div>
   );
 }
 
-/** Letter-by-letter Poppins wordmark */
-function Wordmark() {
+/** TERRITORY wordmark using GSAP Shuffle for slot-machine reveal */
+function ShuffleWordmark() {
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
-      {LETTERS.map((ch, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, y: 22, filter: "blur(3px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ delay: 1.72 + i * 0.045, duration: 0.58, ease: EXPO }}
-          style={{
-            fontFamily: FONT_HEADING,
-            fontSize: "clamp(38px, 9vw, 70px)",
-            fontWeight: 700,
-            letterSpacing: "0.2em",
-            lineHeight: 1,
-            color: INK,
-            display: "inline-block",
-            willChange: "transform, opacity, filter",
-          }}
-        >
-          {ch}
-        </motion.span>
-      ))}
-    </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 1.55, duration: 0.01 }} // make visible just before Shuffle fires
+      style={{ marginTop: 22, overflow: "hidden", willChange: "opacity" }}
+    >
+      <Shuffle
+        text="TERRITORY"
+        tag="h1"
+        shuffleDirection="up"
+        duration={0.38}
+        shuffleTimes={3}
+        animationMode="evenodd"
+        stagger={0.032}
+        ease="power3.out"
+        triggerOnHover={true}
+        triggerOnce={false}
+        respectReducedMotion={true}
+        // Mount-mode: fire 1.6s into the splash without needing scroll
+        playOnMount={true}
+        playDelay={1.6}
+        colorFrom={SLATE}
+        colorTo={INK}
+        style={{
+          fontFamily: FONT_HEADING,
+          fontSize: "clamp(40px, 9vw, 72px)",
+          fontWeight: 700,
+          letterSpacing: "0.2em",
+          lineHeight: 1,
+          color: INK,
+          textAlign: "center",
+          margin: 0,
+          padding: 0,
+        }}
+      />
+    </motion.div>
   );
 }
 
@@ -197,7 +222,7 @@ function Divider() {
     <motion.div
       initial={{ scaleX: 0, opacity: 0 }}
       animate={{ scaleX: 1, opacity: 1 }}
-      transition={{ delay: 2.35, duration: 0.6, ease: EXPO }}
+      transition={{ delay: 2.5, duration: 0.65, ease: EXPO }}
       style={{
         height: 1.5,
         width: "min(280px, 58vw)",
@@ -211,18 +236,18 @@ function Divider() {
   );
 }
 
-/** Final tagline — Inter */
+/** Tagline using Inter */
 function Tagline() {
   return (
     <motion.p
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 0.65, y: 0 }}
-      transition={{ delay: 2.55, duration: 0.55, ease: EXPO }}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 0.6, y: 0 }}
+      transition={{ delay: 2.7, duration: 0.55, ease: EXPO }}
       style={{
         fontFamily: FONT_BODY,
-        fontSize: "clamp(8px, 1.8vw, 11px)",
+        fontSize: "clamp(8px, 1.8vw, 10px)",
         fontWeight: 500,
-        letterSpacing: "0.48em",
+        letterSpacing: "0.5em",
         textTransform: "uppercase",
         color: SLATE,
         marginTop: 10,
@@ -234,21 +259,19 @@ function Tagline() {
   );
 }
 
-/** Viewfinder bracket corners */
+/** Viewfinder bracket corners that shrink into frame */
 function ViewfinderCorners() {
-  const SIZE = 20;
-  const THICKNESS = 2;
+  const SIZE = 22;
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 1.08 }}
+      initial={{ opacity: 0, scale: 1.1 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 2.5, duration: 0.65, ease: EXPO }}
+      transition={{ delay: 2.6, duration: 0.65, ease: EXPO }}
       style={{
         position: "absolute",
-        inset: 0,
-        margin: "auto",
-        width: "min(520px, 88vw)",
-        height: "min(480px, 82vh)",
+        inset: 0, margin: "auto",
+        width: "min(500px, 86vw)",
+        height: "min(460px, 80vh)",
         pointerEvents: "none",
         willChange: "transform, opacity",
       }}
@@ -259,7 +282,6 @@ function ViewfinderCorners() {
           style={{
             position: "absolute",
             width: SIZE, height: SIZE,
-            borderColor: EMERALD,
             borderStyle: "solid",
             borderWidth: 0,
             ...corner,
@@ -270,17 +292,15 @@ function ViewfinderCorners() {
   );
 }
 
-/** Bottom progress bar (loads from 0→100% over DISPLAY_MS) */
+/** Thin progress bar crawling across the bottom */
 function ProgressBar() {
   return (
     <motion.div
       style={{
-        position: "absolute",
-        bottom: 0,
-        left: 0,
+        position: "absolute", bottom: 0, left: 0,
         height: 2,
         background: `linear-gradient(90deg, ${EMERALD}, #047857)`,
-        willChange: "transform",
+        willChange: "width",
         transformOrigin: "left",
       }}
       initial={{ width: "0%" }}
@@ -305,17 +325,16 @@ function DotGrid() {
   );
 }
 
-/** Ambient glow orb */
+/** Centre ambient glow */
 function GlowOrb() {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.6 }}
-      animate={{ opacity: 0.35, scale: 1 }}
+      animate={{ opacity: 0.38, scale: 1 }}
       transition={{ duration: 1.3, ease: "easeOut" }}
       style={{
         position: "absolute",
-        width: "min(580px, 90vw)",
-        height: "min(580px, 90vw)",
+        width: "min(580px, 90vw)", height: "min(580px, 90vw)",
         background: "radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(244,244,244,0) 70%)",
         filter: "blur(32px)",
         pointerEvents: "none",
@@ -359,11 +378,15 @@ export default function SplashAnimation({ onComplete }: SplashAnimationProps) {
           <GlowOrb />
           <ViewfinderCorners />
 
-          {/* Content */}
-          <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", width: "100%", padding: "0 24px" }}>
+          {/* Content stack */}
+          <div style={{
+            position: "relative", zIndex: 1,
+            display: "flex", flexDirection: "column",
+            alignItems: "center", width: "100%", padding: "0 24px",
+          }}>
             <Skyline />
-            <MottoSequence />
-            <Wordmark />
+            <MottoRotator />
+            <ShuffleWordmark />
             <Divider />
             <Tagline />
           </div>
