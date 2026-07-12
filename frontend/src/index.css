@@ -218,7 +218,7 @@ body {
 
 /* ── HERO ────────────────────────────────────────────────────────────── */
 .hero-cinematic {
-  background: #f4f4f4;
+  background: transparent;
   padding: 6rem 1.5rem 5rem;
   display: flex;
   align-items: center;
@@ -263,7 +263,9 @@ body {
 /* ── SEARCH BAR ──────────────────────────────────────────────────────── */
 .search-bar {
   display: flex;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 0.35rem;
@@ -517,13 +519,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f4f4f4;
+  background: transparent;
   padding: 2rem 1.5rem;
 }
 
 /* ── FOOTER ──────────────────────────────────────────────────────────── */
 .site-footer {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid #e5e7eb;
 }
 

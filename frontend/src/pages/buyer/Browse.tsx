@@ -322,7 +322,9 @@ export default function Browse() {
 
       {/* ── SEARCH HEADER ── */}
       <div style={{
-        background: '#ffffff',
+        background: 'rgba(255, 255, 255, 0.75)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '1px solid #e5e7eb',
       }}>
         <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '0.75rem 1rem' }}>
@@ -398,7 +400,13 @@ export default function Browse() {
 
       {/* ── EXPANDABLE FILTERS PANEL ── */}
       {showFilters && (
-        <div className="fade-in" style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
+        <div className="fade-in" style={{
+          background: 'rgba(255, 255, 255, 0.75)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderBottom: '1px solid #e5e7eb',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
+        }}>
           <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '1.25rem 1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#898989', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Filter Specifications</span>

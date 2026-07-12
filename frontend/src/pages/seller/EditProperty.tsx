@@ -323,7 +323,7 @@ export default function EditProperty() {
   );
 
   return (
-    <div style={{ background: '#f4f4f4', minHeight: '100vh', padding: '3rem 1.5rem' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', padding: '3rem 1.5rem' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         
         <div style={{ marginBottom: '1.5rem' }}>
@@ -335,7 +335,12 @@ export default function EditProperty() {
           </Link>
         </div>
 
-        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px' }}>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.75)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderRadius: '12px', padding: '1.5rem', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px'
+        }}>
           <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.5rem', fontWeight: 600, color: '#101010', marginBottom: '2rem', letterSpacing: '0.01em' }}>
             Edit Property Listing
           </h2>
