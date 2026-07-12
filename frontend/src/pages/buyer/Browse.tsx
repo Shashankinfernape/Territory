@@ -333,7 +333,7 @@ export default function Browse() {
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', minWidth: 0 }}>
             {/* Search */}
             <div
-              style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f7f7f7', border: '1.5px solid #e5e7eb', borderRadius: '10px', padding: '0.5rem 0.75rem', transition: 'border-color 0.2s' }}
+              style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255, 255, 255, 0.4)', border: '1.5px solid #e5e7eb', borderRadius: '10px', padding: '0.5rem 0.75rem', transition: 'border-color 0.2s' }}
               onFocusCapture={e => (e.currentTarget.style.borderColor = '#101010')}
               onBlurCapture={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
             >
@@ -358,9 +358,9 @@ export default function Browse() {
               className="browse-sort-select"
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              style={{ flexShrink: 0, padding: '0.5rem 0.75rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: '#fff', color: '#242424', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
+              style={{ flexShrink: 0, padding: '0.5rem 0.75rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', color: '#242424', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
             >
-              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value} style={{ background: '#fff' }}>{o.label}</option>)}
             </select>
 
             {/* Filter toggle */}
@@ -370,7 +370,9 @@ export default function Browse() {
                 flexShrink: 0, display: 'flex', alignItems: 'center', gap: '0.35rem',
                 padding: '0.5rem 0.85rem', borderRadius: '10px', cursor: 'pointer', fontFamily: 'inherit',
                 border: hasActive ? '1.5px solid #101010' : '1.5px solid #e5e7eb',
-                background: hasActive ? '#101010' : '#fff',
+                background: hasActive ? '#101010' : 'rgba(255, 255, 255, 0.4)',
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)',
                 color: hasActive ? '#fff' : '#242424',
                 fontSize: '0.875rem', fontWeight: 500, transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}

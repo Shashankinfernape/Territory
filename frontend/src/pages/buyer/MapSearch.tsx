@@ -734,7 +734,7 @@ export default function MapSearch() {
   };
 
   return (
-    <div className="map-search-page-container" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', overflow: 'hidden', background: '#f0f0ef' }}>
+    <div className="map-search-page-container" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', overflow: 'hidden', background: 'transparent' }}>
       <style>{`
         /* ── FILTER BAR ── */
         .filters-container::-webkit-scrollbar { display: none !important; }
@@ -745,7 +745,9 @@ export default function MapSearch() {
           align-items: center;
           gap: 0.35rem;
           padding: 0.42rem 1rem;
-          background: #ffffff;
+          background: rgba(255, 255, 255, 0.65);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
           border: 1.5px solid #e4e4e3;
           border-radius: 99px;
           font-size: 0.8rem;
@@ -813,7 +815,9 @@ export default function MapSearch() {
         .listing-card {
           display: flex;
           flex-direction: column;
-          background: #ffffff;
+          background: rgba(255, 255, 255, 0.75);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           border-radius: 12px;
           border: 1px solid #e5e7eb;
           overflow: hidden;
@@ -887,7 +891,9 @@ export default function MapSearch() {
 
       {/* ── TOP FILTER BAR ── */}
       <div className="filters-container" style={{
-        background: '#ffffff',
+        background: 'rgba(255, 255, 255, 0.75)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '1px solid #e8e8e7',
         padding: '0.6rem 1.25rem',
         display: 'flex',
@@ -1005,7 +1011,7 @@ export default function MapSearch() {
         overflow: 'hidden',
         padding: '0.875rem',
         gap: '0.875rem',
-        background: '#f0f0ef'
+        background: 'transparent'
       }}>
         
         {/* LEFT COLUMN: Map Card */}
@@ -1298,7 +1304,7 @@ export default function MapSearch() {
                   </div>
 
                   {/* Details Body */}
-                  <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: '#ffffff', minHeight: '85px' }}>
+                  <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: 'transparent', minHeight: '85px' }}>
                     <div>
                       {/* Price & Options row */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
