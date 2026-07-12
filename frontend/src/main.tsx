@@ -19,8 +19,12 @@ auth.onIdTokenChanged(async (user) => {
   }
 });
 
+import { SettingsProvider } from './contexts/SettingsContext'
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <SettingsProvider>
+      <App />
+    </SettingsProvider>
   </StrictMode>,
 )

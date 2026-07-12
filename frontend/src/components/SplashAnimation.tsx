@@ -307,7 +307,8 @@ export default function SplashAnimation({ onComplete }: SplashAnimationProps) {
   const prefersReduced = useReducedMotion();
 
   useEffect(() => {
-    if (prefersReduced) { setVisible(false); onComplete?.(); return; }
+    const isMinimal = localStorage.getItem('propit_animation_setting') === 'minimal' || !localStorage.getItem('propit_animation_setting');
+    if (prefersReduced || isMinimal) { setVisible(false); onComplete?.(); return; }
     const t1 = setTimeout(() => setVisible(false), DISPLAY_MS);
     const t2 = setTimeout(() => onComplete?.(), DISPLAY_MS + EXIT_MS);
     return () => { clearTimeout(t1); clearTimeout(t2); };

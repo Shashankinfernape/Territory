@@ -8,6 +8,8 @@ import type { Property } from '../../lib/types';
 import { getPropertyImageUrl } from '../../lib/types';
 import { TAMIL_NADU_GEOJSON as OFFLINE_GEOJSON } from '../../components/common/tamilnadu_geojson';
 import TAMIL_NADU_CITY_DIVISIONS from '../../components/common/tamilnadu_city_divisions.json';
+import { useSettings } from '../../contexts/SettingsContext';
+import GlareHover from '../../components/ui/GlareHover';
 
 // Styled Google Maps Tile Server (Hides all roads, highways, and place labels)
 const MAP_TILES = 'https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t:0|s.e:l|p.v:off,s.t:3|p.v:off';
@@ -439,6 +441,7 @@ export default function MapSearch() {
   const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
   const [mobileView, setMobileView] = useState<'map' | 'list'>('map');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const { animationSetting } = useSettings();
 
   // Wishlist states
   const [wishlist, setWishlist] = useState<string[]>([]);
@@ -1401,12 +1404,20 @@ export default function MapSearch() {
             <>
               <div className="listings-grid">
                 {filteredProperties.slice(0, visibleCount).map(p => (
-                  <Link
+                  <GlareHover
                     key={p.id}
-                    to={`/property/${p.id}`}
+                    disabled={animationSetting === 'minimal'}
+                    glareColor="#ffffff"
+                    glareOpacity={0.25}
+                    glareSize={200}
+                    borderRadius="12px"
                     className="listing-card"
                   >
-                    {/* Image Container with overlays */}
+                    <Link
+                      to={`/property/${p.id}`}
+                      style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}
+                    >
+                      {/* Image Container with overlays */}
                     <div style={{ width: '100%', position: 'relative', aspectRatio: '16/9', background: '#f3f4f6', overflow: 'hidden' }}>
                       <img
                         src={getPropertyImageUrl(p)}
@@ -1509,7 +1520,8 @@ export default function MapSearch() {
                         </p>
                       </div>
                     </div>
-                  </Link>
+                    </Link>
+                  </GlareHover>
                 ))}
               </div>
               

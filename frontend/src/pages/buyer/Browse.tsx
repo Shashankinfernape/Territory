@@ -4,6 +4,8 @@ import { api, getToken } from '../../lib/api';
 import { getPropertyImageUrl, type Property } from '../../lib/types';
 import { formatPrice } from '../../lib/utils';
 import TAMIL_NADU_CITY_DIVISIONS from '../../components/common/tamilnadu_city_divisions.json';
+import { useSettings } from '../../contexts/SettingsContext';
+import GlareHover from '../../components/ui/GlareHover';
 
 const TAMIL_NADU_DISTRICTS = [
   "Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri",
@@ -45,15 +47,25 @@ function PropertyCard({
   togglingId: string | null;
   toggleWishlist: (e: React.MouseEvent, id: string) => void;
 }) {
+  const { animationSetting } = useSettings();
+
   return (
-    <div className="property-card" style={{
-      display: 'flex', flexDirection: 'column', height: '100%',
-      background: 'rgba(255, 255, 255, 0.75)',
-      backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
-      borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden'
-    }}>
-      <Link to={`/property/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <GlareHover 
+      disabled={animationSetting === 'minimal'}
+      glareColor="#ffffff"
+      glareOpacity={0.25}
+      glareSize={200}
+      borderRadius="12px"
+      className="property-card"
+      style={{
+        display: 'flex', flexDirection: 'column', height: '100%',
+        background: 'rgba(255, 255, 255, 0.75)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden'
+      }}
+    >
+      <Link to={`/property/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
         {/* Image Container with overlays */}
         <div style={{ width: '100%', position: 'relative', aspectRatio: '16/9', background: '#f3f4f6', overflow: 'hidden' }}>
           <img
@@ -158,7 +170,7 @@ function PropertyCard({
           </div>
         </div>
       </Link>
-    </div>
+    </GlareHover>
   );
 }
 

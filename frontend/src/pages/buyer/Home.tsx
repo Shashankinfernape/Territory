@@ -4,6 +4,8 @@ import { api, getToken } from '../../lib/api';
 import { getPropertyImageUrl, type Property } from '../../lib/types';
 import { formatPrice } from '../../lib/utils';
 import TextType from '../../components/TextType';
+import { useSettings } from '../../contexts/SettingsContext';
+import GlareHover from '../../components/ui/GlareHover';
 
 const TYPES = ['', 'Agricultural Land', 'Farm Land', 'Flat Plot', 'Residential Plot', 'Commercial Plot'];
 
@@ -12,6 +14,7 @@ export default function Home() {
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const { animationSetting } = useSettings();
   const [selectedType, _setSelectedType] = useState('');
   const isLoggedIn = !!getToken();
   const navigate = useNavigate();
@@ -179,8 +182,16 @@ export default function Home() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '1.5rem' }}>
             {featured.map(p => (
-              <div key={p.id} className="property-card">
-                <Link to={`/property/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <GlareHover
+                key={p.id}
+                disabled={animationSetting === 'minimal'}
+                glareColor="#ffffff"
+                glareOpacity={0.25}
+                glareSize={200}
+                borderRadius="12px"
+                className="property-card"
+              >
+                <Link to={`/property/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
 
                   <div className="card-img" style={{ position: 'relative', height: '210px', overflow: 'hidden', background: '#f4f4f4', flexShrink: 0 }}>
                     <img src={getPropertyImageUrl(p)} alt={p.type} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -244,7 +255,7 @@ export default function Home() {
                     </span>
                   </div>
                 </Link>
-              </div>
+              </GlareHover>
             ))}
           </div>
         )}

@@ -23,6 +23,7 @@ import Wishlist from './pages/buyer/Wishlist';
 import MapSearch from './pages/buyer/MapSearch';
 import NotFound from './pages/NotFound';
 import SellGuide from './pages/SellGuide';
+import Settings from './pages/Settings';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -52,6 +53,7 @@ function App() {
                 <Route path="login" element={<Login />} />
                 <Route path="contact" element={<Contact />} />
                 <Route path="help" element={<Help />} />
+                <Route path="settings" element={<Settings />} />
                 <Route path="sell-guide" element={<SellGuide />} />
 
                 {/* Protected: Unified Dashboard (BUY + SELL) */}
