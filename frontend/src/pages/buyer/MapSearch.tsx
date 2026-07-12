@@ -745,7 +745,7 @@ export default function MapSearch() {
           align-items: center;
           gap: 0.35rem;
           padding: 0.42rem 1rem;
-          background: rgba(255, 255, 255, 0.65);
+          background: rgba(255, 255, 255, 0.45);
           backdrop-filter: blur(4px);
           -webkit-backdrop-filter: blur(4px);
           border: 1.5px solid #e4e4e3;
@@ -891,10 +891,10 @@ export default function MapSearch() {
 
       {/* ── TOP FILTER BAR ── */}
       <div className="filters-container" style={{
-        background: 'rgba(255, 255, 255, 0.75)',
+        background: 'rgba(255, 255, 255, 0.25)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid #e8e8e7',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
         padding: '0.6rem 1.25rem',
         display: 'flex',
         alignItems: 'center',
@@ -995,7 +995,7 @@ export default function MapSearch() {
                 setMaxPrice('');
                 setSearchTerm('');
               }}
-              style={{ color: '#ef4444', borderColor: '#fca5a5', background: '#fff5f5', fontWeight: 600 }}
+              style={{ color: '#ef4444', borderColor: '#fca5a5', background: 'rgba(254, 226, 226, 0.6)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', fontWeight: 600 }}
             >
               ✕ Clear
             </button>

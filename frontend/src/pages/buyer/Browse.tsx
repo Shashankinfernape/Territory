@@ -46,7 +46,13 @@ function PropertyCard({
   toggleWishlist: (e: React.MouseEvent, id: string) => void;
 }) {
   return (
-    <div className="property-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#ffffff', borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
+    <div className="property-card" style={{
+      display: 'flex', flexDirection: 'column', height: '100%',
+      background: 'rgba(255, 255, 255, 0.75)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden'
+    }}>
       <Link to={`/property/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
         {/* Image Container with overlays */}
         <div style={{ width: '100%', position: 'relative', aspectRatio: '16/9', background: '#f3f4f6', overflow: 'hidden' }}>
@@ -118,7 +124,7 @@ function PropertyCard({
         </div>
 
         {/* Details Body */}
-        <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: '#ffffff', minHeight: '85px' }}>
+        <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: 'transparent', minHeight: '85px' }}>
           <div>
             {/* Price & Options row */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -322,10 +328,10 @@ export default function Browse() {
 
       {/* ── SEARCH HEADER ── */}
       <div style={{
-        background: 'rgba(255, 255, 255, 0.75)',
+        background: 'rgba(255, 255, 255, 0.25)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid #e5e7eb',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
       }}>
         <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '0.75rem 1rem' }}>
 
@@ -403,10 +409,10 @@ export default function Browse() {
       {/* ── EXPANDABLE FILTERS PANEL ── */}
       {showFilters && (
         <div className="fade-in" style={{
-          background: 'rgba(255, 255, 255, 0.75)',
+          background: 'rgba(255, 255, 255, 0.25)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          borderBottom: '1px solid #e5e7eb',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
         }}>
           <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '1.25rem 1.5rem' }}>
@@ -425,7 +431,7 @@ export default function Browse() {
                   value={filterDistrict}
                   onChange={e => setFilterDistrict(e.target.value)}
                   className="form-input"
-                  style={{ fontSize: '0.875rem', background: '#fff', width: '100%' }}
+                  style={{ fontSize: '0.875rem', width: '100%' }}
                 >
                   <option value="">Any District</option>
                   {TAMIL_NADU_DISTRICTS.map(d => (
@@ -441,7 +447,7 @@ export default function Browse() {
                   value={filterTaluk}
                   onChange={e => setFilterTaluk(e.target.value)}
                   className="form-input"
-                  style={{ fontSize: '0.875rem', background: '#fff', width: '100%' }}
+                  style={{ fontSize: '0.875rem', width: '100%' }}
                 >
                   <option value="">Any Taluk</option>
                   {sortedTaluks.map((t: string) => (
@@ -512,7 +518,7 @@ export default function Browse() {
             {loading ? 'Searching…' : `${properties.length} listing${properties.length !== 1 ? 's' : ''} found`}
           </p>
           {hasActive && (
-            <button onClick={clearFilters} style={{ fontSize: '0.8rem', color: '#4b5563', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '0.3rem 0.75rem', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}>
+            <button onClick={clearFilters} style={{ fontSize: '0.8rem', color: '#4b5563', background: 'rgba(255, 255, 255, 0.45)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '0.3rem 0.75rem', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}>
               Clear all filters
             </button>
           )}
@@ -532,7 +538,13 @@ export default function Browse() {
             ))}
           </div>
         ) : properties.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '5rem 2rem', background: '#fff', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', boxShadow: '0 4px 8px rgba(36,36,36,0.05)' }}>
+          <div style={{
+            textAlign: 'center', padding: '5rem 2rem',
+            background: 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', boxShadow: '0 4px 8px rgba(36,36,36,0.05)'
+          }}>
             <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: '#f4f4f4', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#898989" strokeWidth="1.5">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
