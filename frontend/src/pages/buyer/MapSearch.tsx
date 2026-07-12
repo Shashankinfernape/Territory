@@ -438,6 +438,7 @@ export default function MapSearch() {
   const [loading, setLoading] = useState(true);
   const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
   const [mobileView, setMobileView] = useState<'map' | 'list'>('map');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Wishlist states
   const [wishlist, setWishlist] = useState<string[]>([]);
@@ -872,19 +873,24 @@ export default function MapSearch() {
           }
           .filters-container {
             padding: 0.5rem 0.875rem !important;
-            flex-wrap: wrap !important;
-            overflow-x: visible !important;
-            justify-content: flex-start !important;
+            flex-wrap: nowrap !important;
+            overflow-x: hidden !important;
+            justify-content: space-between !important;
+            background: rgba(255, 255, 255, 0.8) !important;
           }
           .filters-container > .search-pill-wrap {
             width: 100% !important;
+            flex: 1 !important;
           }
           .filters-container > .search-pill-wrap > input {
             width: 100% !important;
             box-sizing: border-box !important;
           }
-          .filters-container .filter-divider {
+          .filters-container .desktop-only-filter {
             display: none !important;
+          }
+          .mobile-filter-btn {
+            display: flex !important;
           }
           .split-view-container {
             grid-template-columns: 1fr !important;
@@ -940,7 +946,7 @@ export default function MapSearch() {
         display: 'flex',
         alignItems: 'center',
         gap: '0.5rem',
-        zIndex: 1000,
+        zIndex: 900,
         overflowX: 'auto'
       }}>
         {/* Search */}
@@ -958,11 +964,23 @@ export default function MapSearch() {
           />
         </div>
 
-        <div className="filter-divider" />
+        {/* Mobile Filters Toggle Button */}
+        <button
+          className="mobile-filter-btn filter-pill"
+          onClick={() => setMobileFiltersOpen(true)}
+          style={{ display: 'none', background: '#101010', color: '#fff', border: 'none', padding: '0.5rem 1rem' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+          Filters
+        </button>
+
+        <div className="filter-divider desktop-only-filter" />
 
         {/* District */}
         <select
-          className={`filter-pill filter-pill-select${selectedDistrict ? ' active' : ''}`}
+          className={`filter-pill filter-pill-select desktop-only-filter ${selectedDistrict ? ' active' : ''}`}
           value={selectedDistrict || ''}
           onChange={e => handleDistrictChange(e.target.value)}
         >
@@ -975,7 +993,7 @@ export default function MapSearch() {
         {/* City — only shown when district selected */}
         {selectedDistrict && (
           <select
-            className={`filter-pill filter-pill-select${selectedCity ? ' active' : ''}`}
+            className={`filter-pill filter-pill-select desktop-only-filter ${selectedCity ? ' active' : ''}`}
             value={selectedCity || ''}
             onChange={e => handleCityChange(e.target.value)}
           >
@@ -986,11 +1004,11 @@ export default function MapSearch() {
           </select>
         )}
 
-        <div className="filter-divider" />
+        <div className="filter-divider desktop-only-filter" />
 
         {/* Type */}
         <select
-          className={`filter-pill filter-pill-select${filterType ? ' active' : ''}`}
+          className={`filter-pill filter-pill-select desktop-only-filter ${filterType ? ' active' : ''}`}
           value={filterType}
           onChange={e => setFilterType(e.target.value)}
         >
@@ -1002,12 +1020,12 @@ export default function MapSearch() {
           <option>Commercial Plot</option>
         </select>
 
-        <div className="filter-divider" />
+        <div className="filter-divider desktop-only-filter" />
 
         {/* Price range */}
         <input
           type="number"
-          className="filter-pill"
+          className="filter-pill desktop-only-filter"
           placeholder="Min ₹"
           value={minPrice}
           onChange={e => setMinPrice(e.target.value)}
@@ -1015,7 +1033,7 @@ export default function MapSearch() {
         />
         <input
           type="number"
-          className="filter-pill"
+          className="filter-pill desktop-only-filter"
           placeholder="Max ₹"
           value={maxPrice}
           onChange={e => setMaxPrice(e.target.value)}
@@ -1025,9 +1043,9 @@ export default function MapSearch() {
         {/* Reset if any active filter */}
         {(selectedDistrict || selectedCity || filterType || minPrice || maxPrice || searchTerm) && (
           <>
-            <div className="filter-divider" />
+            <div className="filter-divider desktop-only-filter" />
             <button
-              className="filter-pill"
+              className="filter-pill desktop-only-filter"
               onClick={() => {
                 handleMapBackgroundClick();
                 setFilterType('');
@@ -1042,6 +1060,114 @@ export default function MapSearch() {
           </>
         )}
       </div>
+
+      {/* ── MOBILE FULL SCREEN FILTERS MODAL ── */}
+      {mobileFiltersOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(255, 255, 255, 0.98)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '2rem 1.5rem',
+          overflowY: 'auto'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>Filters</h2>
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              style={{ background: '#f3f4f6', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4b5563' }}>Location</label>
+              <select
+                style={{ padding: '0.875rem', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fff', fontSize: '1rem', width: '100%' }}
+                value={selectedDistrict || ''}
+                onChange={e => handleDistrictChange(e.target.value)}
+              >
+                <option value="">All Districts</option>
+                {TAMIL_NADU_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              {selectedDistrict && (
+                <select
+                  style={{ padding: '0.875rem', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fff', fontSize: '1rem', width: '100%', marginTop: '0.5rem' }}
+                  value={selectedCity || ''}
+                  onChange={e => handleCityChange(e.target.value)}
+                >
+                  <option value="">All of {selectedDistrict}</option>
+                  {sortedTaluksList.map(name => <option key={name} value={name}>{name}</option>)}
+                </select>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4b5563' }}>Plot Type</label>
+              <select
+                style={{ padding: '0.875rem', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fff', fontSize: '1rem', width: '100%' }}
+                value={filterType}
+                onChange={e => setFilterType(e.target.value)}
+              >
+                <option value="">All Types</option>
+                <option>Agricultural Land</option>
+                <option>Flat Plot</option>
+                <option>Farm Land</option>
+                <option>Residential Plot</option>
+                <option>Commercial Plot</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4b5563' }}>Price Range</label>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <input
+                  type="number"
+                  placeholder="Min ₹"
+                  value={minPrice}
+                  onChange={e => setMinPrice(e.target.value)}
+                  style={{ flex: 1, padding: '0.875rem', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fff', fontSize: '1rem' }}
+                />
+                <input
+                  type="number"
+                  placeholder="Max ₹"
+                  value={maxPrice}
+                  onChange={e => setMaxPrice(e.target.value)}
+                  style={{ flex: 1, padding: '0.875rem', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fff', fontSize: '1rem' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 'auto', display: 'flex', gap: '1rem', paddingTop: '2rem' }}>
+            <button
+              onClick={() => {
+                handleMapBackgroundClick();
+                setFilterType('');
+                setMinPrice('');
+                setMaxPrice('');
+                setSearchTerm('');
+                setMobileFiltersOpen(false);
+              }}
+              style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: '#f3f4f6', color: '#374151', fontWeight: 600, border: 'none', fontSize: '1rem' }}
+            >
+              Clear All
+            </button>
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              style={{ flex: 2, padding: '1rem', borderRadius: '12px', background: '#101010', color: '#fff', fontWeight: 600, border: 'none', fontSize: '1rem' }}
+            >
+              Show {filteredProperties.length} Lands
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── SPLIT VIEW CONTAINER ── */}
       <div className="split-view-container" style={{
