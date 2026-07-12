@@ -106,9 +106,6 @@ export default function Login() {
       localStorage.setItem('user_phone', regPhone);
       window.dispatchEvent(new Event('storage'));
       
-      if (regRole === 'SELLER') {
-        alert('Account created! You can use the app as a Buyer immediately. Your Seller Account request has been sent to the admin for KYC verification.');
-      }
       navigate('/dashboard/buyer');
     } catch (err: any) {
       console.error(err);

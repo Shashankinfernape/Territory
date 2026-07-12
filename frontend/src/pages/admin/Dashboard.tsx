@@ -53,6 +53,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [viewDocsFor, setViewDocsFor] = useState<Property | null>(null);
+  const [viewKycFor, setViewKycFor] = useState<User | null>(null);
   const navigate = useNavigate();
 
   const BACKEND_ROOT = import.meta.env.VITE_API_ROOT || 'http://localhost:8000';
@@ -124,6 +125,7 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to approve this user as a Seller?')) return;
     try {
       await api.put(`/admin/users/${id}/verify-seller`);
+      setViewKycFor(null);
       fetchData();
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to verify seller');
@@ -504,11 +506,11 @@ export default function AdminDashboard() {
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           {u.kyc_details?.status === 'PENDING' && u.role === 'USER' && (
                             <button
-                              onClick={() => handleVerifySeller(u.id)}
+                              onClick={() => setViewKycFor(u)}
                               style={{
-                                background: 'rgba(16, 185, 129, 0.08)',
+                                background: 'rgba(184, 150, 62, 0.08)',
                                 border: 'none',
-                                color: '#10b981',
+                                color: '#b8963e',
                                 fontWeight: 600,
                                 padding: '0.4rem 0.8rem',
                                 borderRadius: '6px',
@@ -517,10 +519,10 @@ export default function AdminDashboard() {
                                 fontSize: '0.8rem',
                                 transition: 'all 0.15s ease'
                               }}
-                              onMouseEnter={e => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.15)'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.08)'}
+                              onMouseEnter={e => e.currentTarget.style.background = 'rgba(184, 150, 62, 0.15)'}
+                              onMouseLeave={e => e.currentTarget.style.background = 'rgba(184, 150, 62, 0.08)'}
                             >
-                              Approve Seller
+                              Review KYC
                             </button>
                           )}
                           {u.role !== 'ADMIN' && (
@@ -862,6 +864,73 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* KYC Verification Modal */}
+        {viewKycFor && viewKycFor.kyc_details && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', zIndex: 100 }}>
+            <div style={{ background: '#ffffff', border: '1px solid rgba(15, 23, 42, 0.08)', borderRadius: '12px', boxShadow: '0 12px 40px rgba(15,23,42,0.08)', maxWidth: '500px', width: '100%', padding: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid rgba(15, 23, 42, 0.06)', paddingBottom: '1rem' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Review Seller Request</h2>
+                  <p style={{ fontSize: '0.8rem', color: 'rgba(15, 23, 42, 0.55)', marginTop: '0.25rem' }}>User: {viewKycFor.phone_number}</p>
+                </div>
+                <button onClick={() => setViewKycFor(null)} style={{ background: 'none', border: 'none', color: 'rgba(15, 23, 42, 0.5)', fontSize: '1.5rem', cursor: 'pointer', lineHeight: 1 }}>&times;</button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <div style={{ padding: '1rem', background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.06)', borderRadius: '6px' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.75rem', color: 'rgba(15,23,42,0.6)', textTransform: 'uppercase' }}>Aadhaar Number</span>
+                  <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginTop: '0.2rem', fontFamily: 'monospace' }}>{viewKycFor.kyc_details.aadhaar_number}</p>
+                </div>
+                <div style={{ padding: '1rem', background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.06)', borderRadius: '6px' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.75rem', color: 'rgba(15,23,42,0.6)', textTransform: 'uppercase' }}>PAN Number</span>
+                  <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginTop: '0.2rem', fontFamily: 'monospace', textTransform: 'uppercase' }}>{viewKycFor.kyc_details.pan_number}</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid rgba(15, 23, 42, 0.06)', paddingTop: '1.25rem' }}>
+                <button
+                  onClick={() => setViewKycFor(null)}
+                  style={{
+                    padding: '0.55rem 1.25rem',
+                    borderRadius: '6px',
+                    border: '1px solid rgba(15,23,42,0.1)',
+                    background: 'transparent',
+                    color: 'rgba(15,23,42,0.7)',
+                    fontWeight: 600,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(15,23,42,0.05)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleVerifySeller(viewKycFor.id)}
+                  style={{
+                    padding: '0.55rem 1.25rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: '#10b981',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#059669'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#10b981'}
+                >
+                  Approve Seller
+                </button>
               </div>
             </div>
           </div>
