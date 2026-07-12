@@ -29,6 +29,14 @@ export default function Navbar() {
         }
       };
       fetchAdminStats();
+
+      const interval = setInterval(fetchAdminStats, 10000);
+      window.addEventListener('admin-notifications-update', fetchAdminStats);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('admin-notifications-update', fetchAdminStats);
+      };
     }
   }, [role]);
 

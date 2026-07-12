@@ -215,30 +215,29 @@ npm run dev                    # Runs at http://localhost:5173
 ## Current Project State
 
 ### What Works
-- Firebase auth (email/password) with JWT token verification
-- Full property listing with 15+ searchable land features
-- Server-side filtered search (10+ filter parameters)
-- **Smart recommendation engine** - location-based -> most popular -> newest fallback
-- **Browse page** with search, sort, type pills, and expandable filters
-- Wishlist (add/remove properties, persisted per-user)
-- Mock payment gateway (Rs.500 demo unlock)
-- Buyer dashboard showing unlocked properties
-- Secure document viewer with anti-copy protections and user watermark
-- Seller dashboard with edit functionality and engagement stats
-- Admin dashboard with platform stats, users, and property management
-- Role-based route protection (ProtectedRoute component)
-- Auth-aware Navbar with direct Buy->Browse navigation
-- Mobile-responsive design throughout
-- DB seed script with 20 sample properties across Tamil Nadu
-- 404 Not Found page, Help center, Contact page, Sell Guide
+- **Firebase Auth & JWT Verification:** Secure signup/login using Firebase with JWT validation via FastAPI.
+- **Seller Verification (KYC) Workflow:** 
+  - Mandatory Voter ID/Aadhaar/PAN details for registration.
+  - Initial role set to `USER` with a custom `show_seller_pending_msg` flag.
+  - Dynamic dashboard warning banner instructing the user that approval is pending, allowing them to browse listings as a buyer in the meantime.
+- **Admin Dashboard Modules:**
+  - **Overview Stats:** Displays key metrics with renamed panels like "Sellers Awaiting Approval".
+  - **New Seller Approvals:** Specific tab listing only pending sellers with full search and instant "Review KYC & Approve" / "Delete" actions.
+  - **New Property Approvals:** Specific tab listing only pending properties with document checklist, accept/reject options, search filtering, and details view.
+  - **Live Notifications Badge:** Admin notification badge on the Navbar stays updated dynamically using real-time polling (10s interval) and a browser `admin-notifications-update` event listener triggered on action completion.
+- **Full Property Listings:** Over 15+ detailed searchable features (soil type, water source, fencing, nearby town, distance, road access, etc.).
+- **Smart Recommendations:** 3-tier matching (geolocation-based -> most popular -> newest fallback).
+- **Secure Document Viewer:** Locked documents require a Rs.500 payment simulation. Viewer includes anti-copy protections and dynamic user email watermark.
+- **Wishlist Management:** Add/remove items with database persistence.
 
 ### Known Limitations (Prototype)
 
 | Limitation | Production Fix |
 |---|---|
 | Mock payment only | Integrate Razorpay / PhonePe |
-| KYC not actually verified | Integrate DigiLocker or NSDL Aadhaar API |
-| No OTP on registration | Integrate MSG91 or Twilio |
+| Documents stored locally | Cloudinary or AWS S3 |
+| Manual KYC review | Integrate DigiLocker or NSDL Aadhaar verification API |
+| No OTP verification | Integrate SMS services (Twilio / MSG91) |
 
 ---
 

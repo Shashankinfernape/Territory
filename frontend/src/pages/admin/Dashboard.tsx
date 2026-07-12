@@ -111,6 +111,7 @@ export default function AdminDashboard() {
       await api.delete(`/admin/users/${id}`);
       setDeleteTargetUser(null);
       fetchData();
+      window.dispatchEvent(new Event('admin-notifications-update'));
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to delete user');
     }
@@ -121,6 +122,7 @@ export default function AdminDashboard() {
       await api.delete(`/admin/properties/${id}`);
       setDeleteTargetProperty(null);
       fetchData();
+      window.dispatchEvent(new Event('admin-notifications-update'));
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to delete property');
     }
@@ -131,6 +133,7 @@ export default function AdminDashboard() {
       await api.put(`/admin/properties/${id}/verify`, { status });
       setViewDocsFor(null);
       fetchData();
+      window.dispatchEvent(new Event('admin-notifications-update'));
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to update property status');
     }
@@ -141,6 +144,7 @@ export default function AdminDashboard() {
       await api.put(`/admin/users/${id}/verify-seller`);
       setViewKycFor(null);
       fetchData();
+      window.dispatchEvent(new Event('admin-notifications-update'));
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to verify seller');
     }
