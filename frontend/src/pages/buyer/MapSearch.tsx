@@ -479,6 +479,11 @@ export default function MapSearch() {
   const [filterType, setFilterType] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  
+  const [visibleCount, setVisibleCount] = useState(12);
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [searchTerm, filterType, minPrice, maxPrice, selectedDistrict, selectedCity]);
 
   // Fetch updated 38-district GeoJSON from GitHub raw link (CORS enabled)
   useEffect(() => {
@@ -859,27 +864,33 @@ export default function MapSearch() {
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
           .map-search-page-container {
-            height: auto !important;
-            overflow-y: visible !important;
+            height: calc(100vh - 60px) !important;
+            overflow: hidden !important;
           }
           .filters-container {
             padding: 0.5rem 0.875rem !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
           }
           .split-view-container {
             grid-template-columns: 1fr !important;
-            height: auto !important;
-            overflow-y: visible !important;
-            padding: 0.625rem !important;
-            gap: 0.625rem !important;
+            grid-template-rows: 1fr 1fr !important;
+            height: 100% !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+            gap: 0 !important;
           }
           .map-card-col {
-            height: 500px !important;
+            height: 100% !important;
             order: 1 !important;
           }
           .listings-card-col {
-            height: auto !important;
-            overflow-y: visible !important;
+            height: 100% !important;
+            overflow-y: auto !important;
             order: 2 !important;
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(12px) !important;
+            border-top: 1px solid rgba(0,0,0,0.1) !important;
           }
           .listings-grid {
             grid-template-columns: 1fr !important;
@@ -1228,7 +1239,7 @@ export default function MapSearch() {
             </div>
           ) : (
             <div className="listings-grid">
-              {filteredProperties.map(p => (
+              {filteredProperties.slice(0, visibleCount).map(p => (
                 <Link
                   key={p.id}
                   to={`/property/${p.id}`}
@@ -1340,6 +1351,29 @@ export default function MapSearch() {
                 </Link>
               ))}
             </div>
+            
+            {visibleCount < filteredProperties.length && (
+              <div style={{ textAlign: 'center', margin: '2rem 0' }}>
+                <button 
+                  onClick={() => setVisibleCount(prev => prev + 12)}
+                  style={{
+                    padding: '0.6rem 1.5rem',
+                    background: 'rgba(255,255,255,0.75)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '99px',
+                    color: '#101010',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                  }}
+                >
+                  Load More Lands
+                </button>
+              </div>
+            )}
           )}
         </div>
       </div>

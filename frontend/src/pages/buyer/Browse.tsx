@@ -165,6 +165,7 @@ function PropertyCard({
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [visibleCount, setVisibleCount] = useState(12);
   const [recommendations, setRecommendations] = useState<Property[]>([]);
   const [recLabel, setRecLabel] = useState<string>('Recommended for You');
   const [loading, setLoading] = useState(true);
@@ -271,6 +272,7 @@ export default function Browse() {
       else if (sortBy === 'price_desc') data = [...data].sort((a, b) => b.price - a.price);
       else if (sortBy === 'views') data = [...data].sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0));
       setProperties(data);
+      setVisibleCount(12);
     } catch { /* silent */ }
     finally { setLoading(false); }
   }, [searchTerm, filterType, filterDistrict, filterTaluk, filterMinPrice, filterMaxPrice, filterMinArea, filterMaxArea, filterWaterSource, filterRoadAccess, sortBy]);
@@ -557,9 +559,33 @@ export default function Browse() {
             {hasActive && <button onClick={clearFilters} className="btn-primary" style={{ fontSize: '0.875rem' }}>Clear filters</button>}
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.25rem' }}>
-            {properties.map(p => <PropertyCard key={p.id} p={p} {...cardProps} />)}
-          </div>
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.25rem' }}>
+              {properties.slice(0, visibleCount).map(p => <PropertyCard key={p.id} p={p} {...cardProps} />)}
+            </div>
+            {visibleCount < properties.length && (
+              <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+                <button 
+                  onClick={() => setVisibleCount(prev => prev + 12)}
+                  style={{
+                    padding: '0.6rem 1.5rem',
+                    background: 'rgba(255,255,255,0.75)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '99px',
+                    color: '#101010',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                  }}
+                >
+                  Load More Lands
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
