@@ -437,6 +437,7 @@ export default function MapSearch() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
+  const [mobileView, setMobileView] = useState<'map' | 'list'>('map');
 
   // Wishlist states
   const [wishlist, setWishlist] = useState<string[]>([]);
@@ -874,27 +875,43 @@ export default function MapSearch() {
           }
           .split-view-container {
             grid-template-columns: 1fr !important;
-            grid-template-rows: 40vh 1fr !important;
+            grid-template-rows: 1fr !important;
             height: 100% !important;
             overflow: hidden !important;
             padding: 0 !important;
             gap: 0 !important;
+            position: relative !important;
           }
           .map-card-col {
+            position: absolute !important;
+            top: 0; left: 0; right: 0; bottom: 0;
             height: 100% !important;
-            order: 1 !important;
+            z-index: 1 !important;
+            border-radius: 0 !important;
+            opacity: var(--map-opacity, 1) !important;
+            pointer-events: var(--map-pointer, auto) !important;
+            transition: opacity 0.3s ease !important;
           }
           .listings-card-col {
+            position: absolute !important;
+            top: 0; left: 0; right: 0; bottom: 0;
             height: 100% !important;
             overflow-y: auto !important;
-            order: 2 !important;
-            background: rgba(255, 255, 255, 0.6) !important;
-            backdrop-filter: blur(12px) !important;
-            border-top: 1px solid rgba(0,0,0,0.1) !important;
+            z-index: 2 !important;
+            background: rgba(250, 250, 250, 0.95) !important;
+            backdrop-filter: blur(16px) !important;
+            border-top: none !important;
+            opacity: var(--list-opacity, 0) !important;
+            pointer-events: var(--list-pointer, none) !important;
+            transition: opacity 0.3s ease !important;
+            padding-bottom: 5rem !important;
           }
           .listings-grid {
             grid-template-columns: 1fr !important;
             gap: 1rem !important;
+          }
+          .mobile-view-toggle {
+            display: flex !important;
           }
         }
       `}</style>
@@ -1022,8 +1039,12 @@ export default function MapSearch() {
         overflow: 'hidden',
         padding: '0.875rem',
         gap: '0.875rem',
-        background: 'transparent'
-      }}>
+        background: 'transparent',
+        '--map-opacity': mobileView === 'map' ? 1 : 0,
+        '--map-pointer': mobileView === 'map' ? 'auto' : 'none',
+        '--list-opacity': mobileView === 'list' ? 1 : 0,
+        '--list-pointer': mobileView === 'list' ? 'auto' : 'none'
+      } as React.CSSProperties}>
         
         {/* LEFT COLUMN: Map Card */}
         <div className="map-card-col" style={{
@@ -1379,7 +1400,58 @@ export default function MapSearch() {
             </>
           )}
         </div>
+        </div>
       </div>
+      
+      {/* ── MOBILE VIEW TOGGLE ── */}
+      <div className="mobile-view-toggle" style={{
+        display: 'none',
+        position: 'fixed',
+        bottom: '1.5rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 2000,
+        background: '#101010',
+        borderRadius: '99px',
+        padding: '4px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        alignItems: 'center',
+        gap: '4px'
+      }}>
+        <button
+          onClick={() => setMobileView('map')}
+          style={{
+            background: mobileView === 'map' ? '#374151' : 'transparent',
+            color: mobileView === 'map' ? '#ffffff' : '#9ca3af',
+            border: 'none',
+            padding: '0.5rem 1rem',
+            borderRadius: '99px',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          Map
+        </button>
+        <button
+          onClick={() => setMobileView('list')}
+          style={{
+            background: mobileView === 'list' ? '#374151' : 'transparent',
+            color: mobileView === 'list' ? '#ffffff' : '#9ca3af',
+            border: 'none',
+            padding: '0.5rem 1rem',
+            borderRadius: '99px',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          List
+        </button>
+      </div>
+
     </div>
   );
 }
