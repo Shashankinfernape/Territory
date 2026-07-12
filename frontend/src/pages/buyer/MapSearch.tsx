@@ -1238,142 +1238,144 @@ export default function MapSearch() {
               </button>
             </div>
           ) : (
-            <div className="listings-grid">
-              {filteredProperties.slice(0, visibleCount).map(p => (
-                <Link
-                  key={p.id}
-                  to={`/property/${p.id}`}
-                  className="listing-card"
-                >
-                  {/* Image Container with overlays */}
-                  <div style={{ width: '100%', position: 'relative', aspectRatio: '16/9', background: '#f3f4f6', overflow: 'hidden' }}>
-                    <img
-                      src={getPropertyImageUrl(p)}
-                      alt="land"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                    
-                    {/* Showcase Pill */}
-                    <div style={{
-                      position: 'absolute', top: '0.625rem', left: '0.625rem',
-                      background: '#ffffff',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-                      borderRadius: '4px', padding: '3px 8px',
-                      fontSize: '0.625rem', fontWeight: 800, color: '#111827',
-                      letterSpacing: '0.03em', textTransform: 'uppercase'
-                    }}>
-                      Active
-                    </div>
-
-                    {/* Wishlist Heart Overlay */}
-                    <button
-                      onClick={(e) => toggleWishlist(e, p.id)}
-                      disabled={togglingId === p.id}
-                      style={{
-                        position: 'absolute', top: '0.625rem', right: '0.625rem',
-                        background: 'transparent',
-                        border: 'none', cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: 0,
-                        transition: 'transform 0.15s ease',
-                        outline: 'none',
-                        zIndex: 10
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
-                      onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-                    >
-                      <svg
-                        width="26"
-                        height="26"
-                        viewBox="0 0 24 24"
-                        style={{
-                          filter: 'drop-shadow(0 1.5px 3.5px rgba(0,0,0,0.7))',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        <path
-                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                          fill={wishlist.includes(p.id) ? '#101010' : 'none'}
-                          stroke="#ffffff"
-                          strokeWidth="2.2"
-                        />
-                      </svg>
-                    </button>
-
-                    {/* Zillow style pagination dots */}
-                    <div style={{
-                      position: 'absolute', bottom: '0.625rem', left: '50%', transform: 'translateX(-50%)',
-                      display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.22)', padding: '3px 6px', borderRadius: '99px'
-                    }}>
-                      {[1, 2, 3, 4, 5].map((dot, i) => (
-                        <div key={dot} style={{
-                          width: '5px', height: '5px', borderRadius: '50%',
-                          background: i === 0 ? '#ffffff' : 'rgba(255,255,255,0.5)'
-                        }} />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Details Body */}
-                  <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: 'transparent', minHeight: '85px' }}>
-                    <div>
-                      {/* Price & Options row */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <p style={{ margin: 0, fontSize: '1.0625rem', fontWeight: 800, color: '#111827', fontFamily: "'Poppins', sans-serif" }}>
-                          {formatPrice(p.price)}
-                        </p>
-                        {/* Three dots icon */}
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: 'pointer' }}>
-                          <circle cx="12" cy="12" r="1" />
-                          <circle cx="19" cy="12" r="1" />
-                          <circle cx="5" cy="12" r="1" />
-                        </svg>
+            <>
+              <div className="listings-grid">
+                {filteredProperties.slice(0, visibleCount).map(p => (
+                  <Link
+                    key={p.id}
+                    to={`/property/${p.id}`}
+                    className="listing-card"
+                  >
+                    {/* Image Container with overlays */}
+                    <div style={{ width: '100%', position: 'relative', aspectRatio: '16/9', background: '#f3f4f6', overflow: 'hidden' }}>
+                      <img
+                        src={getPropertyImageUrl(p)}
+                        alt="land"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      
+                      {/* Showcase Pill */}
+                      <div style={{
+                        position: 'absolute', top: '0.625rem', left: '0.625rem',
+                        background: '#ffffff',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+                        borderRadius: '4px', padding: '3px 8px',
+                        fontSize: '0.625rem', fontWeight: 800, color: '#111827',
+                        letterSpacing: '0.03em', textTransform: 'uppercase'
+                      }}>
+                        Active
                       </div>
 
-                      {/* Property specs row */}
-                      <p style={{ margin: '0.15rem 0 0', fontSize: '0.72rem', color: '#1f2937', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {p.area} {p.area_unit.replace('_', ' ')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> {p.type.replace(' Land', '').replace(' Plot', '')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> <span style={{ color: '#16a34a' }}>Deed</span>
-                      </p>
+                      {/* Wishlist Heart Overlay */}
+                      <button
+                        onClick={(e) => toggleWishlist(e, p.id)}
+                        disabled={togglingId === p.id}
+                        style={{
+                          position: 'absolute', top: '0.625rem', right: '0.625rem',
+                          background: 'transparent',
+                          border: 'none', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: 0,
+                          transition: 'transform 0.15s ease',
+                          outline: 'none',
+                          zIndex: 10
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
+                        onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                      >
+                        <svg
+                          width="26"
+                          height="26"
+                          viewBox="0 0 24 24"
+                          style={{
+                            filter: 'drop-shadow(0 1.5px 3.5px rgba(0,0,0,0.7))',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                            fill={wishlist.includes(p.id) ? '#101010' : 'none'}
+                            stroke="#ffffff"
+                            strokeWidth="2.2"
+                          />
+                        </svg>
+                      </button>
 
-                      {/* Address row */}
-                      <p style={{ margin: '0.1rem 0 0', fontSize: '0.72rem', color: '#4b5563', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                        {p.city}{p.district ? `, ${p.district}` : ''}
-                      </p>
+                      {/* Zillow style pagination dots */}
+                      <div style={{
+                        position: 'absolute', bottom: '0.625rem', left: '50%', transform: 'translateX(-50%)',
+                        display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.22)', padding: '3px 6px', borderRadius: '99px'
+                      }}>
+                        {[1, 2, 3, 4, 5].map((dot, i) => (
+                          <div key={dot} style={{
+                            width: '5px', height: '5px', borderRadius: '50%',
+                            background: i === 0 ? '#ffffff' : 'rgba(255,255,255,0.5)'
+                          }} />
+                        ))}
+                      </div>
                     </div>
 
-                    {/* Broker/Seller name */}
-                    <div style={{ marginTop: '0.28rem' }}>
-                      <p style={{ margin: 0, fontSize: '0.6rem', color: '#9ca3af', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                        Territory Premium
-                      </p>
+                    {/* Details Body */}
+                    <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: 'transparent', minHeight: '85px' }}>
+                      <div>
+                        {/* Price & Options row */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <p style={{ margin: 0, fontSize: '1.0625rem', fontWeight: 800, color: '#111827', fontFamily: "'Poppins', sans-serif" }}>
+                            {formatPrice(p.price)}
+                          </p>
+                          {/* Three dots icon */}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: 'pointer' }}>
+                            <circle cx="12" cy="12" r="1" />
+                            <circle cx="19" cy="12" r="1" />
+                            <circle cx="5" cy="12" r="1" />
+                          </svg>
+                        </div>
+
+                        {/* Property specs row */}
+                        <p style={{ margin: '0.15rem 0 0', fontSize: '0.72rem', color: '#1f2937', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {p.area} {p.area_unit.replace('_', ' ')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> {p.type.replace(' Land', '').replace(' Plot', '')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> <span style={{ color: '#16a34a' }}>Deed</span>
+                        </p>
+
+                        {/* Address row */}
+                        <p style={{ margin: '0.1rem 0 0', fontSize: '0.72rem', color: '#4b5563', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                          {p.city}{p.district ? `, ${p.district}` : ''}
+                        </p>
+                      </div>
+
+                      {/* Broker/Seller name */}
+                      <div style={{ marginTop: '0.28rem' }}>
+                        <p style={{ margin: 0, fontSize: '0.6rem', color: '#9ca3af', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                          Territory Premium
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            
-            {visibleCount < filteredProperties.length && (
-              <div style={{ textAlign: 'center', margin: '2rem 0' }}>
-                <button 
-                  onClick={() => setVisibleCount(prev => prev + 12)}
-                  style={{
-                    padding: '0.6rem 1.5rem',
-                    background: 'rgba(255,255,255,0.75)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '99px',
-                    color: '#101010',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                  }}
-                >
-                  Load More Lands
-                </button>
+                  </Link>
+                ))}
               </div>
-            )}
+              
+              {visibleCount < filteredProperties.length && (
+                <div style={{ textAlign: 'center', margin: '2rem 0' }}>
+                  <button 
+                    onClick={() => setVisibleCount(prev => prev + 12)}
+                    style={{
+                      padding: '0.6rem 1.5rem',
+                      background: 'rgba(255,255,255,0.75)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '99px',
+                      color: '#101010',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                    }}
+                  >
+                    Load More Lands
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
