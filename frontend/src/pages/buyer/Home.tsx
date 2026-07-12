@@ -185,6 +185,7 @@ export default function Home() {
               <GlareHover
                 key={p.id}
                 disabled={animationSetting === 'minimal'}
+                background="#ffffff"
                 glareColor="#ffffff"
                 glareOpacity={0.25}
                 glareSize={200}

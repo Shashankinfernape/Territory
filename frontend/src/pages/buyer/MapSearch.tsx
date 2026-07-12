@@ -1407,6 +1407,7 @@ export default function MapSearch() {
                   <GlareHover
                     key={p.id}
                     disabled={animationSetting === 'minimal'}
+                    background="rgba(255, 255, 255, 0.75)"
                     glareColor="#ffffff"
                     glareOpacity={0.25}
                     glareSize={200}
