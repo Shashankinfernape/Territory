@@ -31,6 +31,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db=Depends(get_d
     user = await db.users.find_one({"_id": token_data.uid})
     if user is None:
         raise credentials_exception
+        
+    if user.get("role") == "SELLER":
+        kyc = user.get("kyc_details") or {}
+        if kyc.get("status") != "APPROVED":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Your seller account is pending admin approval."
+            )
+            
     return user
 
 

@@ -59,7 +59,18 @@ export default function Login() {
     } catch (err: any) {
       console.error(err);
       localStorage.removeItem('token');
-      setError('Incorrect credentials. Please ensure your account registration is complete.');
+      // Sign them out of Firebase just in case to be fully secure
+      await auth.signOut();
+      
+      let errorMsg = 'Incorrect credentials. Please ensure your account registration is complete.';
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'string') {
+          errorMsg = err.response.data.detail;
+        } else {
+          errorMsg = JSON.stringify(err.response.data.detail);
+        }
+      }
+      setError(errorMsg);
     } finally { setLoading(false); }
   };
 
