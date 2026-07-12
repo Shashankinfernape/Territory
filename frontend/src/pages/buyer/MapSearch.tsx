@@ -582,6 +582,7 @@ export default function MapSearch() {
 
     setSelectedDistrict(districtName);
     setSelectedCity(null);
+    setMobileView('list');
     
     // Zoom/pan map dynamically to that district in our loaded GeoJSON
     if (geoJsonData) {
@@ -734,6 +735,7 @@ export default function MapSearch() {
         setSelectedDistrict(distName);
         setSelectedCity(null);
         setSelectedBounds(e.target.getBounds());
+        setMobileView('list');
       }
     });
 
@@ -870,8 +872,8 @@ export default function MapSearch() {
           }
           .filters-container {
             padding: 0.5rem 0.875rem !important;
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
+            flex-wrap: wrap !important;
+            overflow-x: visible !important;
           }
           .split-view-container {
             grid-template-columns: 1fr !important;
