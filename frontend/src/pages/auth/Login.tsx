@@ -98,6 +98,7 @@ export default function Login() {
       
       if (regRole === 'SELLER') {
         payload.kyc_details = { aadhaar_number: aadhaar, pan_number: pan };
+        localStorage.setItem('show_seller_pending_msg', 'true');
       }
       
       await api.post('/auth/register', payload);

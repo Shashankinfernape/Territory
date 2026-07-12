@@ -254,14 +254,57 @@ function SellPanel() {
   );
 }
 
-// ── Buy Dashboard ──────────────────────────────────────────────────────────────
 export default function UnifiedDashboard() {
   const location = useLocation();
   const isSeller = location.pathname.includes('seller');
+  const [showPendingBanner, setShowPendingBanner] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem('show_seller_pending_msg') === 'true') {
+      setShowPendingBanner(true);
+    }
+  }, []);
+
+  const handleDismissBanner = () => {
+    localStorage.removeItem('show_seller_pending_msg');
+    setShowPendingBanner(false);
+  };
 
   return (
     <div style={{ background: 'transparent', minHeight: '100vh', padding: '3rem 1.5rem' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        
+        {showPendingBanner && (
+          <div style={{
+            background: 'rgba(184, 150, 62, 0.08)',
+            border: '1px solid #b8963e',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
+            boxShadow: '0 4px 20px rgba(184, 150, 62, 0.05)'
+          }}>
+            <button onClick={handleDismissBanner} style={{
+              position: 'absolute', top: '1rem', right: '1rem',
+              background: 'none', border: 'none', color: '#b8963e',
+              fontSize: '1.25rem', cursor: 'pointer', fontWeight: 'bold'
+            }}>&times;</button>
+            <h3 style={{ margin: 0, color: '#b8963e', fontSize: '1.05rem', fontWeight: 800 }}>Seller Verification Request Submitted!</h3>
+            <p style={{ margin: 0, color: 'rgba(15, 23, 42, 0.7)', fontSize: '0.85rem', lineHeight: 1.4 }}>
+              Our team will review your voter ID/Aadhaar/PAN details and approve your seller request soon. 
+              Until then, you can browse through the catalog and use the platform as a buyer.
+            </p>
+            <div style={{ marginTop: '0.5rem' }}>
+              <Link to="/browse" className="btn-primary" style={{ textDecoration: 'none', padding: '0.4rem 1rem', fontSize: '0.75rem', background: '#b8963e', border: 'none' }} onClick={handleDismissBanner}>
+                Browse Catalog
+              </Link>
+            </div>
+          </div>
+        )}
+
         <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(15,23,42,0.06)', paddingBottom: '1rem' }}>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
             {isSeller ? 'My Listings Panel' : 'My Property Registry'}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../../lib/api';
 import type { Property } from '../../lib/types';
 
-type Tab = 'overview' | 'users' | 'properties' | 'transactions' | 'trending';
+type Tab = 'overview' | 'users' | 'properties' | 'transactions' | 'trending' | 'seller_approvals' | 'property_approvals';
 
 const TAB_LABELS: Record<Tab, string> = {
   overview: 'Overview',
@@ -11,6 +11,8 @@ const TAB_LABELS: Record<Tab, string> = {
   properties: 'Land Listings',
   transactions: 'Payments History',
   trending: 'Trending Listings',
+  seller_approvals: 'New Seller Approvals',
+  property_approvals: 'New Property Approvals',
 };
 
 interface User {
@@ -179,6 +181,20 @@ export default function AdminDashboard() {
     (t.property_district || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredPendingSellers = users.filter(u => 
+    (u.kyc_details?.status === 'PENDING' && u.role === 'USER') &&
+    (u.phone_number.includes(searchQuery) || 
+     (u.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const filteredPendingProperties = properties.filter(p => 
+    p.status === 'PENDING_VERIFICATION' &&
+    (p.city.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     (p.district || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+     shortId(p.seller_id).toLowerCase().includes(searchQuery.toLowerCase()) ||
+     (p.type || '').toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   return (
     <div style={{ background: '#faf9f6', minHeight: '100vh', padding: '1rem 1.5rem 3rem' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
@@ -239,6 +255,38 @@ export default function AdminDashboard() {
                   {stats.pending_properties}
                 </span>
               ) : null}
+              {tab === 'seller_approvals' && stats?.pending_sellers ? (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.1rem 0.35rem',
+                  borderRadius: '4px',
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  background: activeTab === tab ? '#ffffff' : '#ff3b30',
+                  color: activeTab === tab ? '#101010' : '#ffffff',
+                  transition: 'all 0.2s ease'
+                }}>
+                  {stats.pending_sellers}
+                </span>
+              ) : null}
+              {tab === 'property_approvals' && stats?.pending_properties ? (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.1rem 0.35rem',
+                  borderRadius: '4px',
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  background: activeTab === tab ? '#ffffff' : '#ff3b30',
+                  color: activeTab === tab ? '#101010' : '#ffffff',
+                  transition: 'all 0.2s ease'
+                }}>
+                  {stats.pending_properties}
+                </span>
+              ) : null}
             </button>
           ))}
         </div>
@@ -281,7 +329,7 @@ export default function AdminDashboard() {
                   { label: 'Total Users', value: stats.total_users, color: '#0f172a' },
                   { label: 'Active Properties', value: stats.active_properties, color: '#0f172a' },
                   { label: 'Pending Reviews', value: stats.pending_properties, color: '#b8963e' },
-                  { label: 'Pending Sellers', value: stats.pending_sellers, color: '#b8963e' },
+                  { label: 'Sellers Awaiting Approval', value: stats.pending_sellers, color: '#b8963e' },
                   { label: 'Total Transactions', value: stats.total_transactions, color: '#0f172a' },
                 ].map(({ label, value, color }) => (
                   <div key={label} style={{
@@ -712,6 +760,233 @@ export default function AdminDashboard() {
                               </button>
                             </>
                           )}
+                          <button
+                            onClick={() => handleEditProperty(p.id)}
+                            style={{
+                              background: 'rgba(0, 122, 255, 0.08)',
+                              border: 'none',
+                              color: '#007aff',
+                              fontWeight: 600,
+                              padding: '0.4rem 0.8rem',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              fontSize: '0.8rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.15)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.08)'}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => setDeleteTargetProperty(p.id)}
+                            style={{
+                              background: 'rgba(255, 59, 48, 0.08)',
+                              border: 'none',
+                              color: '#ff3b30',
+                              fontWeight: 600,
+                              padding: '0.4rem 0.8rem',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              fontSize: '0.8rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.15)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.08)'}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* SELLER APPROVALS TAB */}
+        {activeTab === 'seller_approvals' && (
+          <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid rgba(15, 23, 42, 0.06)', overflow: 'hidden', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(15, 23, 42, 0.02)', borderBottom: '1px solid rgba(15, 23, 42, 0.06)' }}>
+                    {['Phone', 'Role', 'Full Name', 'KYC Status', 'Actions'].map(h => (
+                      <th key={h} style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.72rem', fontWeight: 800, color: 'rgba(15,23,42,0.45)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPendingSellers.length === 0 ? (
+                    <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'rgba(15,23,42,0.45)' }}>No pending seller approvals.</td></tr>
+                  ) : filteredPendingSellers.map(u => (
+                    <tr key={u.id} style={{ borderBottom: '1px solid rgba(15, 23, 42, 0.06)', transition: 'background 0.15s' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(15,23,42,0.015)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a', fontFamily: 'monospace' }}>{u.phone_number}</td>
+                      <td style={{ padding: '1rem 1.5rem' }}>
+                        <span className="badge-verified" style={{
+                          border: '1px solid #0f2042',
+                          color: '#0f2042',
+                          background: 'rgba(15, 32, 66, 0.05)'
+                        }}>{u.role}</span>
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.7)' }}>{u.full_name ?? '-'}</td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
+                        <span style={{ color: '#b8963e', fontWeight: 700 }}>{u.kyc_details?.status || 'PENDING'}</span>
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            onClick={() => setViewKycFor(u)}
+                            style={{
+                              background: 'rgba(184, 150, 62, 0.08)',
+                              border: 'none',
+                              color: '#b8963e',
+                              fontWeight: 600,
+                              padding: '0.4rem 0.8rem',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              fontSize: '0.8rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(184, 150, 62, 0.15)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(184, 150, 62, 0.08)'}
+                          >
+                            Review KYC & Approve
+                          </button>
+                          <button
+                            onClick={() => setDeleteTargetUser(u.id)}
+                            style={{
+                              background: 'rgba(255, 59, 48, 0.08)',
+                              border: 'none',
+                              color: '#ff3b30',
+                              fontWeight: 600,
+                              padding: '0.4rem 0.8rem',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              fontSize: '0.8rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.15)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.08)'}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* PROPERTY APPROVALS TAB */}
+        {activeTab === 'property_approvals' && (
+          <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid rgba(15, 23, 42, 0.06)', overflow: 'hidden', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(15, 23, 42, 0.02)', borderBottom: '1px solid rgba(15, 23, 42, 0.06)' }}>
+                    {['City / Type', 'Seller ID', 'Status', 'Docs', 'Actions'].map(h => (
+                      <th key={h} style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.72rem', fontWeight: 800, color: 'rgba(15,23,42,0.45)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPendingProperties.length === 0 ? (
+                    <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'rgba(15,23,42,0.45)' }}>No properties pending approval.</td></tr>
+                  ) : filteredPendingProperties.map(p => (
+                    <tr key={p.id} style={{ borderBottom: '1px solid rgba(15, 23, 42, 0.06)', transition: 'background 0.15s' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(15,23,42,0.015)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <td style={{ padding: '1rem 1.5rem' }}>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{p.city}{p.district ? `, ${p.district}` : ''}</div>
+                        {p.type && <div style={{ fontSize: '0.7rem', color: 'rgba(15,23,42,0.4)' }}>{p.type}</div>}
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.5)', fontFamily: 'monospace' }}>
+                        <span style={{ background: '#f1f5f9', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                          {shortId(p.seller_id)}
+                        </span>
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem' }}>
+                        <span className="badge-verified" style={{
+                          border: '1px solid #b8963e',
+                          color: '#b8963e',
+                          background: 'rgba(184, 150, 62, 0.04)'
+                        }}>{p.status}</span>
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
+                        <button
+                          onClick={() => setViewDocsFor(p)}
+                          style={{
+                            background: 'rgba(184, 150, 62, 0.08)',
+                            border: 'none',
+                            color: '#b8963e',
+                            fontWeight: 600,
+                            padding: '0.4rem 0.8rem',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            fontSize: '0.8rem',
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(184, 150, 62, 0.15)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'rgba(184, 150, 62, 0.08)'}
+                        >
+                          {p.documents?.length || 0} Docs
+                        </button>
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <button
+                            onClick={() => handleVerify(p.id, 'ACTIVE')}
+                            style={{
+                              background: 'rgba(16, 185, 129, 0.08)',
+                              border: 'none',
+                              color: '#10b981',
+                              fontWeight: 600,
+                              padding: '0.4rem 0.8rem',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              fontSize: '0.8rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.15)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.08)'}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => handleVerify(p.id, 'REJECTED')}
+                            style={{
+                              background: 'rgba(255, 59, 48, 0.08)',
+                              border: 'none',
+                              color: '#ff3b30',
+                              fontWeight: 600,
+                              padding: '0.4rem 0.8rem',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              fontSize: '0.8rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.15)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.08)'}
+                          >
+                            Reject
+                          </button>
                           <button
                             onClick={() => handleEditProperty(p.id)}
                             style={{
