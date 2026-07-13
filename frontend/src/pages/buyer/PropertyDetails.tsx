@@ -27,21 +27,31 @@ export default function PropertyDetails() {
         const propRes = await api.get<DetailedProperty>(`/properties/${id}`);
         let propData = propRes.data;
 
-        // If logged in, check if already unlocked
-        const token = localStorage.getItem('token');
-        if (token) {
-          try {
-            const checkRes = await api.get(`/payments/check-unlock/${id}`);
-            if (checkRes.data.unlocked) {
-              propData = {
-                ...propData,
-                unlocked: true,
-                owner_name: checkRes.data.owner_name,
-                owner_phone: checkRes.data.owner_phone
-              };
+        // If logged in, check ownership or unlock status
+        const loggedInUserId = localStorage.getItem('user_id');
+        if (loggedInUserId && propData.seller_id === loggedInUserId) {
+          propData = {
+            ...propData,
+            unlocked: true,
+            owner_name: 'You (Seller)',
+            owner_phone: localStorage.getItem('user_phone') || ''
+          };
+        } else {
+          const token = localStorage.getItem('token');
+          if (token) {
+            try {
+              const checkRes = await api.get(`/payments/check-unlock/${id}`);
+              if (checkRes.data.unlocked) {
+                propData = {
+                  ...propData,
+                  unlocked: true,
+                  owner_name: checkRes.data.owner_name,
+                  owner_phone: checkRes.data.owner_phone
+                };
+              }
+            } catch (err) {
+              console.error('Failed to check unlock status', err);
             }
-          } catch (err) {
-            console.error('Failed to check unlock status', err);
           }
         }
 

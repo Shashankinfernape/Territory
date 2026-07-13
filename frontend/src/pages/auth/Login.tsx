@@ -49,9 +49,10 @@ export default function Login() {
       const token = await userCredential.user.getIdToken();
       setToken(token);
       const userRes = await api.get('/auth/me');
-      const { role: userRole, phone_number } = userRes.data;
+      const { id: userId, role: userRole, phone_number } = userRes.data;
       localStorage.setItem('user_role', userRole);
       localStorage.setItem('user_phone', phone_number);
+      localStorage.setItem('user_id', userId);
       window.dispatchEvent(new Event('storage'));
       if (userRole === 'ADMIN') navigate('/dashboard/admin');
       else if (userRole === 'SELLER') navigate('/dashboard/seller');
@@ -101,10 +102,11 @@ export default function Login() {
         localStorage.setItem('show_seller_pending_msg', 'true');
       }
       
-      await api.post('/auth/register', payload);
+      const regRes = await api.post('/auth/register', payload);
 
       localStorage.setItem('user_role', 'USER');
       localStorage.setItem('user_phone', regPhone);
+      localStorage.setItem('user_id', regRes.data.id);
       window.dispatchEvent(new Event('storage'));
       
       navigate('/dashboard/buyer');
