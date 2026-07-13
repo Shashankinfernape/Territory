@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export default function SellGuide() {
   return (
-    <div className="fade-in" style={{ background: '#f4f4f4', minHeight: '100vh', padding: '4rem 1.5rem' }}>
+    <div className="fade-in" style={{ background: 'transparent', minHeight: '100vh', padding: '4rem 1.5rem' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         
         {/* Header Section */}
@@ -18,7 +18,12 @@ export default function SellGuide() {
         {/* Steps Grid */}
         <div style={{ display: 'grid', gap: '2rem', marginBottom: '4rem' }}>
           
-          <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 12px', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            padding: '2rem', borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 12px', display: 'flex', gap: '1.5rem', alignItems: 'flex-start'
+          }}>
             <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 800, flexShrink: 0 }}>
               1
             </div>
@@ -30,7 +35,12 @@ export default function SellGuide() {
             </div>
           </div>
 
-          <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 12px', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            padding: '2rem', borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 12px', display: 'flex', gap: '1.5rem', alignItems: 'flex-start'
+          }}>
             <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 800, flexShrink: 0 }}>
               2
             </div>
@@ -42,7 +52,12 @@ export default function SellGuide() {
             </div>
           </div>
 
-          <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 12px', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            padding: '2rem', borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 12px', display: 'flex', gap: '1.5rem', alignItems: 'flex-start'
+          }}>
             <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 800, flexShrink: 0 }}>
               3
             </div>
@@ -54,7 +69,12 @@ export default function SellGuide() {
             </div>
           </div>
 
-          <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 12px', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            padding: '2rem', borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 12px', display: 'flex', gap: '1.5rem', alignItems: 'flex-start'
+          }}>
             <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 800, flexShrink: 0 }}>
               4
             </div>

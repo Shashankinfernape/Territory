@@ -29,6 +29,9 @@ export default function Login() {
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPhone, setRegPhone] = useState('');
+  const [regRole, setRegRole] = useState<'USER' | 'SELLER'>('USER');
+  const [aadhaar, setAadhaar] = useState('');
+  const [pan, setPan] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirm, setRegConfirm] = useState('');
   const [forgotEmail, setForgotEmail] = useState('');
@@ -46,9 +49,10 @@ export default function Login() {
       const token = await userCredential.user.getIdToken();
       setToken(token);
       const userRes = await api.get('/auth/me');
-      const { role: userRole, phone_number } = userRes.data;
+      const { id: userId, role: userRole, phone_number } = userRes.data;
       localStorage.setItem('user_role', userRole);
       localStorage.setItem('user_phone', phone_number);
+      localStorage.setItem('user_id', userId);
       window.dispatchEvent(new Event('storage'));
       if (userRole === 'ADMIN') navigate('/dashboard/admin');
       else if (userRole === 'SELLER') navigate('/dashboard/seller');
@@ -56,7 +60,18 @@ export default function Login() {
     } catch (err: any) {
       console.error(err);
       localStorage.removeItem('token');
-      setError('Incorrect credentials. Please ensure your account registration is complete.');
+      // Sign them out of Firebase just in case to be fully secure
+      await auth.signOut();
+      
+      let errorMsg = 'Incorrect credentials. Please ensure your account registration is complete.';
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'string') {
+          errorMsg = err.response.data.detail;
+        } else {
+          errorMsg = JSON.stringify(err.response.data.detail);
+        }
+      }
+      setError(errorMsg);
     } finally { setLoading(false); }
   };
 
@@ -64,6 +79,8 @@ export default function Login() {
     e.preventDefault();
     if (regPassword !== regConfirm) { setError('Passwords do not match.'); return; }
     if (regPassword.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (!/^\d{10}$/.test(regPhone)) { setError('Phone number must be exactly 10 digits.'); return; }
+    if (regRole === 'SELLER' && (!aadhaar || !pan)) { setError('Aadhaar and PAN numbers are required for Seller registration.'); return; }
     setLoading(true); setError(''); setSuccessMsg('');
     let firebaseUser: any = null;
     try {
@@ -71,16 +88,47 @@ export default function Login() {
       firebaseUser = userCredential.user;
       const token = await firebaseUser.getIdToken();
       setToken(token);
-      await api.post('/auth/register', { uid: firebaseUser.uid, email: regEmail, phone_number: regPhone, role: 'USER', full_name: regName });
+      
+      const payload: any = { 
+        uid: firebaseUser.uid, 
+        email: regEmail, 
+        phone_number: regPhone, 
+        role: 'USER', 
+        full_name: regName 
+      };
+      
+      if (regRole === 'SELLER') {
+        payload.kyc_details = { aadhaar_number: aadhaar, pan_number: pan };
+        localStorage.setItem('show_seller_pending_msg', 'true');
+      }
+      
+      const regRes = await api.post('/auth/register', payload);
+
       localStorage.setItem('user_role', 'USER');
       localStorage.setItem('user_phone', regPhone);
+      localStorage.setItem('user_id', regRes.data.id);
       window.dispatchEvent(new Event('storage'));
+      
       navigate('/dashboard/buyer');
     } catch (err: any) {
       console.error(err);
       if (firebaseUser) { try { await firebaseUser.delete(); } catch {} }
       localStorage.removeItem('token');
-      setError(err.response?.data?.detail || err.message || 'Registration failed.');
+      
+      let errorMsg = 'Registration failed.';
+      if (err.response?.data?.detail) {
+        const detail = err.response.data.detail;
+        if (Array.isArray(detail)) {
+          errorMsg = detail.map((d: any) => `${d.loc[d.loc.length - 1]}: ${d.msg}`).join(', ');
+        } else if (typeof detail === 'string') {
+          errorMsg = detail;
+        } else {
+          errorMsg = JSON.stringify(detail);
+        }
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      setError(errorMsg);
     } finally { setLoading(false); }
   };
 
@@ -107,7 +155,9 @@ export default function Login() {
     <div className="login-split">
       <div className="fade-in" style={{
         width: '100%', maxWidth: step === 'register' ? '500px' : '400px',
-        background: '#ffffff',
+        background: 'rgba(255,255,255,0.75)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         border: '1px solid #e5e7eb',
         borderRadius: '12px',
         padding: '2.25rem',
@@ -178,13 +228,35 @@ export default function Login() {
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem', letterSpacing: '-0.2px' }}>Purchase and list verified land directly.</p>
 
             <form onSubmit={handleRegister} className="register-grid">
+              <div className="grid-col-span-2">
+                {label('Account Type')}
+                <select className="form-input" value={regRole} onChange={e => setRegRole(e.target.value as any)}>
+                  <option value="USER">Buyer Account</option>
+                  <option value="SELLER">Seller Account</option>
+                </select>
+              </div>
               <div className="grid-col-span-2">{label('Email address')}<input id="reg-email" className="form-input" type="email" required placeholder="you@example.com" value={regEmail} onChange={e => setRegEmail(e.target.value)} /></div>
               <div>{label('Full name')}<input id="reg-name" className="form-input" type="text" required placeholder="Your name" value={regName} onChange={e => setRegName(e.target.value)} /></div>
               <div>{label('Phone number')}<input id="reg-phone" className="form-input" type="tel" required placeholder="10-digit number" value={regPhone} onChange={e => setRegPhone(e.target.value)} /></div>
               <div>{label('Password')}<input id="reg-password" className="form-input" type="password" required placeholder="Min 6 characters" value={regPassword} onChange={e => setRegPassword(e.target.value)} /></div>
               <div>{label('Confirm password')}<input id="reg-confirm" className="form-input" type="password" required placeholder="Repeat password" value={regConfirm} onChange={e => setRegConfirm(e.target.value)} /></div>
+              
+              {regRole === 'SELLER' && (
+                <>
+                  <div className="grid-col-span-2" style={{ marginTop: '0.5rem', marginBottom: '0.2rem' }}>
+                    <div style={{ padding: '0.75rem', background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '8px' }}>
+                      <p style={{ fontSize: '0.8125rem', color: '#475569', margin: 0, fontWeight: 500 }}>
+                        <strong style={{ color: '#0f172a' }}>Verification Required:</strong> To maintain a secure marketplace, seller accounts must be verified by an admin.
+                      </p>
+                    </div>
+                  </div>
+                  <div>{label('Aadhaar Number')}<input className="form-input" type="text" required={regRole === 'SELLER'} placeholder="12-digit number" value={aadhaar} onChange={e => setAadhaar(e.target.value)} /></div>
+                  <div>{label('PAN Number')}<input className="form-input" type="text" required={regRole === 'SELLER'} placeholder="10-character PAN" value={pan} onChange={e => setPan(e.target.value)} /></div>
+                </>
+              )}
+
               <button id="register-submit" type="submit" disabled={loading} className="btn-primary grid-col-span-2" style={{ width: '100%', marginTop: '0.5rem' }}>
-                {loading ? 'Creating account…' : 'Create account'}
+                {loading ? 'Submitting…' : (regRole === 'SELLER' ? 'Submit for Verification' : 'Create account')}
               </button>
             </form>
           </div>

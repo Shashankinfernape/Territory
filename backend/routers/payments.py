@@ -93,7 +93,7 @@ async def check_unlock_status(
         raise HTTPException(status_code=400, detail="Invalid property ID")
 
     tx = await _get_transaction(db, str(current_user["_id"]), property_id)
-    if tx:
+    if tx or current_user["role"] == "ADMIN":
         prop = await db.properties.find_one({"_id": ObjectId(property_id)})
         owner_name = "Landowner"
         owner_phone = "+91 XXXXX XXXXX"

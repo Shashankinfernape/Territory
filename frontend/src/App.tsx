@@ -23,22 +23,22 @@ import Wishlist from './pages/buyer/Wishlist';
 import MapSearch from './pages/buyer/MapSearch';
 import NotFound from './pages/NotFound';
 import SellGuide from './pages/SellGuide';
+import Settings from './pages/Settings';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
 
   return (
-    <AnimatePresence mode="wait">
+    /* mode="sync" = crossfade dissolve: splash fades out while app fades in simultaneously */
+    <AnimatePresence mode="sync">
       {showSplash ? (
-        /* 1. Play Premium Silver Cinematic Sequence first */
         <SplashAnimation key="splash" onComplete={() => setShowSplash(false)} />
       ) : (
-        /* 2. Soft-fade directly into your real application layout and routes */
         <motion.div
           key="app-router-root"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
           className="min-h-screen"
         >
           <Router>
@@ -53,6 +53,7 @@ function App() {
                 <Route path="login" element={<Login />} />
                 <Route path="contact" element={<Contact />} />
                 <Route path="help" element={<Help />} />
+                <Route path="settings" element={<Settings />} />
                 <Route path="sell-guide" element={<SellGuide />} />
 
                 {/* Protected: Unified Dashboard (BUY + SELL) */}

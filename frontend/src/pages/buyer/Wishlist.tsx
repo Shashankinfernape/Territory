@@ -70,14 +70,26 @@ export default function Wishlist() {
       </div>
 
       {!isLoggedIn ? (
-        <div style={{ textAlign: 'center', padding: '5rem 2rem', background: '#ffffff', borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px', border: '1px solid #e5e7eb' }}>
+        <div style={{
+          textAlign: 'center', padding: '5rem 2rem',
+          background: 'rgba(255, 255, 255, 0.75)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px', border: '1px solid #e5e7eb'
+        }}>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔒</div>
           <h3 style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, color: '#101010', fontSize: '1.125rem', marginBottom: '0.5rem', letterSpacing: '0.01em' }}>Secure Profile Required</h3>
           <p style={{ color: '#6b7280', fontSize: '0.875rem', maxWidth: '300px', margin: '0 auto 1.5rem', lineHeight: 1.5, letterSpacing: '-0.2px' }}>Please sign in to your registry profile to monitor saved properties.</p>
           <Link to="/login" className="btn-primary" style={{ textDecoration: 'none' }}>Sign In</Link>
         </div>
       ) : properties.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '5rem 2rem', background: '#ffffff', borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px', border: '1px solid #e5e7eb' }}>
+        <div style={{
+          textAlign: 'center', padding: '5rem 2rem',
+          background: 'rgba(255, 255, 255, 0.75)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderRadius: '12px', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px', border: '1px solid #e5e7eb'
+        }}>
           <div style={{
             width: '64px', height: '64px', borderRadius: '50%',
             background: '#f4f4f4',

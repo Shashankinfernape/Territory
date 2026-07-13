@@ -1,6 +1,6 @@
 export default function Contact() {
   return (
-    <div className="fade-in" style={{ minHeight: '80vh', backgroundColor: '#f4f4f4', padding: '4rem 1rem' }}>
+    <div className="fade-in" style={{ minHeight: '80vh', padding: '4rem 1rem' }}>
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
 
         {/* Header */}

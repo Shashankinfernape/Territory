@@ -4,6 +4,8 @@ import { api, getToken } from '../../lib/api';
 import { getPropertyImageUrl, type Property } from '../../lib/types';
 import { formatPrice } from '../../lib/utils';
 import TAMIL_NADU_CITY_DIVISIONS from '../../components/common/tamilnadu_city_divisions.json';
+import { useSettings } from '../../contexts/SettingsContext';
+import GlareHover from '../../components/ui/GlareHover';
 
 const TAMIL_NADU_DISTRICTS = [
   "Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri",
@@ -45,9 +47,25 @@ function PropertyCard({
   togglingId: string | null;
   toggleWishlist: (e: React.MouseEvent, id: string) => void;
 }) {
+  const { animationSetting } = useSettings();
+
   return (
-    <div className="property-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#ffffff', borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
-      <Link to={`/property/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <GlareHover 
+      disabled={animationSetting === 'minimal'}
+      glareColor="#ffffff"
+      glareOpacity={0.25}
+      glareSize={200}
+      borderRadius="12px"
+      className="property-card"
+      style={{
+        display: 'flex', flexDirection: 'column', height: '100%',
+        background: 'rgba(255, 255, 255, 0.75)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden'
+      }}
+    >
+      <Link to={`/property/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
         {/* Image Container with overlays */}
         <div style={{ width: '100%', position: 'relative', aspectRatio: '16/9', background: '#f3f4f6', overflow: 'hidden' }}>
           <img
@@ -118,7 +136,7 @@ function PropertyCard({
         </div>
 
         {/* Details Body */}
-        <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: '#ffffff', minHeight: '85px' }}>
+        <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: 'transparent', minHeight: '85px' }}>
           <div>
             {/* Price & Options row */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -152,13 +170,14 @@ function PropertyCard({
           </div>
         </div>
       </Link>
-    </div>
+    </GlareHover>
   );
 }
 
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [visibleCount, setVisibleCount] = useState(12);
   const [recommendations, setRecommendations] = useState<Property[]>([]);
   const [recLabel, setRecLabel] = useState<string>('Recommended for You');
   const [loading, setLoading] = useState(true);
@@ -265,6 +284,7 @@ export default function Browse() {
       else if (sortBy === 'price_desc') data = [...data].sort((a, b) => b.price - a.price);
       else if (sortBy === 'views') data = [...data].sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0));
       setProperties(data);
+      setVisibleCount(12);
     } catch { /* silent */ }
     finally { setLoading(false); }
   }, [searchTerm, filterType, filterDistrict, filterTaluk, filterMinPrice, filterMaxPrice, filterMinArea, filterMaxArea, filterWaterSource, filterRoadAccess, sortBy]);
@@ -318,12 +338,14 @@ export default function Browse() {
   const cardProps = { wishlist, togglingId, isLoggedIn, toggleWishlist };
 
   return (
-    <div className="fade-in" style={{ backgroundColor: '#f0f0f0', minHeight: '100vh' }}>
+    <div className="fade-in" style={{ minHeight: '100vh' }}>
 
       {/* ── SEARCH HEADER ── */}
       <div style={{
-        background: '#ffffff',
-        borderBottom: '1px solid #e5e7eb',
+        background: 'rgba(255, 255, 255, 0.25)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
       }}>
         <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '0.75rem 1rem' }}>
 
@@ -331,7 +353,7 @@ export default function Browse() {
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', minWidth: 0 }}>
             {/* Search */}
             <div
-              style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f7f7f7', border: '1.5px solid #e5e7eb', borderRadius: '10px', padding: '0.5rem 0.75rem', transition: 'border-color 0.2s' }}
+              style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255, 255, 255, 0.4)', border: '1.5px solid #e5e7eb', borderRadius: '10px', padding: '0.5rem 0.75rem', transition: 'border-color 0.2s' }}
               onFocusCapture={e => (e.currentTarget.style.borderColor = '#101010')}
               onBlurCapture={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
             >
@@ -356,9 +378,9 @@ export default function Browse() {
               className="browse-sort-select"
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              style={{ flexShrink: 0, padding: '0.5rem 0.75rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: '#fff', color: '#242424', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
+              style={{ flexShrink: 0, padding: '0.5rem 0.75rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', color: '#242424', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
             >
-              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value} style={{ background: '#fff' }}>{o.label}</option>)}
             </select>
 
             {/* Filter toggle */}
@@ -368,7 +390,9 @@ export default function Browse() {
                 flexShrink: 0, display: 'flex', alignItems: 'center', gap: '0.35rem',
                 padding: '0.5rem 0.85rem', borderRadius: '10px', cursor: 'pointer', fontFamily: 'inherit',
                 border: hasActive ? '1.5px solid #101010' : '1.5px solid #e5e7eb',
-                background: hasActive ? '#101010' : '#fff',
+                background: hasActive ? '#101010' : 'rgba(255, 255, 255, 0.4)',
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)',
                 color: hasActive ? '#fff' : '#242424',
                 fontSize: '0.875rem', fontWeight: 500, transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
@@ -398,7 +422,13 @@ export default function Browse() {
 
       {/* ── EXPANDABLE FILTERS PANEL ── */}
       {showFilters && (
-        <div className="fade-in" style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
+        <div className="fade-in" style={{
+          background: 'rgba(255, 255, 255, 0.25)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
+        }}>
           <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '1.25rem 1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#898989', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Filter Specifications</span>
@@ -415,7 +445,7 @@ export default function Browse() {
                   value={filterDistrict}
                   onChange={e => setFilterDistrict(e.target.value)}
                   className="form-input"
-                  style={{ fontSize: '0.875rem', background: '#fff', width: '100%' }}
+                  style={{ fontSize: '0.875rem', width: '100%' }}
                 >
                   <option value="">Any District</option>
                   {TAMIL_NADU_DISTRICTS.map(d => (
@@ -431,7 +461,7 @@ export default function Browse() {
                   value={filterTaluk}
                   onChange={e => setFilterTaluk(e.target.value)}
                   className="form-input"
-                  style={{ fontSize: '0.875rem', background: '#fff', width: '100%' }}
+                  style={{ fontSize: '0.875rem', width: '100%' }}
                 >
                   <option value="">Any Taluk</option>
                   {sortedTaluks.map((t: string) => (
@@ -502,7 +532,7 @@ export default function Browse() {
             {loading ? 'Searching…' : `${properties.length} listing${properties.length !== 1 ? 's' : ''} found`}
           </p>
           {hasActive && (
-            <button onClick={clearFilters} style={{ fontSize: '0.8rem', color: '#4b5563', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '0.3rem 0.75rem', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}>
+            <button onClick={clearFilters} style={{ fontSize: '0.8rem', color: '#4b5563', background: 'rgba(255, 255, 255, 0.45)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '0.3rem 0.75rem', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}>
               Clear all filters
             </button>
           )}
@@ -522,7 +552,13 @@ export default function Browse() {
             ))}
           </div>
         ) : properties.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '5rem 2rem', background: '#fff', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', boxShadow: '0 4px 8px rgba(36,36,36,0.05)' }}>
+          <div style={{
+            textAlign: 'center', padding: '5rem 2rem',
+            background: 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', boxShadow: '0 4px 8px rgba(36,36,36,0.05)'
+          }}>
             <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: '#f4f4f4', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#898989" strokeWidth="1.5">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -535,9 +571,33 @@ export default function Browse() {
             {hasActive && <button onClick={clearFilters} className="btn-primary" style={{ fontSize: '0.875rem' }}>Clear filters</button>}
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.25rem' }}>
-            {properties.map(p => <PropertyCard key={p.id} p={p} {...cardProps} />)}
-          </div>
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.25rem' }}>
+              {properties.slice(0, visibleCount).map(p => <PropertyCard key={p.id} p={p} {...cardProps} />)}
+            </div>
+            {visibleCount < properties.length && (
+              <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+                <button 
+                  onClick={() => setVisibleCount(prev => prev + 12)}
+                  style={{
+                    padding: '0.6rem 1.5rem',
+                    background: 'rgba(255,255,255,0.75)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '99px',
+                    color: '#101010',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                  }}
+                >
+                  Load More Lands
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

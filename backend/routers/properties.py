@@ -382,7 +382,7 @@ async def update_property(
     if nearby_town is not None: update_fields["nearby_town"] = nearby_town
     if distance_from_town_km is not None: update_fields["distance_from_town_km"] = distance_from_town_km
     if taluk is not None: update_fields["taluk"] = taluk
-    update_fields["status"] = "ACTIVE"
+    update_fields["status"] = "PENDING_VERIFICATION"
 
     # Process documents
     documents = []

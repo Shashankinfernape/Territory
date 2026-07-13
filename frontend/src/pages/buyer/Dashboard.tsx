@@ -44,7 +44,10 @@ function BuyPanel() {
 
       {!error && unlockedProps.length === 0 ? (
         <div style={{
-          textAlign: 'center', padding: '4rem 1.5rem', background: '#ffffff',
+          textAlign: 'center', padding: '4rem 1.5rem',
+          background: 'rgba(255, 255, 255, 0.75)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           borderRadius: '12px', border: '1px solid rgba(15, 23, 42, 0.06)', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)'
         }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🗺️</div>
@@ -165,7 +168,10 @@ function SellPanel() {
           { label: 'Document Unlocks', value: totalUnlocks, color: '#b8963e' },
         ].map((stat) => (
           <div key={stat.label} style={{
-            background: '#ffffff', borderRadius: '12px', padding: '1.25rem 1.5rem',
+            background: 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderRadius: '12px', padding: '1.25rem 1.5rem',
             border: '1px solid rgba(15, 23, 42, 0.06)', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)'
           }}>
             <p style={{ fontSize: '0.72rem', fontWeight: 800, color: 'rgba(15,23,42,0.45)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.4rem' }}>{stat.label}</p>
@@ -175,7 +181,12 @@ function SellPanel() {
       </div>
 
       {/* Listings Table */}
-      <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid rgba(15, 23, 42, 0.06)', overflow: 'hidden', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)' }}>
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.75)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '12px', border: '1px solid rgba(15, 23, 42, 0.06)', overflow: 'hidden', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.015)'
+      }}>
         <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(15, 23, 42, 0.06)' }}>
           <h3 style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>Property Listings</h3>
         </div>
@@ -243,14 +254,57 @@ function SellPanel() {
   );
 }
 
-// ── Buy Dashboard ──────────────────────────────────────────────────────────────
 export default function UnifiedDashboard() {
   const location = useLocation();
   const isSeller = location.pathname.includes('seller');
+  const [showPendingBanner, setShowPendingBanner] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem('show_seller_pending_msg') === 'true') {
+      setShowPendingBanner(true);
+    }
+  }, []);
+
+  const handleDismissBanner = () => {
+    localStorage.removeItem('show_seller_pending_msg');
+    setShowPendingBanner(false);
+  };
 
   return (
-    <div style={{ background: '#faf9f6', minHeight: '100vh', padding: '3rem 1.5rem' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', padding: '3rem 1.5rem' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        
+        {showPendingBanner && (
+          <div style={{
+            background: 'rgba(184, 150, 62, 0.08)',
+            border: '1px solid #b8963e',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
+            boxShadow: '0 4px 20px rgba(184, 150, 62, 0.05)'
+          }}>
+            <button onClick={handleDismissBanner} style={{
+              position: 'absolute', top: '1rem', right: '1rem',
+              background: 'none', border: 'none', color: '#b8963e',
+              fontSize: '1.25rem', cursor: 'pointer', fontWeight: 'bold'
+            }}>&times;</button>
+            <h3 style={{ margin: 0, color: '#b8963e', fontSize: '1.05rem', fontWeight: 800 }}>Seller Verification Request Submitted!</h3>
+            <p style={{ margin: 0, color: 'rgba(15, 23, 42, 0.7)', fontSize: '0.85rem', lineHeight: 1.4 }}>
+              Our team will review your voter ID/Aadhaar/PAN details and approve your seller request soon. 
+              Until then, you can browse through the catalog and use the platform as a buyer.
+            </p>
+            <div style={{ marginTop: '0.5rem' }}>
+              <Link to="/browse" className="btn-primary" style={{ textDecoration: 'none', padding: '0.4rem 1rem', fontSize: '0.75rem', background: '#b8963e', border: 'none' }} onClick={handleDismissBanner}>
+                Browse Catalog
+              </Link>
+            </div>
+          </div>
+        )}
+
         <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(15,23,42,0.06)', paddingBottom: '1rem' }}>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
             {isSeller ? 'My Listings Panel' : 'My Property Registry'}

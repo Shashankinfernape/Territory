@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export default function NotFound() {
   return (
-    <div className="fade-in" style={{ minHeight: '80vh', backgroundColor: '#f4f4f4', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', paddingLeft: '1rem', paddingRight: '1rem' }}>
+    <div className="fade-in" style={{ minHeight: '80vh', backgroundColor: 'transparent', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', paddingLeft: '1rem', paddingRight: '1rem' }}>
       <div style={{ maxWidth: '400px', margin: '0 auto' }}>
         <h1 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '6rem', fontWeight: 600, color: '#e5e7eb', margin: 0, letterSpacing: '0.01em', lineHeight: 1 }}>
           404

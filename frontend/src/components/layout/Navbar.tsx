@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { clearToken } from '../../lib/api';
+import { api, clearToken } from '../../lib/api';
 import { useState, useEffect, useRef } from 'react';
 import { auth } from '../../lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -14,7 +14,31 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [adminNotifications, setAdminNotifications] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (role === 'ADMIN') {
+      const fetchAdminStats = async () => {
+        try {
+          const res = await api.get('/admin/stats');
+          const count = (res.data.pending_properties || 0) + (res.data.pending_sellers || 0);
+          setAdminNotifications(count);
+        } catch (e) {
+          console.error("Failed to fetch admin notifications");
+        }
+      };
+      fetchAdminStats();
+
+      const interval = setInterval(fetchAdminStats, 10000);
+      window.addEventListener('admin-notifications-update', fetchAdminStats);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('admin-notifications-update', fetchAdminStats);
+      };
+    }
+  }, [role]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -96,8 +120,13 @@ export default function Navbar() {
               Home
             </Link>
             <Link to="/browse" className={`nav-menu-link${isActive('/browse') ? ' active' : ''}`}>
-              Browse
+              Buy
             </Link>
+            {!loggedIn && (
+              <Link to="/sell-guide" className={`nav-menu-link${isActive('/sell-guide') ? ' active' : ''}`}>
+                Sell
+              </Link>
+            )}
             <Link to="/map" className={`nav-menu-link${isActive('/map') ? ' active' : ''}`}>
               Map View
             </Link>
@@ -111,10 +140,10 @@ export default function Navbar() {
                 Wishlist
               </Link>
             )}
-            <Link to="/help" className="nav-menu-link">
+            <Link to="/help" className={`nav-menu-link${isActive('/help') ? ' active' : ''}`}>
               Help
             </Link>
-            <Link to="/contact" className="nav-menu-link">
+            <Link to="/contact" className={`nav-menu-link${isActive('/contact') ? ' active' : ''}`}>
               Contact
             </Link>
           </div>
@@ -139,41 +168,69 @@ export default function Navbar() {
                   </svg>
                 </Link>
 
+                {role === 'ADMIN' && (
+                  <Link to="/dashboard/admin" className="nav-link-item" title="Admin Notifications" style={{
+                    width: '32px', height: '32px', borderRadius: '50%', position: 'relative',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: '1px solid #e5e7eb', textDecoration: 'none',
+                    background: 'transparent', transition: 'background 0.15s ease',
+                    boxSizing: 'border-box'
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    {adminNotifications > 0 && (
+                      <span style={{
+                        position: 'absolute', top: '-4px', right: '-4px',
+                        background: '#ff3b30', color: '#fff', fontSize: '0.6rem',
+                        fontWeight: 800, width: '16px', height: '16px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        borderRadius: '50%', border: '2px solid #fff'
+                      }}>
+                        {adminNotifications > 9 ? '9+' : adminNotifications}
+                      </span>
+                    )}
+                  </Link>
+                )}
+
                 {/* Sell Land pill — always visible for logged-in users, goes directly to upload form */}
-                 <Link
-                   to="/dashboard/seller/upload"
-                   style={{
-                     display: 'inline-flex',
-                     alignItems: 'center',
-                     justifyContent: 'center',
-                     gap: '0.25rem',
-                     background: '#ffffff',
-                     color: '#101010',
-                     border: '3.5px solid',
-                     borderTopColor: '#6b7280',
-                     borderRightColor: '#374151',
-                     borderBottomColor: '#101010',
-                     borderLeftColor: '#898989',
-                     borderRadius: '9999px',
-                     height: '32px',
-                     padding: '0 0.85rem',
-                     boxSizing: 'border-box',
-                     fontFamily: "'Inter', sans-serif",
-                     fontSize: '0.74rem',
-                     fontWeight: 900,
-                     textTransform: 'uppercase',
-                     letterSpacing: '0.08em',
-                     textDecoration: 'none',
-                     transition: 'transform 0.1s ease',
-                     outline: 'none',
-                     WebkitTapHighlightColor: 'transparent'
-                   }}
-                   onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
-                   onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-                 >
-                   <span style={{ fontSize: '0.9rem', fontWeight: 900 }}>+</span>
-                   <span>Sell</span>
-                 </Link>
+                {(role === 'SELLER' || role === 'ADMIN') && (
+                  <Link
+                    to="/dashboard/seller/upload"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.25rem',
+                      background: '#ffffff',
+                      color: '#101010',
+                      border: '3.5px solid',
+                      borderTopColor: '#6b7280',
+                      borderRightColor: '#374151',
+                      borderBottomColor: '#101010',
+                      borderLeftColor: '#898989',
+                      borderRadius: '9999px',
+                      height: '32px',
+                      padding: '0 0.85rem',
+                      boxSizing: 'border-box',
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '0.74rem',
+                      fontWeight: 900,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                      textDecoration: 'none',
+                      transition: 'transform 0.1s ease',
+                      outline: 'none',
+                      WebkitTapHighlightColor: 'transparent'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                  >
+                    <span style={{ fontSize: '0.9rem', fontWeight: 900 }}>+</span>
+                    <span>Sell</span>
+                  </Link>
+                )}
 
                 <div style={{ position: 'relative' }}>
                   <div
@@ -225,6 +282,7 @@ export default function Navbar() {
                       <Link to="/browse" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Browse Listings</Link>
                       <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>My Dashboard</Link>
                       <Link to="/help" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Help Center</Link>
+                      <Link to="/settings" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Settings</Link>
                       <Link to="/contact" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#242424', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Contact Support</Link>
                       <div style={{ height: '1px', background: '#f4f4f4', margin: '0.3rem 0' }} />
                       <button onClick={handleLogout} style={{ width: '100%', padding: '0.55rem 0.8rem', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 500, fontSize: '0.8125rem', textAlign: 'left', cursor: 'pointer', borderRadius: '8px', fontFamily: 'inherit' }}>Logout</button>
@@ -234,31 +292,31 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link to="/browse" style={{
-                  fontSize: '0.875rem', fontWeight: 500, color: '#4b5563',
-                  textDecoration: 'none', transition: 'color 0.2s ease',
-                  padding: '0.35rem 0.65rem', borderRadius: '8px'
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.color = '#101010'; e.currentTarget.style.background = 'rgba(15,23,42,0.05)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = '#4b5563'; e.currentTarget.style.background = 'transparent'; }}>
-                  Buy
-                </Link>
-                <Link to="/sell-guide" style={{
-                  fontSize: '0.875rem', fontWeight: 500, color: '#4b5563',
-                  textDecoration: 'none', transition: 'color 0.2s ease',
-                  padding: '0.35rem 0.65rem', borderRadius: '8px'
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.color = '#101010'; e.currentTarget.style.background = 'rgba(15,23,42,0.05)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = '#4b5563'; e.currentTarget.style.background = 'transparent'; }}>
-                  Sell
-                </Link>
-                <div style={{ width: '1px', height: '16px', background: '#e5e7eb' }} />
                 <Link to="/login" state={{ mode: 'login' }} style={{ fontSize: '0.875rem', fontWeight: 500, color: '#4b5563', textDecoration: 'none' }}>Sign in</Link>
                 <Link to="/login" state={{ mode: 'register' }} className="btn-pill-dark" style={{ textDecoration: 'none' }}>
                   <span>Get started</span>
                 </Link>
               </>
             )}
+
+            {/* Settings Icon (Desktop) */}
+            <Link to="/settings" title="Settings" style={{
+              width: '32px', height: '32px', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '1px solid #e5e7eb', textDecoration: 'none',
+              background: isActive('/settings') ? '#f4f4f4' : 'transparent',
+              transition: 'background 0.15s ease, transform 0.1s ease',
+              boxSizing: 'border-box',
+              marginLeft: '0.25rem'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'rotate(30deg) scale(1.05)'; e.currentTarget.style.background = '#f9fafb'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'rotate(0deg) scale(1)'; e.currentTarget.style.background = isActive('/settings') ? '#f4f4f4' : 'transparent'; }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={isActive('/settings') ? '#101010' : '#4b5563'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -279,7 +337,7 @@ export default function Navbar() {
             <div className="mobile-dropdown-menu" style={{
               position: 'absolute', top: 'calc(100% + 10px)', right: '1.25rem', left: '1.25rem',
               background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px',
-              boxShadow: 'rgba(36,36,36,0.1) 0px 10px 20px -5px', zIndex: 1000, padding: '0.5rem',
+              boxShadow: 'rgba(36,36,36,0.1) 0px 10px 20px -5px', zIndex: 9999, padding: '0.5rem',
               display: 'flex', flexDirection: 'column'
             }}>
               {loggedIn && (
@@ -289,38 +347,42 @@ export default function Navbar() {
               )}
               <Link to="/" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Home</Link>
               <Link to="/browse" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Browse All</Link>
+              <Link to="/map" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Map Search</Link>
               {loggedIn && (
                 <>
                   <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>My Dashboard</Link>
                   <Link to="/wishlist" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Wishlist</Link>
-                  <Link
-                    to="/dashboard/seller/upload"
-                    onClick={() => setMobileMenuOpen(false)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.35rem',
-                      margin: '0.5rem 0.25rem',
-                      padding: '0.65rem 1.25rem',
-                      background: '#ffffff',
-                      color: '#101010',
-                      border: '4px solid #101010',
-                      borderRadius: '9999px',
-                      textDecoration: 'none',
-                      fontSize: '0.85rem',
-                      fontWeight: 900,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.08em',
-                      textAlign: 'center'
-                    }}
-                  >
-                    <span style={{ fontSize: '1rem', fontWeight: 900 }}>+</span>
-                    <span>Sell Land</span>
-                  </Link>
+                  {(role === 'SELLER' || role === 'ADMIN') && (
+                    <Link
+                      to="/dashboard/seller/upload"
+                      onClick={() => setMobileMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.35rem',
+                        margin: '0.5rem 0.25rem',
+                        padding: '0.65rem 1.25rem',
+                        background: '#ffffff',
+                        color: '#101010',
+                        border: '4px solid #101010',
+                        borderRadius: '9999px',
+                        textDecoration: 'none',
+                        fontSize: '0.85rem',
+                        fontWeight: 900,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08em',
+                        textAlign: 'center'
+                      }}
+                    >
+                      <span style={{ fontSize: '1rem', fontWeight: 900 }}>+</span>
+                      <span>Sell Land</span>
+                    </Link>
+                  )}
                 </>
               )}
               <Link to="/help" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Help Center</Link>
+              <Link to="/settings" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Settings</Link>
               <Link to="/contact" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#242424', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500, borderRadius: '8px' }}>Contact Support</Link>
               
               <div style={{ height: '1px', background: '#e5e7eb', margin: '0.5rem 0' }} />
@@ -330,6 +392,7 @@ export default function Navbar() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.5rem' }}>
                   <Link to="/browse" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0.5rem', color: '#242424', textDecoration: 'none', fontWeight: 500 }}>Buy Land</Link>
+                  <Link to="/map" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0.5rem', color: '#242424', textDecoration: 'none', fontWeight: 500 }}>Map Search</Link>
                   <Link to="/sell-guide" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0.5rem', color: '#242424', textDecoration: 'none', fontWeight: 500 }}>Sell Land</Link>
                   <div style={{ height: '1px', background: '#e5e7eb', margin: '0.25rem 0' }} />
                   <Link to="/login" state={{ mode: 'login' }} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', textAlign: 'center', padding: '0.75rem', color: '#4b5563', textDecoration: 'none', fontWeight: 500, border: '1px solid #e5e7eb', borderRadius: '8px' }}>Sign in</Link>

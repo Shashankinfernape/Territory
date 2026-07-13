@@ -15,6 +15,7 @@ async def get_platform_stats(db=Depends(get_db), current_admin=Depends(get_curre
     active_properties = await db.properties.count_documents({"status": "ACTIVE"})
     pending_properties = await db.properties.count_documents({"status": "PENDING_VERIFICATION"})
     total_transactions = await db.transactions.count_documents({})
+    pending_sellers = await db.users.count_documents({"role": "USER", "kyc_details.status": "PENDING"})
 
     # Aggregate total revenue from all successful transactions.
     revenue_pipeline = [
@@ -29,6 +30,7 @@ async def get_platform_stats(db=Depends(get_db), current_admin=Depends(get_curre
         "total_properties": total_properties,
         "active_properties": active_properties,
         "pending_properties": pending_properties,
+        "pending_sellers": pending_sellers,
         "total_transactions": total_transactions,
         "total_revenue": total_revenue,
     }
@@ -74,10 +76,8 @@ async def get_all_properties(db=Depends(get_db), current_admin=Depends(get_curre
 
 @router.get("/transactions", response_model=List[Dict[str, Any]])
 async def get_all_transactions(db=Depends(get_db), current_admin=Depends(get_current_admin)):
-    """List all transactions with buyer phone and property city (via lookup)."""
     pipeline = [
         {"$sort": {"created_at": -1}},
-        # Join buyer info
         {
             "$lookup": {
                 "from": "users",
@@ -89,7 +89,6 @@ async def get_all_transactions(db=Depends(get_db), current_admin=Depends(get_cur
                 "as": "buyer_info",
             }
         },
-        # Join property info
         {
             "$lookup": {
                 "from": "properties",
@@ -101,19 +100,36 @@ async def get_all_transactions(db=Depends(get_db), current_admin=Depends(get_cur
                 "as": "property_info",
             }
         },
+        {
+            "$lookup": {
+                "from": "users",
+                "let": {"seller_id_str": {"$arrayElemAt": ["$property_info.seller_id", 0]}},
+                "pipeline": [
+                    {"$addFields": {"id_str": {"$toString": "$_id"}}},
+                    {"$match": {"$expr": {"$eq": ["$id_str", "$$seller_id_str"]}}},
+                ],
+                "as": "seller_info",
+            }
+        }
     ]
 
     results = []
     async for doc in db.transactions.aggregate(pipeline):
         buyer = doc["buyer_info"][0] if doc.get("buyer_info") else {}
         prop = doc["property_info"][0] if doc.get("property_info") else {}
+        seller = doc["seller_info"][0] if doc.get("seller_info") else {}
         results.append({
             "id": str(doc["_id"]),
             "buyer_id": doc["buyer_id"],
             "buyer_phone": buyer.get("phone_number", "Unknown"),
+            "buyer_name": buyer.get("full_name") or "Unknown",
             "property_id": doc["property_id"],
             "property_city": prop.get("city", "Unknown"),
             "property_district": prop.get("district", ""),
+            "property_type": prop.get("type", ""),
+            "seller_id": prop.get("seller_id", "Unknown"),
+            "seller_phone": seller.get("phone_number", "Unknown"),
+            "seller_name": seller.get("full_name") or "Unknown",
             "amount": doc.get("amount", 0),
             "status": doc.get("status", ""),
             "created_at": doc.get("created_at"),
@@ -189,6 +205,36 @@ async def delete_property(
     await db.transactions.delete_many({"property_id": property_id})
 
     return {"message": "Property deleted successfully"}
+
+
+@router.put("/users/{user_id}/verify-seller")
+async def verify_seller(
+    user_id: str,
+    db=Depends(get_db),
+    current_admin=Depends(get_current_admin)
+):
+    user = await db.users.find_one({"_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if user.get("role") == "SELLER" and user.get("kyc_details", {}).get("status") == "APPROVED":
+        return {"message": "User is already an approved seller"}
+
+    # Update role to SELLER and status to APPROVED
+    result = await db.users.update_one(
+        {"_id": user_id},
+        {
+            "$set": {
+                "role": "SELLER",
+                "kyc_details.status": "APPROVED"
+            }
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="Failed to update user")
+        
+    return {"message": "Seller account approved successfully"}
 
 
 @router.delete("/users/{user_id}")

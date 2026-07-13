@@ -149,7 +149,7 @@ class PropertyUpdate(BaseModel):
 class PropertyInDB(MongoInsertBase, PropertyCreate):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     seller_id: str
-    status: str = "ACTIVE"
+    status: str = "PENDING_VERIFICATION"
     view_count: int = 0
     created_at: datetime = Field(default_factory=datetime.utcnow)
 

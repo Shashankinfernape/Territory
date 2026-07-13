@@ -8,6 +8,8 @@ import type { Property } from '../../lib/types';
 import { getPropertyImageUrl } from '../../lib/types';
 import { TAMIL_NADU_GEOJSON as OFFLINE_GEOJSON } from '../../components/common/tamilnadu_geojson';
 import TAMIL_NADU_CITY_DIVISIONS from '../../components/common/tamilnadu_city_divisions.json';
+import { useSettings } from '../../contexts/SettingsContext';
+import GlareHover from '../../components/ui/GlareHover';
 
 // Styled Google Maps Tile Server (Hides all roads, highways, and place labels)
 const MAP_TILES = 'https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t:0|s.e:l|p.v:off,s.t:3|p.v:off';
@@ -437,6 +439,9 @@ export default function MapSearch() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
+  const [mobileView, setMobileView] = useState<'map' | 'list'>('map');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const { animationSetting } = useSettings();
 
   // Wishlist states
   const [wishlist, setWishlist] = useState<string[]>([]);
@@ -479,6 +484,11 @@ export default function MapSearch() {
   const [filterType, setFilterType] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  
+  const [visibleCount, setVisibleCount] = useState(12);
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [searchTerm, filterType, minPrice, maxPrice, selectedDistrict, selectedCity]);
 
   // Fetch updated 38-district GeoJSON from GitHub raw link (CORS enabled)
   useEffect(() => {
@@ -576,6 +586,7 @@ export default function MapSearch() {
 
     setSelectedDistrict(districtName);
     setSelectedCity(null);
+    setMobileView('list');
     
     // Zoom/pan map dynamically to that district in our loaded GeoJSON
     if (geoJsonData) {
@@ -728,13 +739,14 @@ export default function MapSearch() {
         setSelectedDistrict(distName);
         setSelectedCity(null);
         setSelectedBounds(e.target.getBounds());
+        setMobileView('list');
       }
     });
 
   };
 
   return (
-    <div className="map-search-page-container" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', overflow: 'hidden', background: '#f0f0ef' }}>
+    <div className="map-search-page-container" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', overflow: 'hidden', background: 'transparent' }}>
       <style>{`
         /* ── FILTER BAR ── */
         .filters-container::-webkit-scrollbar { display: none !important; }
@@ -745,7 +757,9 @@ export default function MapSearch() {
           align-items: center;
           gap: 0.35rem;
           padding: 0.42rem 1rem;
-          background: #ffffff;
+          background: rgba(255, 255, 255, 0.45);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
           border: 1.5px solid #e4e4e3;
           border-radius: 99px;
           font-size: 0.8rem;
@@ -813,7 +827,9 @@ export default function MapSearch() {
         .listing-card {
           display: flex;
           flex-direction: column;
-          background: #ffffff;
+          background: rgba(255, 255, 255, 0.75);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           border-radius: 12px;
           border: 1px solid #e5e7eb;
           overflow: hidden;
@@ -855,31 +871,69 @@ export default function MapSearch() {
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
           .map-search-page-container {
-            height: auto !important;
-            overflow-y: visible !important;
+            height: calc(100vh - 60px) !important;
+            overflow: hidden !important;
           }
           .filters-container {
             padding: 0.5rem 0.875rem !important;
+            flex-wrap: nowrap !important;
+            overflow-x: hidden !important;
+            justify-content: space-between !important;
+            background: rgba(255, 255, 255, 0.8) !important;
+          }
+          .filters-container > .search-pill-wrap {
+            width: 100% !important;
+            flex: 1 !important;
+          }
+          .filters-container > .search-pill-wrap > input {
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .filters-container .desktop-only-filter {
+            display: none !important;
+          }
+          .mobile-filter-btn {
+            display: flex !important;
           }
           .split-view-container {
             grid-template-columns: 1fr !important;
-            height: auto !important;
-            overflow-y: visible !important;
-            padding: 0.625rem !important;
-            gap: 0.625rem !important;
+            grid-template-rows: 1fr !important;
+            height: 100% !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+            gap: 0 !important;
+            position: relative !important;
           }
           .map-card-col {
-            height: 500px !important;
-            order: 1 !important;
+            position: absolute !important;
+            top: 0; left: 0; right: 0; bottom: 0;
+            height: 100% !important;
+            z-index: 1 !important;
+            border-radius: 0 !important;
+            opacity: var(--map-opacity, 1) !important;
+            pointer-events: var(--map-pointer, auto) !important;
+            transition: opacity 0.3s ease !important;
           }
           .listings-card-col {
-            height: auto !important;
-            overflow-y: visible !important;
-            order: 2 !important;
+            position: absolute !important;
+            top: 0; left: 0; right: 0; bottom: 0;
+            height: 100% !important;
+            overflow-y: auto !important;
+            z-index: 2 !important;
+            background: rgba(250, 250, 250, 0.95) !important;
+            backdrop-filter: blur(16px) !important;
+            border-top: none !important;
+            opacity: var(--list-opacity, 0) !important;
+            pointer-events: var(--list-pointer, none) !important;
+            transition: opacity 0.3s ease !important;
+            padding-bottom: 5rem !important;
           }
           .listings-grid {
             grid-template-columns: 1fr !important;
             gap: 1rem !important;
+          }
+          .mobile-view-toggle {
+            display: flex !important;
           }
         }
       `}</style>
@@ -887,15 +941,16 @@ export default function MapSearch() {
 
       {/* ── TOP FILTER BAR ── */}
       <div className="filters-container" style={{
-        background: '#ffffff',
-        borderBottom: '1px solid #e8e8e7',
+        background: 'rgba(255, 255, 255, 0.25)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
         padding: '0.6rem 1.25rem',
         display: 'flex',
         alignItems: 'center',
         gap: '0.5rem',
-        zIndex: 50,
-        overflowX: 'auto',
-        whiteSpace: 'nowrap'
+        zIndex: 900,
+        overflowX: 'auto'
       }}>
         {/* Search */}
         <div className="search-pill-wrap">
@@ -912,11 +967,23 @@ export default function MapSearch() {
           />
         </div>
 
-        <div className="filter-divider" />
+        {/* Mobile Filters Toggle Button */}
+        <button
+          className="mobile-filter-btn filter-pill"
+          onClick={() => setMobileFiltersOpen(true)}
+          style={{ display: 'none', background: '#101010', color: '#fff', border: 'none', padding: '0.5rem 1rem' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+          Filters
+        </button>
+
+        <div className="filter-divider desktop-only-filter" />
 
         {/* District */}
         <select
-          className={`filter-pill filter-pill-select${selectedDistrict ? ' active' : ''}`}
+          className={`filter-pill filter-pill-select desktop-only-filter ${selectedDistrict ? ' active' : ''}`}
           value={selectedDistrict || ''}
           onChange={e => handleDistrictChange(e.target.value)}
         >
@@ -929,7 +996,7 @@ export default function MapSearch() {
         {/* City — only shown when district selected */}
         {selectedDistrict && (
           <select
-            className={`filter-pill filter-pill-select${selectedCity ? ' active' : ''}`}
+            className={`filter-pill filter-pill-select desktop-only-filter ${selectedCity ? ' active' : ''}`}
             value={selectedCity || ''}
             onChange={e => handleCityChange(e.target.value)}
           >
@@ -940,11 +1007,11 @@ export default function MapSearch() {
           </select>
         )}
 
-        <div className="filter-divider" />
+        <div className="filter-divider desktop-only-filter" />
 
         {/* Type */}
         <select
-          className={`filter-pill filter-pill-select${filterType ? ' active' : ''}`}
+          className={`filter-pill filter-pill-select desktop-only-filter ${filterType ? ' active' : ''}`}
           value={filterType}
           onChange={e => setFilterType(e.target.value)}
         >
@@ -956,12 +1023,12 @@ export default function MapSearch() {
           <option>Commercial Plot</option>
         </select>
 
-        <div className="filter-divider" />
+        <div className="filter-divider desktop-only-filter" />
 
         {/* Price range */}
         <input
           type="number"
-          className="filter-pill"
+          className="filter-pill desktop-only-filter"
           placeholder="Min ₹"
           value={minPrice}
           onChange={e => setMinPrice(e.target.value)}
@@ -969,7 +1036,7 @@ export default function MapSearch() {
         />
         <input
           type="number"
-          className="filter-pill"
+          className="filter-pill desktop-only-filter"
           placeholder="Max ₹"
           value={maxPrice}
           onChange={e => setMaxPrice(e.target.value)}
@@ -979,9 +1046,9 @@ export default function MapSearch() {
         {/* Reset if any active filter */}
         {(selectedDistrict || selectedCity || filterType || minPrice || maxPrice || searchTerm) && (
           <>
-            <div className="filter-divider" />
+            <div className="filter-divider desktop-only-filter" />
             <button
-              className="filter-pill"
+              className="filter-pill desktop-only-filter"
               onClick={() => {
                 handleMapBackgroundClick();
                 setFilterType('');
@@ -989,13 +1056,121 @@ export default function MapSearch() {
                 setMaxPrice('');
                 setSearchTerm('');
               }}
-              style={{ color: '#ef4444', borderColor: '#fca5a5', background: '#fff5f5', fontWeight: 600 }}
+              style={{ color: '#ef4444', borderColor: '#fca5a5', background: 'rgba(254, 226, 226, 0.6)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', fontWeight: 600 }}
             >
               ✕ Clear
             </button>
           </>
         )}
       </div>
+
+      {/* ── MOBILE FULL SCREEN FILTERS MODAL ── */}
+      {mobileFiltersOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(255, 255, 255, 0.98)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '2rem 1.5rem',
+          overflowY: 'auto'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>Filters</h2>
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              style={{ background: '#f3f4f6', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4b5563' }}>Location</label>
+              <select
+                style={{ padding: '0.875rem', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fff', fontSize: '1rem', width: '100%' }}
+                value={selectedDistrict || ''}
+                onChange={e => handleDistrictChange(e.target.value)}
+              >
+                <option value="">All Districts</option>
+                {TAMIL_NADU_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              {selectedDistrict && (
+                <select
+                  style={{ padding: '0.875rem', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fff', fontSize: '1rem', width: '100%', marginTop: '0.5rem' }}
+                  value={selectedCity || ''}
+                  onChange={e => handleCityChange(e.target.value)}
+                >
+                  <option value="">All of {selectedDistrict}</option>
+                  {sortedTaluksList.map(name => <option key={name} value={name}>{name}</option>)}
+                </select>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4b5563' }}>Plot Type</label>
+              <select
+                style={{ padding: '0.875rem', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fff', fontSize: '1rem', width: '100%' }}
+                value={filterType}
+                onChange={e => setFilterType(e.target.value)}
+              >
+                <option value="">All Types</option>
+                <option>Agricultural Land</option>
+                <option>Flat Plot</option>
+                <option>Farm Land</option>
+                <option>Residential Plot</option>
+                <option>Commercial Plot</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4b5563' }}>Price Range</label>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <input
+                  type="number"
+                  placeholder="Min ₹"
+                  value={minPrice}
+                  onChange={e => setMinPrice(e.target.value)}
+                  style={{ flex: 1, padding: '0.875rem', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fff', fontSize: '1rem' }}
+                />
+                <input
+                  type="number"
+                  placeholder="Max ₹"
+                  value={maxPrice}
+                  onChange={e => setMaxPrice(e.target.value)}
+                  style={{ flex: 1, padding: '0.875rem', borderRadius: '12px', border: '1px solid #e5e7eb', background: '#fff', fontSize: '1rem' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 'auto', display: 'flex', gap: '1rem', paddingTop: '2rem' }}>
+            <button
+              onClick={() => {
+                handleMapBackgroundClick();
+                setFilterType('');
+                setMinPrice('');
+                setMaxPrice('');
+                setSearchTerm('');
+                setMobileFiltersOpen(false);
+              }}
+              style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: '#f3f4f6', color: '#374151', fontWeight: 600, border: 'none', fontSize: '1rem' }}
+            >
+              Clear All
+            </button>
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              style={{ flex: 2, padding: '1rem', borderRadius: '12px', background: '#101010', color: '#fff', fontWeight: 600, border: 'none', fontSize: '1rem' }}
+            >
+              Show {filteredProperties.length} Lands
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── SPLIT VIEW CONTAINER ── */}
       <div className="split-view-container" style={{
@@ -1005,8 +1180,12 @@ export default function MapSearch() {
         overflow: 'hidden',
         padding: '0.875rem',
         gap: '0.875rem',
-        background: '#f0f0ef'
-      }}>
+        background: 'transparent',
+        '--map-opacity': mobileView === 'map' ? 1 : 0,
+        '--map-pointer': mobileView === 'map' ? 'auto' : 'none',
+        '--list-opacity': mobileView === 'list' ? 1 : 0,
+        '--list-pointer': mobileView === 'list' ? 'auto' : 'none'
+      } as React.CSSProperties}>
         
         {/* LEFT COLUMN: Map Card */}
         <div className="map-card-col" style={{
@@ -1021,6 +1200,7 @@ export default function MapSearch() {
               center={mapCenter}
               zoom={mapZoom}
               zoomControl={false}
+              attributionControl={false}
               maxBounds={[[5, 68], [24, 88]]} // locks viewport bounds to India space
               minZoom={6}
               style={{ height: '100%', width: '100%' }}
@@ -1221,122 +1401,207 @@ export default function MapSearch() {
               </button>
             </div>
           ) : (
-            <div className="listings-grid">
-              {filteredProperties.map(p => (
-                <Link
-                  key={p.id}
-                  to={`/property/${p.id}`}
-                  className="listing-card"
-                >
-                  {/* Image Container with overlays */}
-                  <div style={{ width: '100%', position: 'relative', aspectRatio: '16/9', background: '#f3f4f6', overflow: 'hidden' }}>
-                    <img
-                      src={getPropertyImageUrl(p)}
-                      alt="land"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                    
-                    {/* Showcase Pill */}
-                    <div style={{
-                      position: 'absolute', top: '0.625rem', left: '0.625rem',
-                      background: '#ffffff',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-                      borderRadius: '4px', padding: '3px 8px',
-                      fontSize: '0.625rem', fontWeight: 800, color: '#111827',
-                      letterSpacing: '0.03em', textTransform: 'uppercase'
-                    }}>
-                      Active
-                    </div>
-
-                    {/* Wishlist Heart Overlay */}
-                    <button
-                      onClick={(e) => toggleWishlist(e, p.id)}
-                      disabled={togglingId === p.id}
-                      style={{
-                        position: 'absolute', top: '0.625rem', right: '0.625rem',
-                        background: 'transparent',
-                        border: 'none', cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: 0,
-                        transition: 'transform 0.15s ease',
-                        outline: 'none',
-                        zIndex: 10
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
-                      onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+            <>
+              <div className="listings-grid">
+                {filteredProperties.slice(0, visibleCount).map(p => (
+                  <GlareHover
+                    key={p.id}
+                    disabled={animationSetting === 'minimal'}
+                    background="rgba(255, 255, 255, 0.75)"
+                    glareColor="#ffffff"
+                    glareOpacity={0.25}
+                    glareSize={200}
+                    borderRadius="12px"
+                    className="listing-card"
+                  >
+                    <Link
+                      to={`/property/${p.id}`}
+                      style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}
                     >
-                      <svg
-                        width="26"
-                        height="26"
-                        viewBox="0 0 24 24"
-                        style={{
-                          filter: 'drop-shadow(0 1.5px 3.5px rgba(0,0,0,0.7))',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        <path
-                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                          fill={wishlist.includes(p.id) ? '#101010' : 'none'}
-                          stroke="#ffffff"
-                          strokeWidth="2.2"
-                        />
-                      </svg>
-                    </button>
-
-                    {/* Zillow style pagination dots */}
-                    <div style={{
-                      position: 'absolute', bottom: '0.625rem', left: '50%', transform: 'translateX(-50%)',
-                      display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.22)', padding: '3px 6px', borderRadius: '99px'
-                    }}>
-                      {[1, 2, 3, 4, 5].map((dot, i) => (
-                        <div key={dot} style={{
-                          width: '5px', height: '5px', borderRadius: '50%',
-                          background: i === 0 ? '#ffffff' : 'rgba(255,255,255,0.5)'
-                        }} />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Details Body */}
-                  <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: '#ffffff', minHeight: '85px' }}>
-                    <div>
-                      {/* Price & Options row */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <p style={{ margin: 0, fontSize: '1.0625rem', fontWeight: 800, color: '#111827', fontFamily: "'Poppins', sans-serif" }}>
-                          {formatPrice(p.price)}
-                        </p>
-                        {/* Three dots icon */}
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: 'pointer' }}>
-                          <circle cx="12" cy="12" r="1" />
-                          <circle cx="19" cy="12" r="1" />
-                          <circle cx="5" cy="12" r="1" />
-                        </svg>
+                      {/* Image Container with overlays */}
+                    <div style={{ width: '100%', position: 'relative', aspectRatio: '16/9', background: '#f3f4f6', overflow: 'hidden' }}>
+                      <img
+                        src={getPropertyImageUrl(p)}
+                        alt="land"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      
+                      {/* Showcase Pill */}
+                      <div style={{
+                        position: 'absolute', top: '0.625rem', left: '0.625rem',
+                        background: '#ffffff',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+                        borderRadius: '4px', padding: '3px 8px',
+                        fontSize: '0.625rem', fontWeight: 800, color: '#111827',
+                        letterSpacing: '0.03em', textTransform: 'uppercase'
+                      }}>
+                        Active
                       </div>
 
-                      {/* Property specs row */}
-                      <p style={{ margin: '0.15rem 0 0', fontSize: '0.72rem', color: '#1f2937', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {p.area} {p.area_unit.replace('_', ' ')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> {p.type.replace(' Land', '').replace(' Plot', '')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> <span style={{ color: '#16a34a' }}>Deed</span>
-                      </p>
+                      {/* Wishlist Heart Overlay */}
+                      <button
+                        onClick={(e) => toggleWishlist(e, p.id)}
+                        disabled={togglingId === p.id}
+                        style={{
+                          position: 'absolute', top: '0.625rem', right: '0.625rem',
+                          background: 'transparent',
+                          border: 'none', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: 0,
+                          transition: 'transform 0.15s ease',
+                          outline: 'none',
+                          zIndex: 10
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
+                        onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                      >
+                        <svg
+                          width="26"
+                          height="26"
+                          viewBox="0 0 24 24"
+                          style={{
+                            filter: 'drop-shadow(0 1.5px 3.5px rgba(0,0,0,0.7))',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                            fill={wishlist.includes(p.id) ? '#101010' : 'none'}
+                            stroke="#ffffff"
+                            strokeWidth="2.2"
+                          />
+                        </svg>
+                      </button>
 
-                      {/* Address row */}
-                      <p style={{ margin: '0.1rem 0 0', fontSize: '0.72rem', color: '#4b5563', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                        {p.city}{p.district ? `, ${p.district}` : ''}
-                      </p>
+                      {/* Zillow style pagination dots */}
+                      <div style={{
+                        position: 'absolute', bottom: '0.625rem', left: '50%', transform: 'translateX(-50%)',
+                        display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.22)', padding: '3px 6px', borderRadius: '99px'
+                      }}>
+                        {[1, 2, 3, 4, 5].map((dot, i) => (
+                          <div key={dot} style={{
+                            width: '5px', height: '5px', borderRadius: '50%',
+                            background: i === 0 ? '#ffffff' : 'rgba(255,255,255,0.5)'
+                          }} />
+                        ))}
+                      </div>
                     </div>
 
-                    {/* Broker/Seller name */}
-                    <div style={{ marginTop: '0.28rem' }}>
-                      <p style={{ margin: 0, fontSize: '0.6rem', color: '#9ca3af', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                        Territory Premium
-                      </p>
+                    {/* Details Body */}
+                    <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: 'transparent', minHeight: '85px' }}>
+                      <div>
+                        {/* Price & Options row */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <p style={{ margin: 0, fontSize: '1.0625rem', fontWeight: 800, color: '#111827', fontFamily: "'Poppins', sans-serif" }}>
+                            {formatPrice(p.price)}
+                          </p>
+                          {/* Three dots icon */}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: 'pointer' }}>
+                            <circle cx="12" cy="12" r="1" />
+                            <circle cx="19" cy="12" r="1" />
+                            <circle cx="5" cy="12" r="1" />
+                          </svg>
+                        </div>
+
+                        {/* Property specs row */}
+                        <p style={{ margin: '0.15rem 0 0', fontSize: '0.72rem', color: '#1f2937', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {p.area} {p.area_unit.replace('_', ' ')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> {p.type.replace(' Land', '').replace(' Plot', '')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> <span style={{ color: '#16a34a' }}>Deed</span>
+                        </p>
+
+                        {/* Address row */}
+                        <p style={{ margin: '0.1rem 0 0', fontSize: '0.72rem', color: '#4b5563', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                          {p.city}{p.district ? `, ${p.district}` : ''}
+                        </p>
+                      </div>
+
+                      {/* Broker/Seller name */}
+                      <div style={{ marginTop: '0.28rem' }}>
+                        <p style={{ margin: 0, fontSize: '0.6rem', color: '#9ca3af', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                          Territory Premium
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    </Link>
+                  </GlareHover>
+                ))}
+              </div>
+              
+              {visibleCount < filteredProperties.length && (
+                <div style={{ textAlign: 'center', margin: '2rem 0' }}>
+                  <button 
+                    onClick={() => setVisibleCount(prev => prev + 12)}
+                    style={{
+                      padding: '0.6rem 1.5rem',
+                      background: 'rgba(255,255,255,0.75)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '99px',
+                      color: '#101010',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                    }}
+                  >
+                    Load More Lands
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
+      
+      {/* ── MOBILE VIEW TOGGLE ── */}
+      <div className="mobile-view-toggle" style={{
+        display: 'none',
+        position: 'fixed',
+        bottom: '1.5rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 2000,
+        background: '#101010',
+        borderRadius: '99px',
+        padding: '4px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        alignItems: 'center',
+        gap: '4px'
+      }}>
+        <button
+          onClick={() => setMobileView('map')}
+          style={{
+            background: mobileView === 'map' ? '#374151' : 'transparent',
+            color: mobileView === 'map' ? '#ffffff' : '#9ca3af',
+            border: 'none',
+            padding: '0.5rem 1rem',
+            borderRadius: '99px',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          Map
+        </button>
+        <button
+          onClick={() => setMobileView('list')}
+          style={{
+            background: mobileView === 'list' ? '#374151' : 'transparent',
+            color: mobileView === 'list' ? '#ffffff' : '#9ca3af',
+            border: 'none',
+            padding: '0.5rem 1rem',
+            borderRadius: '99px',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          List
+        </button>
+      </div>
+
     </div>
   );
 }
