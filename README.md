@@ -216,10 +216,14 @@ npm run dev                    # Runs at http://localhost:5173
 
 ### What Works
 - **Firebase Auth & JWT Verification:** Secure signup/login using Firebase with JWT validation via FastAPI.
-- **Seller Verification (KYC) Workflow:** 
+- **Seller Verification (KYC) & Property Verification Workflows:** 
   - Mandatory Voter ID/Aadhaar/PAN details for registration.
   - Initial role set to `USER` with a custom `show_seller_pending_msg` flag.
   - Dynamic dashboard warning banner instructing the user that approval is pending, allowing them to browse listings as a buyer in the meantime.
+  - Newly uploaded properties default to `status="PENDING_VERIFICATION"` and must be approved by the admin.
+  - Edited properties automatically revert to `PENDING_VERIFICATION` status to ensure updated details and documents are re-verified.
+- **Automatic Ownership Unlock:**
+  - Logged-in sellers automatically unlock contact and document details for their own listed properties, bypassing the payment simulation.
 - **Admin Dashboard Modules:**
   - **Overview Stats:** Displays key metrics with renamed panels like "Sellers Awaiting Approval".
   - **New Seller Approvals:** Specific tab listing only pending sellers with full search and instant "Review KYC & Approve" / "Delete" actions.
