@@ -47,7 +47,7 @@ const CORNERS: React.CSSProperties[] = [
 
 /* ─── Subcomponents ──────────────────────────────────────────────────────── */
 
-function Bar({ id, delay, h, w, flagship }: { id: string; delay: number; h: number; w: number; flagship?: boolean }) {
+function Bar({ delay, h, w, flagship }: { id: string; delay: number; h: number; w: number; flagship?: boolean }) {
   return (
     <motion.div
       initial={{ scaleY: 0, opacity: 0 }}

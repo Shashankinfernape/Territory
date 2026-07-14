@@ -137,7 +137,8 @@ const Shuffle: React.FC<ShuffleProps> = ({
         const rolls = Math.max(1, Math.floor(shuffleTimes));
         const rand = (set: string) => set.charAt(Math.floor(Math.random() * set.length)) || '';
 
-        chars.forEach(ch => {
+        chars.forEach(elementNode => {
+          const ch = elementNode as HTMLElement;
           const parent = ch.parentElement;
           if (!parent) return;
           const rect = ch.getBoundingClientRect();
@@ -258,8 +259,8 @@ const Shuffle: React.FC<ShuffleProps> = ({
           repeatDelay: loop ? loopDelay : 0,
           onRepeat: () => {
             if (scrambleCharset) randomizeScrambles();
-            if (isVertical) gsap.set(strips, { y: (i, t) => parseFloat((t as HTMLElement).getAttribute('data-start-y') || '0') });
-            else gsap.set(strips, { x: (i, t) => parseFloat((t as HTMLElement).getAttribute('data-start-x') || '0') });
+            if (isVertical) gsap.set(strips, { y: (_i, t) => parseFloat((t as HTMLElement).getAttribute('data-start-y') || '0') });
+            else gsap.set(strips, { x: (_i, t) => parseFloat((t as HTMLElement).getAttribute('data-start-x') || '0') });
             onShuffleComplete?.();
           },
           onComplete: () => {
@@ -275,8 +276,8 @@ const Shuffle: React.FC<ShuffleProps> = ({
 
         const addTween = (targets: HTMLElement[], at: number | string) => {
           const vars: gsap.TweenVars = { duration, ease, force3D: true, stagger: animationMode === 'evenodd' ? stagger : 0 };
-          if (isVertical) vars.y = (i: number, t: Element) => parseFloat((t as HTMLElement).getAttribute('data-final-y') || '0');
-          else vars.x = (i: number, t: Element) => parseFloat((t as HTMLElement).getAttribute('data-final-x') || '0');
+          if (isVertical) vars.y = (_i: number, t: Element) => parseFloat((t as HTMLElement).getAttribute('data-final-y') || '0');
+          else vars.x = (_i: number, t: Element) => parseFloat((t as HTMLElement).getAttribute('data-final-x') || '0');
           tl.to(targets, vars, at);
           if (colorFrom && colorTo) tl.to(targets, { color: colorTo, duration, ease }, at);
         };

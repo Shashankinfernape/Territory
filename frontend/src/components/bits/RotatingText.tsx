@@ -38,7 +38,7 @@ interface RotatingTextProps {
   mainClassName?: string;
   splitLevelClassName?: string;
   elementLevelClassName?: string;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>((props, ref) => {
@@ -76,24 +76,24 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>((props, ref)
   const elements = useMemo<WordObj[]>(() => {
     const currentText = texts[currentTextIndex];
     if (splitBy === 'characters') {
-      return currentText.split(' ').map((word, i, arr) => ({
+      return currentText.split(' ').map((word: string, i: number, arr: string[]) => ({
         characters: splitIntoCharacters(word),
         needsSpace: i !== arr.length - 1,
       }));
     }
     if (splitBy === 'words') {
-      return currentText.split(' ').map((word, i, arr) => ({
+      return currentText.split(' ').map((word: string, i: number, arr: string[]) => ({
         characters: [word],
         needsSpace: i !== arr.length - 1,
       }));
     }
     if (splitBy === 'lines') {
-      return currentText.split('\n').map((line, i, arr) => ({
+      return currentText.split('\n').map((line: string, i: number, arr: string[]) => ({
         characters: [line],
         needsSpace: i !== arr.length - 1,
       }));
     }
-    return currentText.split(splitBy as string).map((part, i, arr) => ({
+    return currentText.split(splitBy as string).map((part: string, i: number, arr: string[]) => ({
       characters: [part],
       needsSpace: i !== arr.length - 1,
     }));
