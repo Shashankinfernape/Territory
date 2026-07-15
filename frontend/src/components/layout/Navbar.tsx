@@ -35,6 +35,17 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [adminNotifications, setAdminNotifications] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleBlurInput = () => {
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
+    };
+    window.addEventListener('blur-mobile-search', handleBlurInput);
+    return () => window.removeEventListener('blur-mobile-search', handleBlurInput);
+  }, []);
 
   useEffect(() => {
     if (role === 'ADMIN') {
@@ -112,33 +123,39 @@ export default function Navbar() {
 
         {/* Left: Brand */}
         <div className="navbar-left" style={isMobileMap ? { flex: 'none' } : {}}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-            <div style={{
-              width: '28px', height: '28px', borderRadius: '6px',
-              background: '#101010',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
-              </svg>
-            </div>
-            {!isMobileMap && (
-              <span className="nav-logo-text" style={{
-                fontFamily: "'Poppins', sans-serif",
-                fontSize: '1rem', fontWeight: 600, color: '#101010', letterSpacing: '0.01em'
-              }}>
-                TERRITORY
-              </span>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', textDecoration: 'none' }}>
+            {!isMobileMap ? (
+              /* Combined Logo & Title SVG (Provided by User) */
+              <img
+                src="/final_logo.svg"
+                alt="Territory Land Market"
+                style={{
+                  height: '42px',
+                  objectFit: 'contain',
+                  flexShrink: 0,
+                }}
+              />
+            ) : (
+              /* Same logo for mobile, adjusting height to fit */
+              <img
+                src="/final_logo.svg"
+                alt="Territory Logo"
+                style={{
+                  height: '38px',
+                  objectFit: 'contain',
+                  flexShrink: 0,
+                }}
+              />
             )}
           </Link>
         </div>
+
 
         {/* Mobile Search Input between logo icon and hamburger */}
         {isMobileMap && (
           <div style={{
             flex: 1,
-            margin: '0 0.5rem 0 0.75rem',
+            margin: '0 0.25rem 0 0.4rem',
             display: 'flex',
             alignItems: 'center',
             height: '32px',
@@ -151,10 +168,14 @@ export default function Navbar() {
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input
+              ref={inputRef}
               type="text"
               placeholder="Search lands..."
               value={searchTerm}
               onChange={e => handleSearchChange(e.target.value)}
+              onFocus={() => {
+                window.dispatchEvent(new CustomEvent('mobile-search-focus'));
+              }}
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -373,6 +394,43 @@ export default function Navbar() {
               </svg>
             </Link>
           </div>
+
+          {/* Mobile Sell Button (Visible on Home, Browse, and Map pages in Mobile View) */}
+          {isMobile && (role === 'SELLER' || role === 'ADMIN') && (location.pathname === '/' || location.pathname === '/browse' || location.pathname === '/map') && (
+            <Link
+              to="/dashboard/seller/upload"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.15rem',
+                background: '#ffffff',
+                color: '#101010',
+                border: '3.5px solid',
+                borderTopColor: '#6b7280',
+                borderRightColor: '#374151',
+                borderBottomColor: '#101010',
+                borderLeftColor: '#898989',
+                borderRadius: '9999px',
+                height: '32px',
+                padding: '0 0.65rem',
+                boxSizing: 'border-box',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '0.72rem',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                textDecoration: 'none',
+                outline: 'none',
+                WebkitTapHighlightColor: 'transparent',
+                flexShrink: 0,
+                marginRight: '0.5rem'
+              }}
+            >
+              <span style={{ fontSize: '0.85rem', fontWeight: 900 }}>+</span>
+              <span>Sell</span>
+            </Link>
+          )}
 
           {/* Mobile Menu Button */}
           <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{

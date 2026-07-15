@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../lib/api';
 import FileDropzone from '../../components/common/FileDropzone';
 import DraggableGrid from '../../components/common/DraggableGrid';
-import TAMIL_NADU_CITY_DIVISIONS from '../../components/common/tamilnadu_city_divisions.json';
 
 interface DocUploadItem {
   type: string;
@@ -101,18 +100,26 @@ export default function UploadProperty() {
   const [district, setDistrict] = useState('');
   const [taluk, setTaluk] = useState('');
   const [state, setState] = useState('Tamil Nadu');
+  const [cityDivisions, setCityDivisions] = useState<Record<string, { name: string }[]>>({});
+
+  useEffect(() => {
+    fetch('/tamilnadu_city_divisions.json')
+      .then(r => r.json())
+      .then(data => setCityDivisions(data))
+      .catch(() => {});
+  }, []);
 
   const sortedDistricts = useMemo(() => {
     return [...TAMIL_NADU_DISTRICTS].sort((a, b) => a.localeCompare(b));
   }, []);
 
   const sortedTaluks = useMemo(() => {
-    if (!district) return [];
-    const keys = Object.keys(TAMIL_NADU_CITY_DIVISIONS);
-    const matchedKey = keys.find(k => normalizeName(k) === normalizeName(district)) || district;
-    const divisions = (TAMIL_NADU_CITY_DIVISIONS as any)[matchedKey] || [];
-    return divisions.map((d: any) => d.name).sort((a: string, b: string) => a.localeCompare(b));
-  }, [district]);
+    if (!district || !Object.keys(cityDivisions).length) return [];
+    const keys = Object.keys(cityDivisions);
+    const matchedKey = keys.find(k => k === district || normalizeName(k) === normalizeName(district)) || district;
+    const divisions = cityDivisions[matchedKey] || [];
+    return divisions.map((d: { name: string }) => d.name).sort((a, b) => a.localeCompare(b));
+  }, [district, cityDivisions]);
   const [price, setPrice] = useState('');
   const [area, setArea] = useState('');
   const [areaUnit, setAreaUnit] = useState('acres');
@@ -235,17 +242,8 @@ export default function UploadProperty() {
   };
 
   return (
-    <div style={{ background: 'transparent', minHeight: '100vh', padding: '3rem 1.5rem' }}>
+    <div style={{ background: 'transparent', minHeight: '100vh', padding: '1rem 1.5rem' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        
-        <div style={{ marginBottom: '1.5rem' }}>
-          <Link to={dashboardPath} style={{
-            color: '#101010', textDecoration: 'none', fontWeight: 600, fontSize: '0.875rem',
-            display: 'inline-flex', alignItems: 'center', gap: '0.3rem'
-          }}>
-            &larr; Back to Dashboard
-          </Link>
-        </div>
 
         <div style={{
           background: 'rgba(255, 255, 255, 0.75)',
@@ -253,9 +251,31 @@ export default function UploadProperty() {
           WebkitBackdropFilter: 'blur(12px)',
           borderRadius: '12px', padding: '1.5rem', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px'
         }}>
-          <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.5rem', fontWeight: 600, color: '#101010', marginBottom: '2rem', letterSpacing: '0.01em' }}>
-            List New Property
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <Link to={dashboardPath} style={{
+              color: '#101010',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: '#f0f0f0',
+              border: '1.5px solid #101010',
+              fontWeight: 'bold',
+              fontSize: '1rem',
+              transition: 'background-color 0.15s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#e4e4e4'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+            >
+              &larr;
+            </Link>
+            <h2 style={{ margin: 0, fontFamily: "'Poppins', sans-serif", fontSize: '1.5rem', fontWeight: 600, color: '#101010', letterSpacing: '0.01em' }}>
+              List New Property
+            </h2>
+          </div>
 
           {error && <div className="error-box" style={{ marginBottom: '1.5rem' }}>{error}</div>}
 
@@ -276,7 +296,7 @@ export default function UploadProperty() {
                       setDistrict(e.target.value);
                       setTaluk('');
                     }}
-                    className="form-input"
+                    className="form-input select-district"
                     style={{ width: '100%' }}
                   >
                     <option value="">Select District</option>
@@ -292,7 +312,7 @@ export default function UploadProperty() {
                     disabled={!district}
                     value={taluk}
                     onChange={e => setTaluk(e.target.value)}
-                    className="form-input"
+                    className="form-input select-taluk"
                     style={{ width: '100%' }}
                   >
                     <option value="">Select Taluk</option>
@@ -328,7 +348,7 @@ export default function UploadProperty() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Property Type</label>
-                  <select value={type} onChange={e => setType(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
+                  <select value={type} onChange={e => setType(e.target.value)} className="form-input select-type">
                     <option>Agricultural Land</option>
                     <option>Farm Land</option>
                     <option>Flat Plot</option>
@@ -348,7 +368,7 @@ export default function UploadProperty() {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Area Unit</label>
-                  <select value={areaUnit} onChange={e => setAreaUnit(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
+                  <select value={areaUnit} onChange={e => setAreaUnit(e.target.value)} className="form-input select-unit">
                     <option value="acres">Acres</option>
                     <option value="sq_ft">Sq. Ft.</option>
                     <option value="cents">Cents</option>
@@ -370,7 +390,7 @@ export default function UploadProperty() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Soil Type</label>
-                  <select value={soilType} onChange={e => setSoilType(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
+                  <select value={soilType} onChange={e => setSoilType(e.target.value)} className="form-input select-soil">
                     <option value="">-- Select --</option>
                     <option>Red Soil</option>
                     <option>Black Soil</option>
@@ -382,7 +402,7 @@ export default function UploadProperty() {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Water Source</label>
-                  <select value={waterSource} onChange={e => setWaterSource(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
+                  <select value={waterSource} onChange={e => setWaterSource(e.target.value)} className="form-input select-water">
                     <option value="">-- Select --</option>
                     <option>Borewell</option>
                     <option>Open Well</option>
@@ -396,7 +416,7 @@ export default function UploadProperty() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Road Access</label>
-                  <select value={roadAccess} onChange={e => setRoadAccess(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
+                  <select value={roadAccess} onChange={e => setRoadAccess(e.target.value)} className="form-input select-road">
                     <option value="">-- Select --</option>
                     <option>National Highway</option>
                     <option>State Highway</option>
@@ -408,7 +428,7 @@ export default function UploadProperty() {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Fencing</label>
-                  <select value={fencing} onChange={e => setFencing(e.target.value)} className="form-input" style={{ background: '#ffffff' }}>
+                  <select value={fencing} onChange={e => setFencing(e.target.value)} className="form-input select-fence">
                     <option value="">-- Select --</option>
                     <option>Compound Wall</option>
                     <option>Wire Fence</option>
@@ -470,8 +490,8 @@ export default function UploadProperty() {
                         border: '1px solid #e5e7eb', borderRadius: '6px', alignItems: 'center'
                       }}>
                         <select
-                          className="form-input"
-                          style={{ width: '140px', background: '#ffffff', padding: '0.4rem 0.6rem', fontSize: '0.8125rem' }}
+                          style={{ width: '140px' }}
+                          className="form-input select-doc"
                           value={doc.type} onChange={(e) => handleDocTypeChange(index, e.target.value)}
                         >
                           <option>Patta</option>
@@ -537,9 +557,55 @@ export default function UploadProperty() {
             </div>
 
             {/* Submit Block */}
-            <div style={{ paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb', marginTop: '1rem' }}>
-              <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', padding: '0.9rem 1rem', borderRadius: '8px', fontSize: '0.875rem', letterSpacing: '0.02em', whiteSpace: 'normal', lineHeight: 1.3 }}>
-                {loading ? 'Publishing Registry...' : 'Submit Property for Verification'}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '1rem',
+              paddingTop: '1.5rem',
+              borderTop: '1px solid #e5e7eb',
+              marginTop: '1rem'
+            }}>
+              <Link to={dashboardPath} style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#f0f0f0',
+                color: '#101010',
+                border: '1.5px solid #101010',
+                borderRadius: '8px',
+                padding: '0.8rem 1.5rem',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.15s ease'
+              }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#e4e4e4'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+              >
+                Cancel
+              </Link>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#101010',
+                  color: '#ffffff',
+                  border: '1.5px solid #101010',
+                  borderRadius: '8px',
+                  padding: '0.8rem 1.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.15s ease, opacity 0.15s ease'
+                }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#222222'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#101010'}
+              >
+                {loading ? 'Publishing Registry...' : 'Submit Property'}
               </button>
             </div>
 
@@ -550,3 +616,4 @@ export default function UploadProperty() {
     </div>
   );
 }
+

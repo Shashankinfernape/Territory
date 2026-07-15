@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700;800&family=Montserrat:wght@700;800;900&display=swap');
 @import "tailwindcss";
 
 /* ── CAL.COM DESIGN SYSTEM — TERRITORY ───────────────────────────────── */
@@ -300,26 +300,58 @@ body {
 /* ── FORM INPUTS ─────────────────────────────────────────────────────── */
 .form-input {
   width: 100%;
-  border: 1px solid #e5e7eb;
+  border: 1.5px solid #101010;
   border-radius: 8px;
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: #ffffff;
   font-family: inherit;
   color: #101010;
   font-size: 0.9375rem;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
   letter-spacing: -0.2px;
 }
 
 .form-input::placeholder { color: #898989; }
 
+.form-input:hover:not(:disabled) {
+  background-color: #f9f9f9;
+}
+
 .form-input:focus {
   border-color: #101010;
-  box-shadow: 0 0 0 2px rgba(16, 16, 16, 0.08);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(16, 16, 16, 0.08);
 }
+
+.form-input:disabled {
+  border-color: #d1d5db;
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* ── SELECT DROPDOWNS ───────────────────────────────────────────────── */
+select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0.72rem 2.75rem 0.72rem 1rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23101010' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+select.form-input option {
+  font-weight: 400;
+  color: #101010;
+  background: #ffffff;
+}
+
+
 
 /* ── BUTTONS ─────────────────────────────────────────────────────────── */
 
