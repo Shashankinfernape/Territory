@@ -56,6 +56,19 @@ export default function PropertyDetails() {
         }
 
         setProp(propData);
+
+        try {
+          const recentKey = 'recentlyViewed';
+          const existingStr = localStorage.getItem(recentKey);
+          let recent = existingStr ? JSON.parse(existingStr) : [];
+          recent = recent.filter((item: any) => item.id !== propData.id);
+          recent.unshift(propData);
+          if (recent.length > 10) recent.pop();
+          localStorage.setItem(recentKey, JSON.stringify(recent));
+        } catch (e) {
+          console.error('Failed to save to recently viewed', e);
+        }
+
       } catch (err) {
         console.error(err);
         setError('Listing could not be retrieved.');
@@ -113,7 +126,7 @@ export default function PropertyDetails() {
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         
         <Link to="/" style={{
-          color: '#101010', textDecoration: 'none', fontWeight: 500, fontSize: '0.875rem',
+          color: '#2C2C2C', textDecoration: 'none', fontWeight: 500, fontSize: '0.875rem',
           display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginBottom: '1.5rem',
           letterSpacing: '-0.2px'
         }}>
@@ -130,7 +143,7 @@ export default function PropertyDetails() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div style={{
                 background: '#ffffff', borderRadius: '12px', overflow: 'hidden',
-                position: 'relative', height: '400px',
+                position: 'relative', aspectRatio: '16/9',
                 boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px'
               }}>
                 <div style={{
@@ -170,7 +183,7 @@ export default function PropertyDetails() {
                         zIndex: 20,
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
                         transition: 'all 0.15s ease',
-                        color: '#101010'
+                        color: '#2C2C2C'
                       }}
                       onMouseEnter={el => {
                         el.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
@@ -211,7 +224,7 @@ export default function PropertyDetails() {
                         zIndex: 20,
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
                         transition: 'all 0.15s ease',
-                        color: '#101010'
+                        color: '#2C2C2C'
                       }}
                       onMouseEnter={el => {
                         el.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
@@ -232,20 +245,18 @@ export default function PropertyDetails() {
 
                 <div style={{
                   position: 'absolute', inset: 0,
-                  display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-                  padding: '2rem', background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)',
-                  color: '#ffffff',
-                  pointerEvents: 'none' // allow clicking buttons behind the overlay text if needed
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 100%)',
+                  pointerEvents: 'none'
                 }}>
-                  <span className="badge-active" style={{ alignSelf: 'flex-start', marginBottom: '0.75rem' }}>
-                    {prop.type}
-                  </span>
-                  <h1 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '2rem', fontWeight: 600, margin: 0, letterSpacing: '0.01em' }}>
-                    {prop.city}
-                  </h1>
-                  <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.875rem', marginTop: '0.25rem', fontWeight: 400, letterSpacing: '-0.2px' }}>
-                    {prop.district ? `${prop.district}, ` : ''}{prop.state}
-                  </p>
+                  <div className="cinematic-details-overlay" style={{ bottom: '1.25rem' }}>
+                    <h4 className="cinematic-card-title">{prop.city}</h4>
+                    <div className="cinematic-title-line" />
+                    <div className="cinematic-meta-row">
+                      <span className="cinematic-meta-count">
+                        {prop.district ? `${prop.district}, ` : ''}{prop.state}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -259,7 +270,7 @@ export default function PropertyDetails() {
                       style={{
                         width: '72px', height: '54px', borderRadius: '6px',
                         overflow: 'hidden', padding: 0, cursor: 'pointer',
-                        border: activeImageIndex === idx ? '2.5px solid #101010' : '1px solid #e5e7eb',
+                        border: activeImageIndex === idx ? '2.5px solid #2C2C2C' : '1px solid #e5e7eb',
                         opacity: activeImageIndex === idx ? 1 : 0.72,
                         transition: 'all 0.15s ease',
                         background: '#ffffff'
@@ -276,26 +287,26 @@ export default function PropertyDetails() {
 
             {/* Land Specs & Overview */}
             <div style={{ background: '#ffffff', borderRadius: '12px', padding: '2rem', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px' }}>
-              <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.75rem', marginBottom: '1.25rem', letterSpacing: '0.01em' }}>
+              <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.75rem', marginBottom: '1.25rem', letterSpacing: '0.01em' }}>
                 Property Specifications
               </h2>
 
               <div className="specs-grid">
                 <div>
                   <p style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Land Area</p>
-                  <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#242424', marginTop: '0.2rem', letterSpacing: '-0.2px' }}>{prop.area} {prop.area_unit}</p>
+                  <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#2C2C2C', marginTop: '0.2rem', letterSpacing: '-0.2px' }}>{prop.area} {prop.area_unit}</p>
                 </div>
                 <div>
                   <p style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Asking Price</p>
-                  <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#101010', marginTop: '0.2rem', letterSpacing: '-0.2px' }}>{formatPrice(prop.price)}</p>
+                  <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#2C2C2C', marginTop: '0.2rem', letterSpacing: '-0.2px' }}>{formatPrice(prop.price)}</p>
                 </div>
                 <div>
                   <p style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Verification</p>
-                  <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#101010', marginTop: '0.2rem', letterSpacing: '-0.2px' }}>Deed Verified</p>
+                  <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#2C2C2C', marginTop: '0.2rem', letterSpacing: '-0.2px' }}>Deed Verified</p>
                 </div>
               </div>
 
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1rem', fontWeight: 600, color: '#101010', marginBottom: '0.5rem', letterSpacing: '0.01em' }}>Overview</h3>
+              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '0.01em' }}>Overview</h3>
               <p style={{ color: '#6b7280', fontSize: '0.875rem', lineHeight: 1.5, letterSpacing: '-0.19px' }}>
                 {prop.description || "No description provided by the seller."}
               </p>
@@ -303,7 +314,7 @@ export default function PropertyDetails() {
 
             {/* Feature Attributes List */}
             <div style={{ background: '#ffffff', borderRadius: '12px', padding: '2rem', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px' }}>
-              <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.75rem', marginBottom: '1.25rem', letterSpacing: '0.01em' }}>
+              <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.75rem', marginBottom: '1.25rem', letterSpacing: '0.01em' }}>
                 Attributes & Highlights
               </h2>
               <div className="attributes-grid">
@@ -317,7 +328,7 @@ export default function PropertyDetails() {
                 ].map(attr => (
                   <div key={attr.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid #e5e7eb' }}>
                     <span style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: 400, letterSpacing: '-0.2px' }}>{attr.label}</span>
-                    <span style={{ fontSize: '0.875rem', color: '#242424', fontWeight: 500, letterSpacing: '-0.2px' }}>{attr.val}</span>
+                    <span style={{ fontSize: '0.875rem', color: '#2C2C2C', fontWeight: 500, letterSpacing: '-0.2px' }}>{attr.val}</span>
                   </div>
                 ))}
               </div>
@@ -331,7 +342,7 @@ export default function PropertyDetails() {
             {/* Price Box */}
             <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#898989', textTransform: 'uppercase', letterSpacing: '0.04em' }}>TOTAL COST</span>
-              <p style={{ fontSize: '1.75rem', fontWeight: 600, color: '#101010', marginTop: '0.2rem', fontFamily: "'Poppins', sans-serif" }}>
+              <p style={{ fontSize: '1.75rem', fontWeight: 600, color: '#2C2C2C', marginTop: '0.2rem', fontFamily: "'Poppins', sans-serif" }}>
                 {formatPrice(prop.price)}
               </p>
               <div style={{ height: '1px', background: '#e5e7eb', margin: '1rem 0' }} />
@@ -341,18 +352,18 @@ export default function PropertyDetails() {
             </div>
 
             {/* Unlock Contact Verification Box */}
-            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.75rem', color: '#242424', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px', border: '1px solid #e5e7eb' }}>
+            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.75rem', color: '#2C2C2C', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px', border: '1px solid #e5e7eb' }}>
               
               {prop.unlocked ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                   <span className="badge-verified" style={{ alignSelf: 'flex-start' }}>OWNER CONTACT</span>
                   <div>
                     <p style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Landowner Name</p>
-                    <p style={{ fontSize: '1.0625rem', fontWeight: 600, color: '#101010', letterSpacing: '-0.2px' }}>{prop.owner_name || 'Landowner'}</p>
+                    <p style={{ fontSize: '1.0625rem', fontWeight: 600, color: '#2C2C2C', letterSpacing: '-0.2px' }}>{prop.owner_name || 'Landowner'}</p>
                   </div>
                   <div>
                     <p style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Contact Number</p>
-                    <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#101010', letterSpacing: '0.02em' }}>{prop.owner_phone || '+91 XXXXX XXXXX'}</p>
+                    <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#2C2C2C', letterSpacing: '0.02em' }}>{prop.owner_phone || '+91 XXXXX XXXXX'}</p>
                   </div>
                   <div style={{ height: '1px', background: '#e5e7eb', margin: '0.5rem 0' }} />
                   <p style={{ fontSize: '0.8125rem', color: '#6b7280', lineHeight: 1.4, letterSpacing: '-0.2px' }}>
@@ -361,7 +372,7 @@ export default function PropertyDetails() {
                 </div>
               ) : (
                 <>
-                  <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem', color: '#101010', letterSpacing: '0.01em' }}>
+                  <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem', color: '#2C2C2C', letterSpacing: '0.01em' }}>
                     Unlock Owner Contact
                   </h3>
                   <p style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: 1.4, marginBottom: '1.5rem', letterSpacing: '-0.2px' }}>

@@ -86,13 +86,13 @@ export default function Dashboard() {
   ];
 
   return (
-    <div style={{ background: '#f4f4f4', minHeight: '100vh', padding: '2.5rem 1.5rem' }}>
+    <div style={{ background: '#FDFBF7', minHeight: '100vh', padding: '2.5rem 1.5rem' }}>
       <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h1 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.6rem', fontWeight: 700, color: '#101010', margin: 0 }}>
+            <h1 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.6rem', fontWeight: 700, color: '#2C2C2C', margin: 0 }}>
               Seller Dashboard
             </h1>
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.25rem', fontWeight: 400 }}>
@@ -103,8 +103,8 @@ export default function Dashboard() {
             to="/dashboard/seller/upload"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-              background: '#101010', color: '#ffffff',
-              border: '2px solid #101010', borderRadius: '9999px',
+              background: '#2C2C2C', color: '#ffffff',
+              border: '2px solid #2C2C2C', borderRadius: '9999px',
               padding: '0.55rem 1.25rem',
               fontFamily: "'Inter', sans-serif", fontSize: '0.8rem',
               fontWeight: 700, textDecoration: 'none',
@@ -112,7 +112,7 @@ export default function Dashboard() {
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#2d2d2d'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#101010'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#2C2C2C'; }}
           >
             <span style={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1 }}>+</span>
             <span>List New Property</span>
@@ -139,7 +139,7 @@ export default function Dashboard() {
                   {card.icon}
                 </div>
               </div>
-              <p style={{ fontSize: '2rem', fontWeight: 800, color: '#101010', margin: 0, lineHeight: 1 }}>
+              <p style={{ fontSize: '2rem', fontWeight: 800, color: '#2C2C2C', margin: 0, lineHeight: 1 }}>
                 {card.value}
               </p>
               {card.sub && (
@@ -153,8 +153,8 @@ export default function Dashboard() {
 
         {/* Properties Table */}
         <div style={{ background: '#ffffff', borderRadius: '14px', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-          <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f4f4f4', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1rem', fontWeight: 600, color: '#101010', margin: 0 }}>
+          <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #FDFBF7', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1rem', fontWeight: 600, color: '#2C2C2C', margin: 0 }}>
               Your Properties
             </h3>
             <span style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: 500 }}>
@@ -194,7 +194,7 @@ export default function Dashboard() {
                 <tbody>
                   {properties.map((listing, idx) => (
                     <tr key={listing.id} style={{
-                      borderBottom: idx < properties.length - 1 ? '1px solid #f4f4f4' : 'none',
+                      borderBottom: idx < properties.length - 1 ? '1px solid #FDFBF7' : 'none',
                       transition: 'background 0.12s ease',
                     }}
                       onMouseEnter={e => (e.currentTarget as HTMLTableRowElement).style.background = '#fafafa'}
@@ -202,7 +202,7 @@ export default function Dashboard() {
                     >
                       {/* Property */}
                       <td style={{ padding: '1rem 1.25rem', verticalAlign: 'middle' }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#101010' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#2C2C2C' }}>
                           {listing.city}{listing.taluk ? `, ${listing.taluk}` : ''}{listing.district ? `, ${listing.district}` : ''}
                         </div>
                         <div style={{ fontSize: '0.7rem', color: '#9ca3af', fontFamily: 'monospace', marginTop: '0.15rem', letterSpacing: '0.05em' }}>
@@ -225,7 +225,7 @@ export default function Dashboard() {
 
                       {/* Views / Unlocks */}
                       <td style={{ padding: '1rem 1.25rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                        <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#101010' }}>{listing.view_count}</span>
+                        <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#2C2C2C' }}>{listing.view_count}</span>
                         <span style={{ color: '#d1d5db', margin: '0 0.35rem', fontWeight: 300 }}>/</span>
                         <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1a6b45' }}>
                           {stats?.unlock_counts?.[listing.id] ?? 0}
@@ -238,13 +238,13 @@ export default function Dashboard() {
                           to={`/dashboard/seller/edit/${listing.id}`}
                           style={{
                             display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
-                            fontSize: '0.8rem', fontWeight: 600, color: '#101010',
+                            fontSize: '0.8rem', fontWeight: 600, color: '#2C2C2C',
                             textDecoration: 'none', border: '1.5px solid #e5e7eb',
                             borderRadius: '8px', padding: '0.35rem 0.85rem',
                             transition: 'all 0.15s ease',
                           }}
-                          onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = '#101010'; el.style.background = '#101010'; el.style.color = '#ffffff'; }}
-                          onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = '#e5e7eb'; el.style.background = 'transparent'; el.style.color = '#101010'; }}
+                          onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = '#2C2C2C'; el.style.background = '#2C2C2C'; el.style.color = '#ffffff'; }}
+                          onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = '#e5e7eb'; el.style.background = 'transparent'; el.style.color = '#2C2C2C'; }}
                         >
                           <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

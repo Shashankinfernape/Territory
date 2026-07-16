@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime
-from database import get_db
+from database import get_db, get_auth_db
 from .auth import get_current_user
 from .properties import _doc_to_response
 from models import PropertyResponse
@@ -33,7 +33,7 @@ async def _get_transaction(db, buyer_id: str, property_id: str):
 @router.post("/mock-unlock")
 async def mock_unlock_property(
     req: UnlockRequest,
-    db=Depends(get_db),
+    db=Depends(get_db), auth_db=Depends(get_auth_db),
     current_user=Depends(get_current_user),
 ):
     _require_buyer(current_user)
@@ -53,7 +53,7 @@ async def mock_unlock_property(
     existing = await _get_transaction(db, buyer_id, property_id)
     
     # Resolve seller details
-    seller = await db.users.find_one({"_id": prop["seller_id"]})
+    seller = await auth_db.users.find_one({"_id": prop["seller_id"]})
     owner_name = seller.get("full_name", "Landowner") if seller else "Landowner"
     owner_phone = seller.get("phone_number", "+91 XXXXX XXXXX") if seller else "+91 XXXXX XXXXX"
 
@@ -83,7 +83,7 @@ async def mock_unlock_property(
 @router.get("/check-unlock/{property_id}")
 async def check_unlock_status(
     property_id: str,
-    db=Depends(get_db),
+    db=Depends(get_db), auth_db=Depends(get_auth_db),
     current_user=Depends(get_current_user),
 ):
     """Check whether the current buyer has unlocked a specific property."""
@@ -98,7 +98,7 @@ async def check_unlock_status(
         owner_name = "Landowner"
         owner_phone = "+91 XXXXX XXXXX"
         if prop:
-            seller = await db.users.find_one({"_id": prop["seller_id"]})
+            seller = await auth_db.users.find_one({"_id": prop["seller_id"]})
             if seller:
                 owner_name = seller.get("full_name", "Landowner")
                 owner_phone = seller.get("phone_number", "+91 XXXXX XXXXX")
@@ -114,7 +114,7 @@ async def check_unlock_status(
 async def get_document(
     property_id: str,
     doc_index: int,
-    db=Depends(get_db),
+    db=Depends(get_db), auth_db=Depends(get_auth_db),
     current_user=Depends(get_current_user),
 ):
     """
@@ -183,7 +183,7 @@ async def get_document(
 
 @router.get("/unlocked-properties", response_model=List[PropertyResponse])
 async def get_unlocked_properties(
-    db=Depends(get_db),
+    db=Depends(get_db), auth_db=Depends(get_auth_db),
     current_user=Depends(get_current_user),
 ):
     _require_buyer(current_user)

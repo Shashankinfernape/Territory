@@ -217,7 +217,7 @@ export default function AdminDashboard() {
                 padding: '0.45rem 0.85rem',
                 borderRadius: '8px',
                 border: 'none',
-                background: activeTab === tab ? '#101010' : 'transparent',
+                background: activeTab === tab ? '#2C2C2C' : 'transparent',
                 color: activeTab === tab ? '#ffffff' : 'rgba(15, 23, 42, 0.55)',
                 fontWeight: 600,
                 fontSize: '0.82rem',
@@ -232,7 +232,7 @@ export default function AdminDashboard() {
               onMouseEnter={e => {
                 if (activeTab !== tab) {
                   e.currentTarget.style.background = 'rgba(15, 23, 42, 0.05)';
-                  e.currentTarget.style.color = '#101010';
+                  e.currentTarget.style.color = '#2C2C2C';
                 }
               }}
               onMouseLeave={e => {
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
                   fontSize: '0.65rem',
                   fontWeight: 800,
                   background: activeTab === tab ? '#ffffff' : '#b8963e',
-                  color: activeTab === tab ? '#101010' : '#ffffff',
+                  color: activeTab === tab ? '#2C2C2C' : '#ffffff',
                   transition: 'all 0.2s ease'
                 }}>
                   {stats.pending_properties}
@@ -269,7 +269,7 @@ export default function AdminDashboard() {
                   fontSize: '0.65rem',
                   fontWeight: 800,
                   background: activeTab === tab ? '#ffffff' : '#ff3b30',
-                  color: activeTab === tab ? '#101010' : '#ffffff',
+                  color: activeTab === tab ? '#2C2C2C' : '#ffffff',
                   transition: 'all 0.2s ease'
                 }}>
                   {stats.pending_sellers}
@@ -285,7 +285,7 @@ export default function AdminDashboard() {
                   fontSize: '0.65rem',
                   fontWeight: 800,
                   background: activeTab === tab ? '#ffffff' : '#ff3b30',
-                  color: activeTab === tab ? '#101010' : '#ffffff',
+                  color: activeTab === tab ? '#2C2C2C' : '#ffffff',
                   transition: 'all 0.2s ease'
                 }}>
                   {stats.pending_properties}
@@ -1140,9 +1140,9 @@ export default function AdminDashboard() {
                         className="badge-verified"
                         style={{
                           textDecoration: 'none',
-                          border: '1px solid #101010',
+                          border: '1px solid #2C2C2C',
                           color: '#ffffff',
-                          background: '#101010',
+                          background: '#2C2C2C',
                           fontSize: '0.75rem',
                           fontWeight: 600,
                           padding: '0.4rem 0.8rem',
@@ -1152,7 +1152,7 @@ export default function AdminDashboard() {
                           transition: 'all 0.15s ease'
                         }}
                         onMouseEnter={e => e.currentTarget.style.background = '#333333'}
-                        onMouseLeave={e => e.currentTarget.style.background = '#101010'}
+                        onMouseLeave={e => e.currentTarget.style.background = '#2C2C2C'}
                       >
                         Open
                       </a>

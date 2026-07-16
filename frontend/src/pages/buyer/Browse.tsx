@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { api, getToken } from '../../lib/api';
-import { getPropertyImageUrl, type Property } from '../../lib/types';
-import { formatPrice } from '../../lib/utils';
+import type { Property } from '../../lib/types';
 import TAMIL_NADU_CITY_DIVISIONS from '../../components/common/tamilnadu_city_divisions.json';
 import { useSettings } from '../../contexts/SettingsContext';
-import GlareHover from '../../components/ui/GlareHover';
+import { PropertyCard } from '../../components/ui/PropertyCard';
 
 const TAMIL_NADU_DISTRICTS = [
   "Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri",
@@ -39,140 +38,7 @@ const SORT_OPTIONS = [
   { label: 'Most Viewed', value: 'views' },
 ];
 
-function PropertyCard({
-  p, wishlist, togglingId, toggleWishlist
-}: {
-  p: Property;
-  wishlist: string[];
-  togglingId: string | null;
-  toggleWishlist: (e: React.MouseEvent, id: string) => void;
-}) {
-  const { animationSetting } = useSettings();
 
-  return (
-    <GlareHover 
-      disabled={animationSetting === 'minimal'}
-      glareColor="#ffffff"
-      glareOpacity={0.25}
-      glareSize={200}
-      borderRadius="12px"
-      className="property-card"
-      style={{
-        display: 'flex', flexDirection: 'column', height: '100%',
-        background: 'rgba(255, 255, 255, 0.75)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden'
-      }}
-    >
-      <Link to={`/property/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
-        {/* Image Container with overlays */}
-        <div style={{ width: '100%', position: 'relative', aspectRatio: '16/9', background: '#f3f4f6', overflow: 'hidden' }}>
-          <img
-            src={getPropertyImageUrl(p)}
-            alt="land"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-          
-          {/* Status badge */}
-          <div style={{
-            position: 'absolute', top: '0.625rem', left: '0.625rem',
-            background: '#ffffff',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-            borderRadius: '4px', padding: '3px 8px',
-            fontSize: '0.625rem', fontWeight: 800, color: '#111827',
-            letterSpacing: '0.03em', textTransform: 'uppercase'
-          }}>
-            Active
-          </div>
-
-          {/* Wishlist Heart Overlay */}
-          <button
-            onClick={(e) => toggleWishlist(e, p.id)}
-            disabled={togglingId === p.id}
-            style={{
-              position: 'absolute', top: '0.625rem', right: '0.625rem',
-              background: 'transparent',
-              border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: 0,
-              transition: 'transform 0.15s ease',
-              outline: 'none',
-              zIndex: 10
-            }}
-            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
-            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-          >
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              style={{
-                filter: 'drop-shadow(0 1.5px 3.5px rgba(0,0,0,0.7))',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                fill={wishlist.includes(p.id) ? '#101010' : 'none'}
-                stroke="#ffffff"
-                strokeWidth="2.2"
-              />
-            </svg>
-          </button>
-
-          {/* Zillow style pagination dots */}
-          <div style={{
-            position: 'absolute', bottom: '0.625rem', left: '50%', transform: 'translateX(-50%)',
-            display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.22)', padding: '3px 6px', borderRadius: '99px'
-          }}>
-            {[1, 2, 3, 4, 5].map((dot, i) => (
-              <div key={dot} style={{
-                width: '5px', height: '5px', borderRadius: '50%',
-                background: i === 0 ? '#ffffff' : 'rgba(255,255,255,0.5)'
-              }} />
-            ))}
-          </div>
-        </div>
-
-        {/* Details Body */}
-        <div style={{ padding: '0.45rem 0.65rem 0.55rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', background: 'transparent', minHeight: '85px' }}>
-          <div>
-            {/* Price & Options row */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <p style={{ margin: 0, fontSize: '1.0625rem', fontWeight: 800, color: '#111827', fontFamily: "'Poppins', sans-serif" }}>
-                {formatPrice(p.price)}
-              </p>
-              {/* Three dots icon */}
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: 'pointer' }}>
-                <circle cx="12" cy="12" r="1" />
-                <circle cx="19" cy="12" r="1" />
-                <circle cx="5" cy="12" r="1" />
-              </svg>
-            </div>
-
-            {/* Property specs row */}
-            <p style={{ margin: '0.15rem 0 0', fontSize: '0.72rem', color: '#1f2937', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {p.area} {p.area_unit.replace('_', ' ')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> {p.type.replace(' Land', '').replace(' Plot', '')} <span style={{ color: '#d1d5db', margin: '0 3px' }}>|</span> <span style={{ color: '#16a34a' }}>Deed</span>
-            </p>
-
-            {/* Address row */}
-            <p style={{ margin: '0.1rem 0 0', fontSize: '0.72rem', color: '#4b5563', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-              {p.city}{p.district ? `, ${p.district}` : ''}
-            </p>
-          </div>
-
-          {/* Broker/Seller name */}
-          <div style={{ marginTop: '0.28rem' }}>
-            <p style={{ margin: 0, fontSize: '0.6rem', color: '#9ca3af', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              Territory Premium
-            </p>
-          </div>
-        </div>
-      </Link>
-    </GlareHover>
-  );
-}
 
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -186,6 +52,7 @@ export default function Browse() {
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const isLoggedIn = !!getToken();
+  const { animationSetting } = useSettings();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
@@ -335,8 +202,6 @@ export default function Browse() {
     finally { setTogglingId(null); }
   };
 
-  const cardProps = { wishlist, togglingId, isLoggedIn, toggleWishlist };
-
   return (
     <div className="fade-in" style={{ minHeight: '100vh' }}>
 
@@ -347,14 +212,14 @@ export default function Browse() {
         WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
       }}>
-        <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '0.75rem 1rem' }}>
+        <div style={{ maxWidth: '100%', margin: '0 auto', padding: '0.75rem 1rem' }}>
 
           {/* Row 1: search + sort */}
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', minWidth: 0 }}>
             {/* Search */}
             <div
               style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255, 255, 255, 0.4)', border: '1.5px solid #e5e7eb', borderRadius: '10px', padding: '0.5rem 0.75rem', transition: 'border-color 0.2s' }}
-              onFocusCapture={e => (e.currentTarget.style.borderColor = '#101010')}
+              onFocusCapture={e => (e.currentTarget.style.borderColor = '#2C2C2C')}
               onBlurCapture={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#898989" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
@@ -366,7 +231,7 @@ export default function Browse() {
                 placeholder="Search city, district, village..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                style={{ flex: 1, minWidth: 0, border: 'none', background: 'transparent', outline: 'none', fontSize: '0.9375rem', color: '#242424', fontFamily: 'inherit' }}
+                style={{ flex: 1, minWidth: 0, border: 'none', background: 'transparent', outline: 'none', fontSize: '0.9375rem', color: '#2C2C2C', fontFamily: 'inherit' }}
               />
               {searchTerm && (
                 <button onClick={() => setSearchTerm('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#898989', lineHeight: 1, padding: '0.1rem', flexShrink: 0 }}>✕</button>
@@ -378,7 +243,7 @@ export default function Browse() {
               className="browse-sort-select"
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              style={{ flexShrink: 0, padding: '0.5rem 0.75rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', color: '#242424', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
+              style={{ flexShrink: 0, padding: '0.5rem 0.75rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', color: '#2C2C2C', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
             >
               {SORT_OPTIONS.map(o => <option key={o.value} value={o.value} style={{ background: '#fff' }}>{o.label}</option>)}
             </select>
@@ -389,11 +254,11 @@ export default function Browse() {
               style={{
                 flexShrink: 0, display: 'flex', alignItems: 'center', gap: '0.35rem',
                 padding: '0.5rem 0.85rem', borderRadius: '10px', cursor: 'pointer', fontFamily: 'inherit',
-                border: hasActive ? '1.5px solid #101010' : '1.5px solid #e5e7eb',
-                background: hasActive ? '#101010' : 'rgba(255, 255, 255, 0.4)',
+                border: hasActive ? '1.5px solid #2C2C2C' : '1.5px solid #e5e7eb',
+                background: hasActive ? '#2C2C2C' : 'rgba(255, 255, 255, 0.4)',
                 backdropFilter: 'blur(4px)',
                 WebkitBackdropFilter: 'blur(4px)',
-                color: hasActive ? '#fff' : '#242424',
+                color: hasActive ? '#fff' : '#2C2C2C',
                 fontSize: '0.875rem', fontWeight: 500, transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
             >
@@ -408,7 +273,7 @@ export default function Browse() {
             {TYPES.map(t => (
               <button key={t} onClick={() => setFilterType(filterType === t ? '' : t)} style={{
                 padding: '0.28rem 0.85rem', borderRadius: '9999px', border: 'none', cursor: 'pointer',
-                background: filterType === t ? '#101010' : '#f0f0f0',
+                background: filterType === t ? '#2C2C2C' : '#f0f0f0',
                 color: filterType === t ? '#fff' : '#6b7280',
                 fontSize: '0.8rem', fontWeight: filterType === t ? 500 : 400,
                 transition: 'all 0.15s ease', fontFamily: 'inherit', whiteSpace: 'nowrap'
@@ -429,7 +294,7 @@ export default function Browse() {
           borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
         }}>
-          <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '1.25rem 1.5rem' }}>
+          <div style={{ maxWidth: '100%', margin: '0 auto', padding: '1.25rem 1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#898989', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Filter Specifications</span>
               {hasActive && (
@@ -440,7 +305,7 @@ export default function Browse() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#242424', marginBottom: '0.35rem' }}>District</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.35rem' }}>District</label>
                 <select
                   value={filterDistrict}
                   onChange={e => setFilterDistrict(e.target.value)}
@@ -455,7 +320,7 @@ export default function Browse() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#242424', marginBottom: '0.35rem' }}>Taluk</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.35rem' }}>Taluk</label>
                 <select
                   disabled={!filterDistrict}
                   value={filterTaluk}
@@ -477,18 +342,18 @@ export default function Browse() {
                 { label: 'Max Area', value: filterMaxArea, setter: setFilterMaxArea, placeholder: 'Any', type: 'number' },
               ].map(({ label, value, setter, placeholder, type }) => (
                 <div key={label}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#242424', marginBottom: '0.35rem' }}>{label}</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.35rem' }}>{label}</label>
                   <input type={type} value={value} onChange={e => setter(e.target.value)} placeholder={placeholder} className="form-input" style={{ fontSize: '0.875rem' }} />
                 </div>
               ))}
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#242424', marginBottom: '0.35rem' }}>Water Source</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.35rem' }}>Water Source</label>
                 <select value={filterWaterSource} onChange={e => setFilterWaterSource(e.target.value)} className="form-input" style={{ fontSize: '0.875rem' }}>
                   {['', 'Borewell', 'Open Well', 'Canal', 'River', 'Rainfed'].map(o => <option key={o} value={o}>{o || 'Any'}</option>)}
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#242424', marginBottom: '0.35rem' }}>Road Access</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.35rem' }}>Road Access</label>
                 <select value={filterRoadAccess} onChange={e => setFilterRoadAccess(e.target.value)} className="form-input" style={{ fontSize: '0.875rem' }}>
                   {['', 'National Highway', 'State Highway', 'District Road', 'Village Road'].map(o => <option key={o} value={o}>{o || 'Any'}</option>)}
                 </select>
@@ -499,22 +364,22 @@ export default function Browse() {
       )}
 
       {/* ── MAIN CONTENT ── */}
-      <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '1.5rem' }}>
+      <div style={{ maxWidth: '100%', margin: '0 auto', padding: '1.5rem 0.75rem' }}>
 
         {/* ── RECOMMENDATIONS SECTION (shown when no active search/filter) ── */}
         {!searchTerm && !hasActive && recommendations.length > 0 && (
           <div style={{ marginBottom: '2.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
-              <div style={{ width: '3px', height: '20px', background: '#101010', borderRadius: '2px' }} />
-              <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.1rem', fontWeight: 600, color: '#101010', margin: 0 }}>
+              <div style={{ width: '3px', height: '20px', background: '#2C2C2C', borderRadius: '2px' }} />
+              <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.1rem', fontWeight: 600, color: '#2C2C2C', margin: 0 }}>
                 {recLabel}
               </h2>
-              <span style={{ fontSize: '0.75rem', background: '#101010', color: '#fff', borderRadius: '99px', padding: '0.15rem 0.6rem', fontWeight: 500 }}>
+              <span style={{ fontSize: '0.75rem', background: '#2C2C2C', color: '#fff', borderRadius: '99px', padding: '0.15rem 0.6rem', fontWeight: 500 }}>
                 ✦ For You
               </span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.25rem' }}>
-              {recommendations.map(p => <PropertyCard key={p.id} p={p} {...cardProps} />)}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+              {recommendations.map(p => <PropertyCard key={p.id} property={p} isWishlisted={wishlist.includes(p.id)} isTogglingWishlist={togglingId === p.id} onToggleWishlist={toggleWishlist} animationSetting={animationSetting} />)}
             </div>
 
             {/* Divider */}
@@ -539,7 +404,7 @@ export default function Browse() {
         </div>
 
         {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="property-card" style={{ height: '340px' }}>
                 <div className="skeleton" style={{ height: '200px', borderRadius: '12px 12px 0 0' }} />
@@ -559,21 +424,21 @@ export default function Browse() {
             WebkitBackdropFilter: 'blur(12px)',
             borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', boxShadow: '0 4px 8px rgba(36,36,36,0.05)'
           }}>
-            <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: '#f4f4f4', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: '#FDFBF7', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#898989" strokeWidth="1.5">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
             </div>
             <div>
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: '1.1rem', color: '#101010' }}>No listings found</h3>
+              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: '1.1rem', color: '#2C2C2C' }}>No listings found</h3>
               <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.3rem' }}>Try adjusting your filters or search a different location.</p>
             </div>
             {hasActive && <button onClick={clearFilters} className="btn-primary" style={{ fontSize: '0.875rem' }}>Clear filters</button>}
           </div>
         ) : (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.25rem' }}>
-              {properties.slice(0, visibleCount).map(p => <PropertyCard key={p.id} p={p} {...cardProps} />)}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+              {properties.slice(0, visibleCount).map(p => <PropertyCard key={p.id} property={p} isWishlisted={wishlist.includes(p.id)} isTogglingWishlist={togglingId === p.id} onToggleWishlist={toggleWishlist} animationSetting={animationSetting} />)}
             </div>
             {visibleCount < properties.length && (
               <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
@@ -586,7 +451,7 @@ export default function Browse() {
                     WebkitBackdropFilter: 'blur(12px)',
                     border: '1px solid #e5e7eb',
                     borderRadius: '99px',
-                    color: '#101010',
+                    color: '#2C2C2C',
                     fontSize: '0.875rem',
                     fontWeight: 600,
                     cursor: 'pointer',

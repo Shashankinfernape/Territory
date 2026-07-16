@@ -77,7 +77,7 @@ export default function FileDropzone({
       onClick={onContainerClick}
       style={{
         position: 'relative',
-        border: '2.5px dashed #101010',
+        border: '2.5px dashed #2C2C2C',
         borderRadius: '8px',
         padding: '2.5rem 1.5rem',
         textAlign: 'center',
@@ -119,7 +119,7 @@ export default function FileDropzone({
         <div style={{
           position: 'absolute',
           inset: '8px',
-          border: '2.5px dashed #101010',
+          border: '2.5px dashed #2C2C2C',
           borderRadius: '6px',
           background: 'rgba(255, 255, 255, 0.98)',
           display: 'flex',
@@ -130,12 +130,12 @@ export default function FileDropzone({
           pointerEvents: 'none',
           gap: '0.4rem'
         }}>
-          <div style={{ color: '#101010' }}>
+          <div style={{ color: '#2C2C2C' }}>
             <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
           </div>
-          <p style={{ fontSize: '0.85rem', fontWeight: 800, color: '#101010', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <p style={{ fontSize: '0.85rem', fontWeight: 800, color: '#2C2C2C', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Drop files to upload
           </p>
         </div>
@@ -147,7 +147,7 @@ export default function FileDropzone({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#101010',
+          color: '#2C2C2C',
           marginBottom: '0.2rem'
         }}>
           {isImageDropzone ? (
@@ -163,7 +163,7 @@ export default function FileDropzone({
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-          <p style={{ fontSize: '1.125rem', fontWeight: 800, color: '#101010', margin: 0, fontFamily: "'Poppins', sans-serif" }}>
+          <p style={{ fontSize: '1.125rem', fontWeight: 800, color: '#2C2C2C', margin: 0, fontFamily: "'Poppins', sans-serif" }}>
             {label}
           </p>
           <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#6b7280', margin: 0 }}>

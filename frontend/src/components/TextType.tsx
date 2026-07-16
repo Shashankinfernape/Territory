@@ -14,6 +14,7 @@ interface TextTypeProps {
   className?: string;
   showCursor?: boolean;
   hideCursorWhileTyping?: boolean;
+  hideCursorOnComplete?: boolean;
   cursorCharacter?: string | ReactNode;
   cursorClassName?: string;
   cursorBlinkDuration?: number;
@@ -36,6 +37,7 @@ export default function TextType({
   className = '',
   showCursor = true,
   hideCursorWhileTyping = false,
+  hideCursorOnComplete = false,
   cursorCharacter = '|',
   cursorClassName = '',
   cursorBlinkDuration = 0.5,
@@ -171,8 +173,11 @@ export default function TextType({
     onSentenceComplete
   ]);
 
+  const isComplete = !loop && currentTextIndex === textArray.length - 1 && currentCharIndex === textArray[currentTextIndex].length && !isDeleting;
+  
   const shouldHideCursor =
-    hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex].length || isDeleting);
+    (hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex].length || isDeleting)) ||
+    (hideCursorOnComplete && isComplete);
 
   return createElement(
     Component,

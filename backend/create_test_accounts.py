@@ -108,9 +108,9 @@ def main():
             continue
 
         # Sync to MongoDB
-        existing = db.users.find_one({"_id": uid})
+        existing = auth_db.users.find_one({"_id": uid})
         if existing:
-            db.users.update_one(
+            auth_db.users.update_one(
                 {"_id": uid},
                 {"$set": {
                     "email": acc["email"],
@@ -121,7 +121,7 @@ def main():
             )
             print(f"Synced & updated user {acc['email']} (role: {acc['role']}) in MongoDB.")
         else:
-            db.users.insert_one({
+            auth_db.users.insert_one({
                 "_id": uid,
                 "email": acc["email"],
                 "phone_number": acc["phone"],

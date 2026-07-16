@@ -7,7 +7,7 @@ export default function SellGuide() {
         
         {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <h1 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 700, color: '#101010', lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: '1rem' }}>
+          <h1 style={{ fontFamily: "'Poppins', sans-serif", fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 700, color: '#2C2C2C', lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: '1rem' }}>
             Sell Your Land <span style={{ color: '#10b981' }}>Directly.</span>
           </h1>
           <p style={{ fontSize: '1.125rem', color: '#6b7280', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6, letterSpacing: '-0.2px' }}>
@@ -28,7 +28,7 @@ export default function SellGuide() {
               1
             </div>
             <div>
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', marginBottom: '0.5rem' }}>Create an Account</h3>
+              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.5rem' }}>Create an Account</h3>
               <p style={{ color: '#6b7280', fontSize: '0.9375rem', lineHeight: 1.5, margin: 0 }}>
                 Sign up for a free PropIt account using your email and phone number. Your contact details will only be shared with verified buyers.
               </p>
@@ -45,7 +45,7 @@ export default function SellGuide() {
               2
             </div>
             <div>
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', marginBottom: '0.5rem' }}>Upload Property Details</h3>
+              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.5rem' }}>Upload Property Details</h3>
               <p style={{ color: '#6b7280', fontSize: '0.9375rem', lineHeight: 1.5, margin: 0 }}>
                 Navigate to your Seller Dashboard and click "+ List Land". Fill in the property specifications including area, location, soil type, and asking price.
               </p>
@@ -62,7 +62,7 @@ export default function SellGuide() {
               3
             </div>
             <div>
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', marginBottom: '0.5rem' }}>Secure Document Vault</h3>
+              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.5rem' }}>Secure Document Vault</h3>
               <p style={{ color: '#6b7280', fontSize: '0.9375rem', lineHeight: 1.5, margin: 0 }}>
                 Upload high-quality images and legal documents (like Patta, Chitta, or EC). Documents are securely watermarked and hidden behind a paywall.
               </p>
@@ -79,7 +79,7 @@ export default function SellGuide() {
               4
             </div>
             <div>
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', marginBottom: '0.5rem' }}>Connect with Buyers</h3>
+              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.5rem' }}>Connect with Buyers</h3>
               <p style={{ color: '#6b7280', fontSize: '0.9375rem', lineHeight: 1.5, margin: 0 }}>
                 Once verified, your listing goes live. Interested buyers will unlock your contact details, allowing them to negotiate directly with you.
               </p>
@@ -89,7 +89,7 @@ export default function SellGuide() {
         </div>
 
         {/* Call to Action */}
-        <div style={{ textAlign: 'center', background: '#101010', padding: '3rem 2rem', borderRadius: '16px', color: '#ffffff' }}>
+        <div style={{ textAlign: 'center', background: '#2C2C2C', padding: '3rem 2rem', borderRadius: '16px', color: '#ffffff' }}>
           <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.75rem', fontWeight: 600, marginBottom: '1rem', letterSpacing: '-0.01em' }}>
             Ready to list your land?
           </h2>
@@ -98,7 +98,7 @@ export default function SellGuide() {
           </p>
           <Link to="/login" state={{ mode: 'register' }} style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-            background: '#ffffff', color: '#101010', padding: '0.85rem 1.75rem',
+            background: '#ffffff', color: '#2C2C2C', padding: '0.85rem 1.75rem',
             borderRadius: '99px', fontSize: '0.9375rem', fontWeight: 600,
             textDecoration: 'none', transition: 'transform 0.2s ease, box-shadow 0.2s ease'
           }}

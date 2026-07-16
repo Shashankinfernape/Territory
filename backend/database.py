@@ -9,6 +9,9 @@ load_dotenv()
 MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
 DATABASE_NAME = os.getenv("DATABASE_NAME", "propit")
 
+MONGODB_AUTH_URL = os.getenv("MONGODB_AUTH_URL", MONGODB_URL)
+AUTH_DATABASE_NAME = os.getenv("AUTH_DATABASE_NAME", "propit_auth")
+
 # Connection pooling is configured here. serverSelectionTimeoutMS prevents
 # the app from hanging indefinitely if MongoDB is unreachable at startup.
 client = AsyncIOMotorClient(
@@ -19,9 +22,20 @@ client = AsyncIOMotorClient(
 )
 db = client[DATABASE_NAME]
 
+auth_client = AsyncIOMotorClient(
+    MONGODB_AUTH_URL,
+    maxPoolSize=10,
+    minPoolSize=1,
+    serverSelectionTimeoutMS=5000,
+)
+auth_db = auth_client[AUTH_DATABASE_NAME]
+
 
 def get_db():
     return db
+
+def get_auth_db():
+    return auth_db
 
 
 # Initialize Firebase Admin SDK

@@ -6,6 +6,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, auth
+from database import auth_db
 
 load_dotenv()
 
@@ -35,6 +36,8 @@ def create_admin() -> None:
 
     mongo_url = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
     db_name = os.getenv("DATABASE_NAME", "propit")
+    mongo_auth_url = os.getenv("MONGODB_AUTH_URL", mongo_url)
+    auth_db_name = os.getenv("AUTH_DATABASE_NAME", "propit_auth")
     phone_number = os.getenv("ADMIN_PHONE", "9999999999")
     password = os.getenv("ADMIN_PASSWORD", "adminpassword")
     email = os.getenv("ADMIN_EMAIL", "admin@propit.com")
@@ -42,6 +45,9 @@ def create_admin() -> None:
     # Connect to MongoDB
     client = MongoClient(mongo_url, serverSelectionTimeoutMS=5000)
     db = client[db_name]
+
+    auth_client = MongoClient(mongo_auth_url, serverSelectionTimeoutMS=5000)
+    auth_db = auth_client[auth_db_name]
 
     # Check if admin user exists in Firebase Auth
     firebase_user = None
@@ -86,7 +92,7 @@ def create_admin() -> None:
         return
 
     # Sync to MongoDB
-    existing = db.users.find_one({"_id": uid})
+    existing = auth_db.users.find_one({"_id": uid})
     if existing:
         print(f"Admin user with UID {uid} already exists in MongoDB. No changes made.")
     else:
@@ -97,7 +103,7 @@ def create_admin() -> None:
             "role": "ADMIN",
             "full_name": "System Administrator",
         }
-        db.users.insert_one(admin_user)
+        auth_db.users.insert_one(admin_user)
         print(f"Admin synced to MongoDB successfully under UID {uid}.")
 
     print(

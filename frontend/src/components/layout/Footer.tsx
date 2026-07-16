@@ -10,13 +10,13 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.75rem' }}>
-              <div style={{ width: '24px', height: '24px', borderRadius: '5px', background: '#101010', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '24px', height: '24px', borderRadius: '5px', background: '#2C2C2C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5">
                   <rect x="3" y="3" width="18" height="18" rx="2" />
                   <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
                 </svg>
               </div>
-              <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '0.9rem', fontWeight: 600, color: '#101010', letterSpacing: '0.01em' }}>TERRITORY</span>
+              <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '0.9rem', fontWeight: 600, color: '#2C2C2C', letterSpacing: '0.01em' }}>TERRITORY</span>
             </div>
             <p style={{ fontSize: '0.875rem', lineHeight: 1.6, color: '#6b7280', maxWidth: '210px', letterSpacing: '-0.2px' }}>
               Deed-verified land transactions across Tamil Nadu. Direct from owners.

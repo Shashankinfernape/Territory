@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Dict, Any
 from bson import ObjectId
-from database import get_db
+from database import get_db, get_auth_db
 from .auth import get_current_admin
 from firebase_admin import auth
 
@@ -9,13 +9,13 @@ router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
 
 @router.get("/stats", response_model=Dict[str, Any])
-async def get_platform_stats(db=Depends(get_db), current_admin=Depends(get_current_admin)):
-    total_users = await db.users.count_documents({})
+async def get_platform_stats(db=Depends(get_db), auth_db=Depends(get_auth_db), current_admin=Depends(get_current_admin)):
+    total_users = await auth_db.users.count_documents({})
     total_properties = await db.properties.count_documents({})
     active_properties = await db.properties.count_documents({"status": "ACTIVE"})
     pending_properties = await db.properties.count_documents({"status": "PENDING_VERIFICATION"})
     total_transactions = await db.transactions.count_documents({})
-    pending_sellers = await db.users.count_documents({"role": "USER", "kyc_details.status": "PENDING"})
+    pending_sellers = await auth_db.users.count_documents({"role": "USER", "kyc_details.status": "PENDING"})
 
     # Aggregate total revenue from all successful transactions.
     revenue_pipeline = [
@@ -37,9 +37,9 @@ async def get_platform_stats(db=Depends(get_db), current_admin=Depends(get_curre
 
 
 @router.get("/users", response_model=List[Dict[str, Any]])
-async def get_all_users(db=Depends(get_db), current_admin=Depends(get_current_admin)):
+async def get_all_users(db=Depends(get_db), auth_db=Depends(get_auth_db), current_admin=Depends(get_current_admin)):
     users = []
-    cursor = db.users.find({})
+    cursor = auth_db.users.find({})
     async for document in cursor:
         users.append({
             "id": str(document["_id"]),
@@ -53,7 +53,7 @@ async def get_all_users(db=Depends(get_db), current_admin=Depends(get_current_ad
 
 
 @router.get("/properties", response_model=List[Dict[str, Any]])
-async def get_all_properties(db=Depends(get_db), current_admin=Depends(get_current_admin)):
+async def get_all_properties(db=Depends(get_db), auth_db=Depends(get_auth_db), current_admin=Depends(get_current_admin)):
     properties = []
     cursor = db.properties.find({})
     async for document in cursor:
@@ -75,7 +75,7 @@ async def get_all_properties(db=Depends(get_db), current_admin=Depends(get_curre
 
 
 @router.get("/transactions", response_model=List[Dict[str, Any]])
-async def get_all_transactions(db=Depends(get_db), current_admin=Depends(get_current_admin)):
+async def get_all_transactions(db=Depends(get_db), auth_db=Depends(get_auth_db), current_admin=Depends(get_current_admin)):
     pipeline = [
         {"$sort": {"created_at": -1}},
         {
@@ -213,7 +213,7 @@ async def verify_seller(
     db=Depends(get_db),
     current_admin=Depends(get_current_admin)
 ):
-    user = await db.users.find_one({"_id": user_id})
+    user = await auth_db.users.find_one({"_id": user_id})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
         
@@ -221,7 +221,7 @@ async def verify_seller(
         return {"message": "User is already an approved seller"}
 
     # Update role to SELLER and status to APPROVED
-    result = await db.users.update_one(
+    result = await auth_db.users.update_one(
         {"_id": user_id},
         {
             "$set": {
@@ -253,7 +253,7 @@ async def delete_user(
         print(f"Warning: Failed to delete user from Firebase Auth: {e}")
 
     # Delete user from MongoDB
-    result = await db.users.delete_one({"_id": user_id})
+    result = await auth_db.users.delete_one({"_id": user_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
 

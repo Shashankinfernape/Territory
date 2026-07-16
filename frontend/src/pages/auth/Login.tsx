@@ -146,7 +146,7 @@ export default function Login() {
   };
 
   const label = (text: string) => (
-    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: '#242424', marginBottom: '0.4rem', letterSpacing: '-0.2px' }}>
+    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.4rem', letterSpacing: '-0.2px' }}>
       {text}
     </label>
   );
@@ -167,13 +167,13 @@ export default function Login() {
 
         {/* Brand mark */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
-          <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: '#101010', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: '#2C2C2C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5">
               <rect x="3" y="3" width="18" height="18" rx="2" />
               <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
             </svg>
           </div>
-          <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '0.9375rem', fontWeight: 600, color: '#101010', letterSpacing: '0.01em' }}>TERRITORY</span>
+          <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '0.9375rem', fontWeight: 600, color: '#2C2C2C', letterSpacing: '0.01em' }}>TERRITORY</span>
         </div>
 
         {error && <div className="error-box" style={{ marginBottom: '1.25rem' }}>{error}</div>}
@@ -186,7 +186,7 @@ export default function Login() {
         {/* ── Login ── */}
         {step === 'login' && (
           <div className="slide-in">
-            <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', marginBottom: '0.3rem', letterSpacing: '0.01em' }}>Welcome back</h2>
+            <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.3rem', letterSpacing: '0.01em' }}>Welcome back</h2>
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem', letterSpacing: '-0.2px' }}>Sign in to your account to continue.</p>
 
             <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -196,7 +196,7 @@ export default function Login() {
               </div>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                  <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#242424', letterSpacing: '-0.2px' }}>Password</span>
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#2C2C2C', letterSpacing: '-0.2px' }}>Password</span>
                   <button type="button" onClick={() => setStep('forgot-password')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0099ff', fontWeight: 500, fontSize: '0.8125rem', fontFamily: 'inherit' }}>
                     Forgot?
                   </button>
@@ -224,7 +224,7 @@ export default function Login() {
             <button onClick={() => setStep('login')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '0.8125rem', fontWeight: 400, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem', fontFamily: 'inherit' }}>
               ← Back to sign in
             </button>
-            <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', marginBottom: '0.3rem', letterSpacing: '0.01em' }}>Create account</h2>
+            <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.3rem', letterSpacing: '0.01em' }}>Create account</h2>
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem', letterSpacing: '-0.2px' }}>Purchase and list verified land directly.</p>
 
             <form onSubmit={handleRegister} className="register-grid">
@@ -268,7 +268,7 @@ export default function Login() {
             <button onClick={() => { setStep('login'); setResetSent(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '0.8125rem', fontWeight: 400, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem', fontFamily: 'inherit' }}>
               ← Back to sign in
             </button>
-            <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#101010', marginBottom: '0.3rem', letterSpacing: '0.01em' }}>Reset password</h2>
+            <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.3rem', letterSpacing: '0.01em' }}>Reset password</h2>
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem', letterSpacing: '-0.2px' }}>We'll send a reset link to your email.</p>
 
             {!resetSent && (

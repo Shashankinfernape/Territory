@@ -16,11 +16,11 @@ const EXIT_MS    = 500;
 const FONT_HEADING = "'Poppins', ui-sans-serif, system-ui, sans-serif";
 const FONT_BODY    = "'Inter', ui-sans-serif, system-ui, sans-serif";
 
-const INK      = "#101010";
-const GRAPHITE = "#242424";
+const INK      = "#2C2C2C";
+const GRAPHITE = "#2C2C2C";
 const SLATE    = "#6b7280";
 const SILVER   = "#e5e7eb";
-const PAPER    = "#f4f4f4";
+const PAPER    = "#FDFBF7";
 const EMERALD  = "#10b981";
 
 // ── Easing ───────────────────────────────────────────────────────────────────

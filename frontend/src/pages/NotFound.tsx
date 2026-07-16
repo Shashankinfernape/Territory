@@ -7,7 +7,7 @@ export default function NotFound() {
         <h1 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '6rem', fontWeight: 600, color: '#e5e7eb', margin: 0, letterSpacing: '0.01em', lineHeight: 1 }}>
           404
         </h1>
-        <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.5rem', fontWeight: 600, color: '#101010', marginTop: '1rem', letterSpacing: '0.01em' }}>
+        <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.5rem', fontWeight: 600, color: '#2C2C2C', marginTop: '1rem', letterSpacing: '0.01em' }}>
           Page Not Found
         </h2>
         <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.5rem', lineHeight: 1.5, letterSpacing: '-0.2px' }}>

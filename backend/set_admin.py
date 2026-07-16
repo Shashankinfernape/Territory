@@ -23,7 +23,7 @@ def promote_to_admin():
     db = client[db_name]
 
     # Find the user by email
-    user = db.users.find_one({"email": email})
+    user = auth_db.users.find_one({"email": email})
     if not user:
         print(f"Error: User with email '{email}' was not found in MongoDB.")
         print("Please register this email account first through the website sign-up form!")
@@ -31,7 +31,7 @@ def promote_to_admin():
         sys.exit(1)
 
     # Update role to ADMIN
-    res = db.users.update_one({"_id": user["_id"]}, {"$set": {"role": "ADMIN"}})
+    res = auth_db.users.update_one({"_id": user["_id"]}, {"$set": {"role": "ADMIN"}})
     if res.modified_count > 0:
         print(f"Success! Promoted '{email}' to ADMIN in MongoDB.")
     else:

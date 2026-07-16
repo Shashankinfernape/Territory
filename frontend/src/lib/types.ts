@@ -120,3 +120,16 @@ export const getPropertyImageUrl = (property: Property | AdminProperty) => {
   }
   return PROPERTY_IMAGES[property.type || ''] ?? PROPERTY_IMAGES.default;
 };
+
+export const getAllPropertyImageUrls = (property: Property | AdminProperty): string[] => {
+  if (property.images && property.images.length > 0) {
+    const rootUrl = import.meta.env.VITE_API_URL 
+      ? import.meta.env.VITE_API_URL.replace('/api/v1', '') 
+      : 'http://localhost:8000';
+    return property.images.map(img => {
+      if (img.startsWith('http')) return img;
+      return `${rootUrl}${img}`;
+    });
+  }
+  return [PROPERTY_IMAGES[property.type || ''] ?? PROPERTY_IMAGES.default];
+};

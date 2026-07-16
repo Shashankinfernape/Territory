@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from typing import Optional
-from database import get_db
+from database import get_db, get_auth_db
 from models import UserCreate, UserInDB, TokenData, UserResponse
 from firebase_admin import auth
 
@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db=Depends(get_db)):
+async def get_current_user(token: str = Depends(oauth2_scheme), auth_db=Depends(get_auth_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -28,7 +28,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db=Depends(get_d
         # Token invalid, expired, or verification failed
         raise credentials_exception
 
-    user = await db.users.find_one({"_id": token_data.uid})
+    user = await auth_db.users.find_one({"_id": token_data.uid})
     if user is None:
         raise credentials_exception
         
@@ -53,14 +53,14 @@ async def get_current_admin(current_user=Depends(get_current_user)):
 
 
 @router.post("/register", response_model=UserResponse)
-async def register(user: UserCreate, db=Depends(get_db)):
+async def register(user: UserCreate, auth_db=Depends(get_auth_db)):
     # Check if this UID is already registered in MongoDB
-    existing_user_uid = await db.users.find_one({"_id": user.uid})
+    existing_user_uid = await auth_db.users.find_one({"_id": user.uid})
     if existing_user_uid:
         raise HTTPException(status_code=400, detail="User already registered in database")
 
     # Check if the phone number is already registered in MongoDB
-    existing_user_phone = await db.users.find_one({"phone_number": user.phone_number})
+    existing_user_phone = await auth_db.users.find_one({"phone_number": user.phone_number})
     if existing_user_phone:
         raise HTTPException(status_code=400, detail="Phone number already registered")
 
@@ -71,9 +71,9 @@ async def register(user: UserCreate, db=Depends(get_db)):
 
     new_user = UserInDB(**user_dict)
     # Insert into DB
-    await db.users.insert_one(new_user.to_insert_dict())
+    await auth_db.users.insert_one(new_user.to_insert_dict())
 
-    created_user = await db.users.find_one({"_id": new_user.id})
+    created_user = await auth_db.users.find_one({"_id": new_user.id})
     if not created_user:
         raise HTTPException(status_code=500, detail="Failed to create user record")
 
@@ -106,7 +106,7 @@ async def get_wishlist(current_user=Depends(get_current_user)):
 
 
 @router.post("/wishlist/{property_id}")
-async def toggle_wishlist(property_id: str, current_user=Depends(get_current_user), db=Depends(get_db)):
+async def toggle_wishlist(property_id: str, current_user=Depends(get_current_user), auth_db=Depends(get_auth_db)):
     """Toggle a property in/out of the user's wishlist. Returns updated wishlist."""
     uid = str(current_user["_id"])
     wishlist: list = current_user.get("wishlist", [])
@@ -118,7 +118,7 @@ async def toggle_wishlist(property_id: str, current_user=Depends(get_current_use
         wishlist.append(property_id)
         action = "added"
 
-    await db.users.update_one({"_id": uid}, {"$set": {"wishlist": wishlist}})
+    await auth_db.users.update_one({"_id": uid}, {"$set": {"wishlist": wishlist}})
     return {"action": action, "wishlist": wishlist}
 
 

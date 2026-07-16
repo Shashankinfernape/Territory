@@ -1,0 +1,87 @@
+.sword-split-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  margin: 0 auto;
+  opacity: 0;
+  transform: scale(0.95);
+  border-radius: 8px;
+}
+
+.sword-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem calc(2.8rem + 9px) 0.85rem 2.8rem;
+  min-width: 148px;
+  background: #1E3F20;
+  color: #fff;
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  position: relative;
+  z-index: 2;
+  /* Cut bottom-right corner inward by 18px to match 18deg cut (/ shape) */
+  clip-path: polygon(0% 0%, 100% 0%, calc(100% - 18px) 100%, 0% 100%);
+}
+
+.sword-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 2.8rem 0.85rem calc(2.8rem + 9px);
+  min-width: 148px;
+  background: #4a5d23;
+  color: #fff;
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  position: relative;
+  z-index: 1;
+  /* Cut top-left corner inward by 18px to match 18deg cut (/ shape) */
+  clip-path: polygon(18px 0%, 100% 0%, 100% 100%, 0% 100%);
+  /* Overlap the left button perfectly (19px hides anti-aliasing white line) */
+  margin-left: -19px;
+}
+
+.sword-left:hover  { filter: brightness(1.15); }
+.sword-right:hover { filter: brightness(1.15); }
+
+.sword-cut-mark {
+  position: absolute;
+  top: -25%;
+  left: 50%;
+  width: 3px;
+  height: 150%;
+  transform: translateX(-50%) rotate(18deg);
+  transform-origin: center center;
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 20%, #fff 50%, rgba(255,255,255,0.9) 80%, rgba(255,255,255,0) 100%);
+  box-shadow: 0 0 10px rgba(255,255,255,1), 0 0 22px rgba(255,255,255,0.9), 0 0 50px rgba(255,255,255,0.5);
+  opacity: 0;
+  /* starts fully clipped — sweep reveals top→bottom */
+  clip-path: inset(0 0 100% 0);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.sword-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0) 70%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 25;
+}

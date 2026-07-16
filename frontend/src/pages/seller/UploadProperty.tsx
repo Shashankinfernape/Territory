@@ -30,10 +30,10 @@ function ImageThumbnail({ file, index, isDragging, onRemove }: {
         position: 'relative',
         height: '90px',
         borderRadius: '6px',
-        border: isDragging ? '2.5px solid #101010' : '1px solid #e5e7eb',
+        border: isDragging ? '2.5px solid #2C2C2C' : '1px solid #e5e7eb',
         overflow: 'hidden',
         cursor: 'grabbing',
-        background: '#f4f4f4',
+        background: '#FDFBF7',
         boxShadow: 'rgba(36, 36, 36, 0.08) 0px 4px 12px 0px',
         opacity: 1,
         width: '100%',
@@ -44,7 +44,7 @@ function ImageThumbnail({ file, index, isDragging, onRemove }: {
       {index === 0 && (
         <span style={{
           position: 'absolute', bottom: '4px', left: '4px',
-          background: '#101010', color: '#ffffff', fontSize: '0.625rem',
+          background: '#2C2C2C', color: '#ffffff', fontSize: '0.625rem',
           padding: '2px 6px', borderRadius: '4px', fontWeight: 600,
           textTransform: 'uppercase', letterSpacing: '0.02em'
         }}>
@@ -253,7 +253,7 @@ export default function UploadProperty() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
             <Link to={dashboardPath} style={{
-              color: '#101010',
+              color: '#2C2C2C',
               textDecoration: 'none',
               display: 'inline-flex',
               alignItems: 'center',
@@ -262,7 +262,7 @@ export default function UploadProperty() {
               height: '32px',
               borderRadius: '50%',
               background: '#f0f0f0',
-              border: '1.5px solid #101010',
+              border: '1.5px solid #2C2C2C',
               fontWeight: 'bold',
               fontSize: '1rem',
               transition: 'background-color 0.15s ease'
@@ -272,7 +272,7 @@ export default function UploadProperty() {
             >
               &larr;
             </Link>
-            <h2 style={{ margin: 0, fontFamily: "'Poppins', sans-serif", fontSize: '1.5rem', fontWeight: 600, color: '#101010', letterSpacing: '0.01em' }}>
+            <h2 style={{ margin: 0, fontFamily: "'Poppins', sans-serif", fontSize: '1.5rem', fontWeight: 600, color: '#2C2C2C', letterSpacing: '0.01em' }}>
               List New Property
             </h2>
           </div>
@@ -283,12 +283,12 @@ export default function UploadProperty() {
             
             {/* 1. Location Details */}
             <div>
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#2C2C2C', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
                 Location Details
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>District</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>District</label>
                   <select
                     required
                     value={district}
@@ -306,7 +306,7 @@ export default function UploadProperty() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Taluk</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Taluk</label>
                   <select
                     required
                     disabled={!district}
@@ -322,7 +322,7 @@ export default function UploadProperty() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>City / Village</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>City / Village</label>
                   <input
                     type="text"
                     required
@@ -334,7 +334,7 @@ export default function UploadProperty() {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>State</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>State</label>
                   <input type="text" value={state} onChange={e => setState(e.target.value)} className="form-input" style={{ width: '100%' }} />
                 </div>
               </div>
@@ -342,12 +342,12 @@ export default function UploadProperty() {
 
             {/* 2. Property Info */}
             <div>
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#2C2C2C', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
                 Property Specifications
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Property Type</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Property Type</label>
                   <select value={type} onChange={e => setType(e.target.value)} className="form-input select-type">
                     <option>Agricultural Land</option>
                     <option>Farm Land</option>
@@ -357,17 +357,17 @@ export default function UploadProperty() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Asking Price (₹)</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Asking Price (₹)</label>
                   <input type="number" required value={price} onChange={e => setPrice(e.target.value)} className="form-input" placeholder="e.g. 1500000" />
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Total Area</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Total Area</label>
                   <input type="number" step="0.01" required value={area} onChange={e => setArea(e.target.value)} className="form-input" placeholder="e.g. 2.5" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Area Unit</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Area Unit</label>
                   <select value={areaUnit} onChange={e => setAreaUnit(e.target.value)} className="form-input select-unit">
                     <option value="acres">Acres</option>
                     <option value="sq_ft">Sq. Ft.</option>
@@ -377,19 +377,19 @@ export default function UploadProperty() {
                 </div>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Description / Overview</label>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Description / Overview</label>
                 <textarea rows={3} value={description} onChange={e => setDescription(e.target.value)} className="form-input" style={{ resize: 'vertical' }} placeholder="Describe key attributes — landmarks, access paths, survey records..." />
               </div>
             </div>
 
             {/* 3. Features & Attributes */}
             <div>
-              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#2C2C2C', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
                 Land Features
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Soil Type</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Soil Type</label>
                   <select value={soilType} onChange={e => setSoilType(e.target.value)} className="form-input select-soil">
                     <option value="">-- Select --</option>
                     <option>Red Soil</option>
@@ -401,7 +401,7 @@ export default function UploadProperty() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Water Source</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Water Source</label>
                   <select value={waterSource} onChange={e => setWaterSource(e.target.value)} className="form-input select-water">
                     <option value="">-- Select --</option>
                     <option>Borewell</option>
@@ -415,7 +415,7 @@ export default function UploadProperty() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Road Access</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Road Access</label>
                   <select value={roadAccess} onChange={e => setRoadAccess(e.target.value)} className="form-input select-road">
                     <option value="">-- Select --</option>
                     <option>National Highway</option>
@@ -427,7 +427,7 @@ export default function UploadProperty() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Fencing</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Fencing</label>
                   <select value={fencing} onChange={e => setFencing(e.target.value)} className="form-input select-fence">
                     <option value="">-- Select --</option>
                     <option>Compound Wall</option>
@@ -439,22 +439,22 @@ export default function UploadProperty() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Nearest Town</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Nearest Town</label>
                   <input type="text" value={nearbyTown} onChange={e => setNearbyTown(e.target.value)} className="form-input" placeholder="e.g. Pollachi" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Distance from Town (km)</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Distance from Town (km)</label>
                   <input type="number" step="0.1" value={distFromTown} onChange={e => setDistFromTown(e.target.value)} className="form-input" placeholder="e.g. 5" />
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1.25rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9375rem', fontWeight: 500, color: '#242424' }}>
-                  <input type="checkbox" checked={electricity} onChange={e => setElectricity(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#101010' }} />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9375rem', fontWeight: 500, color: '#2C2C2C' }}>
+                  <input type="checkbox" checked={electricity} onChange={e => setElectricity(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#2C2C2C' }} />
                   Electricity Available
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9375rem', fontWeight: 500, color: '#242424' }}>
-                  <input type="checkbox" checked={irrigation} onChange={e => setIrrigation(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#101010' }} />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9375rem', fontWeight: 500, color: '#2C2C2C' }}>
+                  <input type="checkbox" checked={irrigation} onChange={e => setIrrigation(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#2C2C2C' }} />
                   Irrigation Facility
                 </label>
               </div>
@@ -462,7 +462,7 @@ export default function UploadProperty() {
 
             {/* 4. Search Keywords */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#242424', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Keywords (Comma separated)</label>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.5rem', letterSpacing: '-0.2px' }}>Keywords (Comma separated)</label>
               <input type="text" value={keywords} onChange={e => setKeywords(e.target.value)} className="form-input" placeholder="e.g. lake view, clear title, highway access" />
             </div>
 
@@ -471,7 +471,7 @@ export default function UploadProperty() {
               
               {/* Document Dropzone & List */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', margin: 0 }}>
+                <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#2C2C2C', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', margin: 0 }}>
                   Upload Documents
                 </h3>
                 <FileDropzone
@@ -520,7 +520,7 @@ export default function UploadProperty() {
 
               {/* Image Dropzone & Reorder Grid */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#101010', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', margin: 0 }}>
+                <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.0625rem', fontWeight: 600, color: '#2C2C2C', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', margin: 0 }}>
                   Property Gallery Images
                 </h3>
                 <FileDropzone
@@ -570,8 +570,8 @@ export default function UploadProperty() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: '#f0f0f0',
-                color: '#101010',
-                border: '1.5px solid #101010',
+                color: '#2C2C2C',
+                border: '1.5px solid #2C2C2C',
                 borderRadius: '8px',
                 padding: '0.8rem 1.5rem',
                 fontSize: '0.875rem',
@@ -592,9 +592,9 @@ export default function UploadProperty() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: '#101010',
+                  background: '#2C2C2C',
                   color: '#ffffff',
-                  border: '1.5px solid #101010',
+                  border: '1.5px solid #2C2C2C',
                   borderRadius: '8px',
                   padding: '0.8rem 1.5rem',
                   fontSize: '0.875rem',
@@ -603,7 +603,7 @@ export default function UploadProperty() {
                   transition: 'background-color 0.15s ease, opacity 0.15s ease'
                 }}
                 onMouseEnter={e => e.currentTarget.style.backgroundColor = '#222222'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#101010'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2C2C2C'}
               >
                 {loading ? 'Publishing Registry...' : 'Submit Property'}
               </button>
