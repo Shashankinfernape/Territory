@@ -274,36 +274,10 @@ export default function Navbar() {
                 {(role === 'SELLER' || role === 'ADMIN') && (
                   <Link
                     to="/dashboard/seller/upload"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.25rem',
-                      background: '#ffffff',
-                      color: '#101010',
-                      border: '3.5px solid',
-                      borderTopColor: '#6b7280',
-                      borderRightColor: '#374151',
-                      borderBottomColor: '#101010',
-                      borderLeftColor: '#898989',
-                      borderRadius: '9999px',
-                      height: '32px',
-                      padding: '0 0.85rem',
-                      boxSizing: 'border-box',
-                      fontFamily: "'Inter', sans-serif",
-                      fontSize: '0.74rem',
-                      fontWeight: 900,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.08em',
-                      textDecoration: 'none',
-                      transition: 'transform 0.1s ease',
-                      outline: 'none',
-                      WebkitTapHighlightColor: 'transparent'
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                    className="btn-olx-sell"
+                    style={{ gap: '0.25rem' }}
                   >
-                    <span style={{ fontSize: '0.9rem', fontWeight: 900 }}>+</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 900 }}>+</span>
                     <span>Sell</span>
                   </Link>
                 )}
@@ -399,35 +373,10 @@ export default function Navbar() {
           {isMobile && (role === 'SELLER' || role === 'ADMIN') && (location.pathname === '/' || location.pathname === '/browse' || location.pathname === '/map') && (
             <Link
               to="/dashboard/seller/upload"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.15rem',
-                background: '#ffffff',
-                color: '#101010',
-                border: '3.5px solid',
-                borderTopColor: '#6b7280',
-                borderRightColor: '#374151',
-                borderBottomColor: '#101010',
-                borderLeftColor: '#898989',
-                borderRadius: '9999px',
-                height: '32px',
-                padding: '0 0.65rem',
-                boxSizing: 'border-box',
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '0.72rem',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                textDecoration: 'none',
-                outline: 'none',
-                WebkitTapHighlightColor: 'transparent',
-                flexShrink: 0,
-                marginRight: '0.5rem'
-              }}
+              className="btn-olx-sell"
+              style={{ gap: '0.15rem', marginRight: '0.5rem' }}
             >
-              <span style={{ fontSize: '0.85rem', fontWeight: 900 }}>+</span>
+              <span style={{ fontSize: '0.95rem', fontWeight: 900 }}>+</span>
               <span>Sell</span>
             </Link>
           )}
