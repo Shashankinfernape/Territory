@@ -22,7 +22,7 @@ body {
   font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   background-color: #FDFBF7;
   /* solid cream background */
-  /* background-image removed */
+  background-image: url('/bg.webp');
   background-size: cover;
   background-position: center top;
   background-attachment: fixed;

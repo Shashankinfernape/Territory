@@ -10,7 +10,7 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [animationSetting, setAnimationSettingState] = useState<AnimationSetting>('minimal');
+  const [animationSetting, setAnimationSettingState] = useState<AnimationSetting>('dynamic');
 
   useEffect(() => {
     const saved = localStorage.getItem('propit_animation_setting') as AnimationSetting;

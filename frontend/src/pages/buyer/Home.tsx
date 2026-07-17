@@ -93,9 +93,8 @@ export default function Home() {
   return (
     <div className="fade-in" style={{ minHeight: '100vh', paddingBottom: '5rem' }}>
 
-      {/* HERO (Only shown to logged-out users) */}
-      {!isLoggedIn && (
-        <div className="hero-cinematic" style={{ padding: '4rem 0.75rem', textAlign: 'center' }}>
+      {/* HERO (Shown to all users) */}
+      <div className="hero-cinematic" style={{ padding: '4rem 0.75rem', textAlign: 'center' }}>
           <div className="hero-inner" style={{ maxWidth: '800px', margin: '0 auto' }}>
 
             <TextType
@@ -129,7 +128,6 @@ export default function Home() {
 
           </div>
         </div>
-      )}
 
       {/* RECENTLY VIEWED (Horizontal Scroll) */}
       {recentlyViewed.length > 0 && (
