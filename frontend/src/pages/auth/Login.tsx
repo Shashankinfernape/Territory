@@ -1,286 +1,132 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api, setToken } from '../../lib/api';
 import { auth } from '../../lib/firebase';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail
-} from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
-type Step = 'login' | 'register' | 'forgot-password';
+const provider = new GoogleAuthProvider();
 
 export default function Login() {
-  const location = useLocation();
-  const initialStep = (location.state as any)?.mode === 'register' ? 'register' : 'login';
-  const [step, setStep] = useState<Step>(initialStep);
-
-  useEffect(() => {
-    const mode = (location.state as any)?.mode;
-    if (mode === 'register') {
-      setStep('register');
-    } else {
-      setStep('login');
-    }
-  }, [location.state]);
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [regName, setRegName] = useState('');
-  const [regEmail, setRegEmail] = useState('');
-  const [regPhone, setRegPhone] = useState('');
-  const [regRole, setRegRole] = useState<'USER' | 'SELLER'>('USER');
-  const [aadhaar, setAadhaar] = useState('');
-  const [pan, setPan] = useState('');
-  const [regPassword, setRegPassword] = useState('');
-  const [regConfirm, setRegConfirm] = useState('');
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [resetSent, setResetSent] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // No initial loading
   const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true); setError(''); setSuccessMsg('');
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError('');
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const token = await userCredential.user.getIdToken();
-      setToken(token);
-      const userRes = await api.get('/auth/me');
-      const { id: userId, role: userRole, phone_number } = userRes.data;
-      localStorage.setItem('user_role', userRole);
-      localStorage.setItem('user_phone', phone_number);
-      localStorage.setItem('user_id', userId);
-      window.dispatchEvent(new Event('storage'));
-      if (userRole === 'ADMIN') navigate('/dashboard/admin');
-      else if (userRole === 'SELLER') navigate('/dashboard/seller');
-      else navigate('/dashboard/buyer');
+      // We must use Popup because Redirect gets blocked by modern browser security on localhost
+      const result = await signInWithPopup(auth, provider);
+      if (result) {
+        const token = await result.user.getIdToken();
+        setToken(token);
+
+        // Auto-register or login — backend handles both
+        const userRes = await api.post('/auth/google-login', {
+          uid: result.user.uid,
+          email: result.user.email,
+          full_name: result.user.displayName,
+          photo_url: result.user.photoURL,
+        });
+
+        const { id: userId, role: userRole } = userRes.data;
+        localStorage.setItem('user_role', userRole);
+        localStorage.setItem('user_id', userId);
+        window.dispatchEvent(new Event('storage'));
+
+        if (userRole === 'ADMIN') navigate('/dashboard/admin');
+        else navigate('/');
+      }
     } catch (err: any) {
       console.error(err);
-      localStorage.removeItem('token');
-      // Sign them out of Firebase just in case to be fully secure
-      await auth.signOut();
-      
-      let errorMsg = 'Incorrect credentials. Please ensure your account registration is complete.';
-      if (err.response?.data?.detail) {
-        if (typeof err.response.data.detail === 'string') {
-          errorMsg = err.response.data.detail;
-        } else {
-          errorMsg = JSON.stringify(err.response.data.detail);
-        }
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setError(err.response?.data?.detail || err.message || 'Sign in failed. Please try again.');
       }
-      setError(errorMsg);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (regPassword !== regConfirm) { setError('Passwords do not match.'); return; }
-    if (regPassword.length < 6) { setError('Password must be at least 6 characters.'); return; }
-    if (!/^\d{10}$/.test(regPhone)) { setError('Phone number must be exactly 10 digits.'); return; }
-    if (regRole === 'SELLER' && (!aadhaar || !pan)) { setError('Aadhaar and PAN numbers are required for Seller registration.'); return; }
-    setLoading(true); setError(''); setSuccessMsg('');
-    let firebaseUser: any = null;
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, regEmail, regPassword);
-      firebaseUser = userCredential.user;
-      const token = await firebaseUser.getIdToken();
-      setToken(token);
-      
-      const payload: any = { 
-        uid: firebaseUser.uid, 
-        email: regEmail, 
-        phone_number: regPhone, 
-        role: 'USER', 
-        full_name: regName 
-      };
-      
-      if (regRole === 'SELLER') {
-        payload.kyc_details = { aadhaar_number: aadhaar, pan_number: pan };
-        localStorage.setItem('show_seller_pending_msg', 'true');
-      }
-      
-      const regRes = await api.post('/auth/register', payload);
-
-      localStorage.setItem('user_role', 'USER');
-      localStorage.setItem('user_phone', regPhone);
-      localStorage.setItem('user_id', regRes.data.id);
-      window.dispatchEvent(new Event('storage'));
-      
-      navigate('/dashboard/buyer');
-    } catch (err: any) {
-      console.error(err);
-      if (firebaseUser) { try { await firebaseUser.delete(); } catch {} }
-      localStorage.removeItem('token');
-      
-      let errorMsg = 'Registration failed.';
-      if (err.response?.data?.detail) {
-        const detail = err.response.data.detail;
-        if (Array.isArray(detail)) {
-          errorMsg = detail.map((d: any) => `${d.loc[d.loc.length - 1]}: ${d.msg}`).join(', ');
-        } else if (typeof detail === 'string') {
-          errorMsg = detail;
-        } else {
-          errorMsg = JSON.stringify(detail);
-        }
-      } else if (err.message) {
-        errorMsg = err.message;
-      }
-      setError(errorMsg);
-    } finally { setLoading(false); }
-  };
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true); setError(''); setSuccessMsg('');
-    try {
-      await sendPasswordResetEmail(auth, forgotEmail);
-      setResetSent(true);
-      setSuccessMsg('Reset link sent. Please check your email.');
-    } catch (err: any) {
-      console.error(err);
-      setError('Failed to send reset link.');
-    } finally { setLoading(false); }
-  };
-
-  const label = (text: string) => (
-    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: '#2C2C2C', marginBottom: '0.4rem', letterSpacing: '-0.2px' }}>
-      {text}
-    </label>
-  );
 
   return (
-    <div className="login-split">
+    <div className="login-split" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', minHeight: '100vh', background: 'transparent', paddingTop: '15vh' }}>
       <div className="fade-in" style={{
-        width: '100%', maxWidth: step === 'register' ? '500px' : '400px',
-        background: 'rgba(255,255,255,0.75)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        border: '1px solid #e5e7eb',
-        borderRadius: '12px',
-        padding: '2.25rem',
-        boxShadow: 'rgba(36,36,36,0.05) 0px 4px 8px 0px',
-        transition: 'max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+        width: '100%',
+        maxWidth: '420px',
+        background: '#212121', // ChatGPT's signature lighter black / dark grey
+        backdropFilter: 'blur(28px)',
+        WebkitBackdropFilter: 'blur(28px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+        borderLeft: '1px solid rgba(255, 255, 255, 0.15)',
+        borderRadius: '32px',
+        padding: '50px 40px',
+        boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -5px rgba(0,0,0,0.1)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        margin: '0 2rem'
       }}>
 
-        {/* Brand mark */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
-          <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: '#2C2C2C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
-            </svg>
-          </div>
-          <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '0.9375rem', fontWeight: 600, color: '#2C2C2C', letterSpacing: '0.01em' }}>TERRITORY</span>
-        </div>
+        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: '32px', fontWeight: 800, color: '#ffffff', marginBottom: '0.5rem', textAlign: 'center', letterSpacing: '-0.04em' }}>
+          Welcome back
+        </h2>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '15px', color: '#94a3b8', marginBottom: '3.5rem', textAlign: 'center', fontWeight: 500, letterSpacing: '-0.01em' }}>
+          Sign in to browse and list verified land
+        </p>
 
-        {error && <div className="error-box" style={{ marginBottom: '1.25rem' }}>{error}</div>}
-        {successMsg && (
-          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.875rem', marginBottom: '1.25rem' }}>
-            {successMsg}
+        {error && (
+          <div style={{ width: '100%', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#fca5a5', borderRadius: '16px', padding: '1rem', fontSize: '13px', marginBottom: '2rem', textAlign: 'center', fontWeight: 500, backdropFilter: 'blur(8px)' }}>
+            {error}
           </div>
         )}
 
-        {/* ── Login ── */}
-        {step === 'login' && (
-          <div className="slide-in">
-            <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.3rem', letterSpacing: '0.01em' }}>Welcome back</h2>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem', letterSpacing: '-0.2px' }}>Sign in to your account to continue.</p>
-
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                {label('Email address')}
-                <input id="login-email" className="form-input" type="email" required placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
-              </div>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                  <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#2C2C2C', letterSpacing: '-0.2px' }}>Password</span>
-                  <button type="button" onClick={() => setStep('forgot-password')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0099ff', fontWeight: 500, fontSize: '0.8125rem', fontFamily: 'inherit' }}>
-                    Forgot?
-                  </button>
-                </div>
-                <input id="login-password" className="form-input" type="password" required placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} />
-              </div>
-              <button id="login-submit" type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', marginTop: '0.25rem' }}>
-                {loading ? 'Signing in…' : 'Sign in'}
-              </button>
-            </form>
-
-            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb', textAlign: 'center' }}>
-              <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>New to Territory? </span>
-              <button id="go-create-account" onClick={() => setStep('register')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0099ff', fontWeight: 500, fontSize: '0.875rem', fontFamily: 'inherit' }}>
-                Create account
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Register ── */}
-        {step === 'register' && (
-          <div className="slide-in">
-            <button onClick={() => setStep('login')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '0.8125rem', fontWeight: 400, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem', fontFamily: 'inherit' }}>
-              ← Back to sign in
-            </button>
-            <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.3rem', letterSpacing: '0.01em' }}>Create account</h2>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem', letterSpacing: '-0.2px' }}>Purchase and list verified land directly.</p>
-
-            <form onSubmit={handleRegister} className="register-grid">
-              <div className="grid-col-span-2">
-                {label('Account Type')}
-                <select className="form-input" value={regRole} onChange={e => setRegRole(e.target.value as any)}>
-                  <option value="USER">Buyer Account</option>
-                  <option value="SELLER">Seller Account</option>
-                </select>
-              </div>
-              <div className="grid-col-span-2">{label('Email address')}<input id="reg-email" className="form-input" type="email" required placeholder="you@example.com" value={regEmail} onChange={e => setRegEmail(e.target.value)} /></div>
-              <div>{label('Full name')}<input id="reg-name" className="form-input" type="text" required placeholder="Your name" value={regName} onChange={e => setRegName(e.target.value)} /></div>
-              <div>{label('Phone number')}<input id="reg-phone" className="form-input" type="tel" required placeholder="10-digit number" value={regPhone} onChange={e => setRegPhone(e.target.value)} /></div>
-              <div>{label('Password')}<input id="reg-password" className="form-input" type="password" required placeholder="Min 6 characters" value={regPassword} onChange={e => setRegPassword(e.target.value)} /></div>
-              <div>{label('Confirm password')}<input id="reg-confirm" className="form-input" type="password" required placeholder="Repeat password" value={regConfirm} onChange={e => setRegConfirm(e.target.value)} /></div>
-              
-              {regRole === 'SELLER' && (
-                <>
-                  <div className="grid-col-span-2" style={{ marginTop: '0.5rem', marginBottom: '0.2rem' }}>
-                    <div style={{ padding: '0.75rem', background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '8px' }}>
-                      <p style={{ fontSize: '0.8125rem', color: '#475569', margin: 0, fontWeight: 500 }}>
-                        <strong style={{ color: '#0f172a' }}>Verification Required:</strong> To maintain a secure marketplace, seller accounts must be verified by an admin.
-                      </p>
-                    </div>
-                  </div>
-                  <div>{label('Aadhaar Number')}<input className="form-input" type="text" required={regRole === 'SELLER'} placeholder="12-digit number" value={aadhaar} onChange={e => setAadhaar(e.target.value)} /></div>
-                  <div>{label('PAN Number')}<input className="form-input" type="text" required={regRole === 'SELLER'} placeholder="10-character PAN" value={pan} onChange={e => setPan(e.target.value)} /></div>
-                </>
-              )}
-
-              <button id="register-submit" type="submit" disabled={loading} className="btn-primary grid-col-span-2" style={{ width: '100%', marginTop: '0.5rem' }}>
-                {loading ? 'Submitting…' : (regRole === 'SELLER' ? 'Submit for Verification' : 'Create account')}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* ── Forgot Password ── */}
-        {step === 'forgot-password' && (
-          <div className="slide-in">
-            <button onClick={() => { setStep('login'); setResetSent(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '0.8125rem', fontWeight: 400, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem', fontFamily: 'inherit' }}>
-              ← Back to sign in
-            </button>
-            <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: '#2C2C2C', marginBottom: '0.3rem', letterSpacing: '0.01em' }}>Reset password</h2>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem', letterSpacing: '-0.2px' }}>We'll send a reset link to your email.</p>
-
-            {!resetSent && (
-              <form onSubmit={handleForgotPassword} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div>{label('Email address')}<input className="form-input" type="email" required placeholder="you@example.com" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} /></div>
-                <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%' }}>
-                  {loading ? 'Sending…' : 'Send reset link'}
-                </button>
-              </form>
-            )}
-          </div>
-        )}
+        {/* Ultra Premium Google Sign-In Button */}
+        <button
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          style={{
+            width: 'fit-content',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '14px',
+            background: 'linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)',
+            color: '#0f172a',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            borderTop: '1px solid rgba(255, 255, 255, 1)',
+            borderRadius: '100px',
+            padding: '0 36px',
+            height: '52px',
+            fontSize: '15px',
+            fontWeight: 700,
+            fontFamily: "'Inter', sans-serif",
+            cursor: loading ? 'wait' : 'pointer',
+            opacity: loading ? 0.8 : 1,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.05)',
+            transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            letterSpacing: '0.2px',
+            transform: 'translateY(0)',
+          }}
+          onMouseEnter={e => { 
+            if (!loading) {
+              (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 12px 24px rgba(0,0,0,0.25), 0 4px 8px rgba(0,0,0,0.1)';
+            }
+          }}
+          onMouseLeave={e => { 
+            (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.05)';
+          }}
+        >
+          {/* Official Google G logo SVG */}
+          <svg width="20" height="20" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+            <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
       </div>
     </div>
   );

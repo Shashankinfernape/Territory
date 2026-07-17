@@ -84,7 +84,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 async def create_indexes():
     from database import db, auth_db
     try:
-        await auth_db.users.create_index("phone_number", unique=True, background=True)
+        await auth_db.users.create_index("phone_number", unique=True, sparse=True, background=True)
         await db.properties.create_index("status", background=True)
         await db.properties.create_index("seller_id", background=True)
         await db.transactions.create_index("buyer_id", background=True)

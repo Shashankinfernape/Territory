@@ -43,7 +43,8 @@ async def get_all_users(db=Depends(get_db), auth_db=Depends(get_auth_db), curren
     async for document in cursor:
         users.append({
             "id": str(document["_id"]),
-            "phone_number": document["phone_number"],
+            "email": document.get("email"),
+            "phone_number": document.get("phone_number"),
             "role": document["role"],
             "full_name": document.get("full_name"),
             "kyc_details": document.get("kyc_details"),

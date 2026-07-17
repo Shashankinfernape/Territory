@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from typing import Optional
 from database import get_db, get_auth_db
-from models import UserCreate, UserInDB, TokenData, UserResponse
+from models import UserCreate, UserInDB, TokenData, UserResponse, GoogleLoginRequest
 from firebase_admin import auth
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -52,35 +53,58 @@ async def get_current_admin(current_user=Depends(get_current_user)):
     return current_user
 
 
-@router.post("/register", response_model=UserResponse)
-async def register(user: UserCreate, auth_db=Depends(get_auth_db)):
-    # Check if this UID is already registered in MongoDB
-    existing_user_uid = await auth_db.users.find_one({"_id": user.uid})
-    if existing_user_uid:
-        raise HTTPException(status_code=400, detail="User already registered in database")
+@router.post("/google-login", response_model=UserResponse)
+async def google_login(payload: GoogleLoginRequest, auth_db=Depends(get_auth_db)):
+    # 1. Check if user already exists by Firebase UID
+    user = await auth_db.users.find_one({"_id": payload.uid})
+    if user:
+        return UserResponse(
+            id=str(user["_id"]),
+            email=user["email"],
+            phone_number=user.get("phone_number"),
+            role=user["role"],
+            full_name=user.get("full_name"),
+        )
+    
+    # 2. Check if user exists by email (for seeded admin accounts)
+    seeded_user = await auth_db.users.find_one({"email": payload.email})
+    if seeded_user:
+        # Migrate the seeded user to use the Firebase UID
+        seeded_user["_id"] = payload.uid
+        if "full_name" not in seeded_user or not seeded_user["full_name"]:
+            seeded_user["full_name"] = payload.full_name
+            
+        # Delete old seeded record and insert with new UID
+        await auth_db.users.delete_one({"email": payload.email})
+        await auth_db.users.insert_one(seeded_user)
+        
+        return UserResponse(
+            id=str(seeded_user["_id"]),
+            email=seeded_user["email"],
+            phone_number=seeded_user.get("phone_number"),
+            role=seeded_user["role"],
+            full_name=seeded_user.get("full_name"),
+        )
 
-    # Check if the phone number is already registered in MongoDB
-    existing_user_phone = await auth_db.users.find_one({"phone_number": user.phone_number})
-    if existing_user_phone:
-        raise HTTPException(status_code=400, detail="Phone number already registered")
-
-    # Convert to UserInDB model
-    user_dict = user.model_dump(by_alias=True)
-    # Firebase uid maps to _id in MongoDB
-    user_dict["_id"] = user_dict.pop("uid")
-
-    new_user = UserInDB(**user_dict)
-    # Insert into DB
+    # 3. Completely new user: create them
+    new_user = UserInDB(
+        _id=payload.uid,
+        email=payload.email,
+        full_name=payload.full_name,
+        role="USER",
+        phone_number=None
+    )
+    
     await auth_db.users.insert_one(new_user.to_insert_dict())
 
-    created_user = await auth_db.users.find_one({"_id": new_user.id})
+    created_user = await auth_db.users.find_one({"_id": payload.uid})
     if not created_user:
         raise HTTPException(status_code=500, detail="Failed to create user record")
 
     return UserResponse(
         id=str(created_user["_id"]),
         email=created_user["email"],
-        phone_number=created_user["phone_number"],
+        phone_number=created_user.get("phone_number"),
         role=created_user["role"],
         full_name=created_user.get("full_name"),
     )
@@ -91,7 +115,7 @@ async def read_users_me(current_user=Depends(get_current_user)):
     return UserResponse(
         id=str(current_user["_id"]),
         email=current_user["email"],
-        phone_number=current_user["phone_number"],
+        phone_number=current_user.get("phone_number"),
         role=current_user["role"],
         full_name=current_user.get("full_name"),
     )

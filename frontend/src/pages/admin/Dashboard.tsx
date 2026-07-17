@@ -17,7 +17,8 @@ const TAB_LABELS: Record<Tab, string> = {
 
 interface User {
   id: string;
-  phone_number: string;
+  email?: string;
+  phone_number?: string;
   role: string;
   full_name?: string;
   kyc_details?: {
@@ -167,33 +168,35 @@ export default function AdminDashboard() {
   );
 
   const filteredUsers = users.filter(u => 
-    u.phone_number.includes(searchQuery) || 
-    u.role.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (u.phone_number || '').includes(searchQuery) || 
+    (u.email || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (u.role || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
     (u.full_name || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredProperties = properties.filter(p => 
-    p.city.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (p.city || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
     (p.district || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
     shortId(p.seller_id).toLowerCase().includes(searchQuery.toLowerCase()) ||
     (p.type || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredTransactions = transactions.filter(t => 
-    t.buyer_phone.includes(searchQuery) || 
-    t.property_city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (t.buyer_phone || '').includes(searchQuery) || 
+    (t.property_city || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (t.property_district || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredPendingSellers = users.filter(u => 
     (u.kyc_details?.status === 'PENDING' && u.role === 'USER') &&
-    (u.phone_number.includes(searchQuery) || 
+    ((u.phone_number || '').includes(searchQuery) || 
+     (u.email || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
      (u.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const filteredPendingProperties = properties.filter(p => 
     p.status === 'PENDING_VERIFICATION' &&
-    (p.city.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    ((p.city || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
      (p.district || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
      shortId(p.seller_id).toLowerCase().includes(searchQuery.toLowerCase()) ||
      (p.type || '').toLowerCase().includes(searchQuery.toLowerCase()))
@@ -596,7 +599,7 @@ export default function AdminDashboard() {
                       onMouseEnter={e => (e.currentTarget.style.background = 'rgba(15,23,42,0.015)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
-                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a', fontFamily: 'monospace' }}>{u.phone_number}</td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a', fontFamily: 'monospace' }}>{u.phone_number || u.email || 'N/A'}</td>
                       <td style={{ padding: '1rem 1.5rem' }}>
                         <span className="badge-verified" style={{
                           border: u.role === 'ADMIN' ? '1px solid #ff3b30' : u.role === 'SELLER' ? '1px solid #007aff' : '1px solid #0f2042',
@@ -832,7 +835,7 @@ export default function AdminDashboard() {
                       onMouseEnter={e => (e.currentTarget.style.background = 'rgba(15,23,42,0.015)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
-                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a', fontFamily: 'monospace' }}>{u.phone_number}</td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a', fontFamily: 'monospace' }}>{u.phone_number || u.email || 'N/A'}</td>
                       <td style={{ padding: '1rem 1.5rem' }}>
                         <span className="badge-verified" style={{
                           border: '1px solid #0f2042',

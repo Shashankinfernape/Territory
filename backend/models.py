@@ -61,27 +61,35 @@ class KYCDetails(BaseModel):
     status: str = "PENDING"
 
 
+class GoogleLoginRequest(BaseModel):
+    uid: str
+    email: str
+    full_name: Optional[str] = None
+    photo_url: Optional[str] = None
+
+
 class UserCreate(BaseModel):
     uid: str
     email: str
-    phone_number: str
+    phone_number: Optional[str] = None
     role: str = "USER"
     full_name: Optional[str] = None
     kyc_details: Optional[KYCDetails] = None
 
     @field_validator("phone_number")
     @classmethod
-    def phone_must_be_10_digits(cls, v: str) -> str:
-        """Enforce exactly 10 numeric digits for Indian phone numbers."""
-        if not v.isdigit() or len(v) != 10:
-            raise ValueError("phone_number must be exactly 10 digits")
+    def phone_must_be_10_digits(cls, v: Optional[str]) -> Optional[str]:
+        """Enforce exactly 10 numeric digits for Indian phone numbers, if provided."""
+        if v is not None:
+            if not v.isdigit() or len(v) != 10:
+                raise ValueError("phone_number must be exactly 10 digits")
         return v
 
 
 class UserInDB(MongoInsertBase):
     id: str = Field(alias="_id")  # Firebase uid
     email: str
-    phone_number: str
+    phone_number: Optional[str] = None
     role: str
     full_name: Optional[str] = None
     kyc_details: Optional[KYCDetails] = None
@@ -91,7 +99,7 @@ class UserInDB(MongoInsertBase):
 class UserResponse(BaseModel):
     id: str
     email: str
-    phone_number: str
+    phone_number: Optional[str] = None
     role: str
     full_name: Optional[str] = None
 
