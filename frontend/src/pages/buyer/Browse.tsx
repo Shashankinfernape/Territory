@@ -17,7 +17,8 @@ const TAMIL_NADU_DISTRICTS = [
 ];
 
 const normalizeName = (name: string): string => {
-  return name.trim().toLowerCase()
+  let n = name.trim().toLowerCase()
+    .replace(/^the\s+/i, '')
     .replace(/\s+/g, '')
     .replace(/\(.*\)/g, '')
     .replace(/h/g, '')
@@ -28,6 +29,18 @@ const normalizeName = (name: string): string => {
     .replace(/ch/g, 'c')
     .replace(/ai$/g, 'a')
     .replace(/y/g, 'i');
+    
+  if (n === 'tiruppattur' || n === 'tirupatur') return 'tirupattur';
+  if (n === 'kalakkuricici' || n === 'kallakuricici' || n === 'kalakuricici' || n === 'kallakkuricici') return 'kallakurichi';
+  if (n === 'mayuram') return 'mayiladuthurai';
+  if (n === 'nagappattinam' || n === 'nagapatinam') return 'nagapattinam';
+  if (n === 'walajapet' || n === 'walajah') return 'ranipet';
+  if (n === 'udaiyarpalaiyam') return 'ariyalur';
+  if (n === 'kanniiakumari' || n === 'kanniakumari' || n === 'kaniakumari') return 'kanyakumari';
+  if (n === 'tenilgiris' || n === 'nilgiris') return 'nilgiris';
+  if (n === 'tiruccirapali' || n === 'tirucirapali') return 'tiruchirappalli';
+  if (n === 'tuticorin' || n === 'tootukudi' || n === 'tutucorin') return 'thoothukudi';
+  return n;
 };
 
 const TYPES = ['', 'Agricultural Land', 'Farm Land', 'Flat Plot', 'Residential Plot', 'Commercial Plot'];

@@ -86,6 +86,7 @@ const getModernDistrict = (talukName: string, originalDistrict: string): string 
 // Helper to normalize spellings across GeoJSON and directory keys
 const normalizeName = (name: string): string => {
   let n = name.trim().toLowerCase()
+    .replace(/^the\s+/i, '')
     .replace(/\s+/g, '')
     .replace(/\(.*\)/g, '')
     .replace(/h/g, '')

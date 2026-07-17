@@ -69,9 +69,23 @@ export default function PropertyDetails() {
           console.error('Failed to save to recently viewed', e);
         }
 
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
         setError('Listing could not be retrieved.');
+        // Auto-remove from recently viewed if it's a 404 (deleted from DB)
+        if (err.response?.status === 404) {
+          try {
+            const recentKey = 'recentlyViewed';
+            const existingStr = localStorage.getItem(recentKey);
+            if (existingStr) {
+              const recent = JSON.parse(existingStr);
+              const filtered = recent.filter((item: any) => item.id !== id);
+              localStorage.setItem(recentKey, JSON.stringify(filtered));
+            }
+          } catch(e) {
+            console.error('Failed to clear broken recently viewed item', e);
+          }
+        }
       } finally {
         setLoading(false);
       }
