@@ -124,6 +124,25 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             </div>
           )}
 
+          {/* Sold Out Tag */}
+          {property.status === 'SOLD_OUT' && (
+            <div style={{
+              position: 'absolute', top: '0.85rem', left: '0.85rem', zIndex: 10,
+              background: '#ef4444',
+              color: '#ffffff',
+              padding: '0.35rem 0.75rem',
+              borderRadius: '6px',
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              boxShadow: '0 2px 10px rgba(239, 68, 68, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}>
+              Sold Out
+            </div>
+          )}
+
           {/* Wishlist Button */}
           <button
             onClick={e => onToggleWishlist(e, property.id)}

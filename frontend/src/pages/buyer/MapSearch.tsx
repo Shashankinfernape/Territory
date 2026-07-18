@@ -845,6 +845,7 @@ function CustomSelect({
 
 export default function MapSearch() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [visibleCount, setVisibleCount] = useState(6);
   const [loading, setLoading] = useState(true);
   const [geoJsonData, setGeoJsonData] = useState<any | null>(OFFLINE_GEOJSON);
   const [cityDivisions, setCityDivisions] = useState<any>({});
@@ -1085,6 +1086,23 @@ export default function MapSearch() {
   const [soilType, setSoilType] = useState('');
   const [waterSource, setWaterSource] = useState('');
   const [roadAccess, setRoadAccess] = useState('');
+
+  // Reset visibleCount when any filter changes
+  useEffect(() => {
+    setVisibleCount(6);
+  }, [
+    selectedDistrict,
+    selectedCity,
+    searchTerm,
+    filterType,
+    minPrice,
+    maxPrice,
+    minArea,
+    maxArea,
+    soilType,
+    waterSource,
+    roadAccess,
+  ]);
 
   // Mobile layout and popup states
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -1485,11 +1503,15 @@ export default function MapSearch() {
   };
 
   return (
-    <div className="map-search-page-container" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', overflow: 'hidden', background: '#f0f0ef' }}>
+    <div className="map-search-page-container" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', overflow: 'hidden', background: '#f4f4f2' }}>
       <style>{`
         @keyframes slideUp {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
 
         /* ── FILTER BAR ── */
@@ -1687,14 +1709,15 @@ export default function MapSearch() {
       {/* ── TOP FILTER BAR ── */}
       <div className="filters-container" style={{
         background: '#ffffff',
-        borderBottom: '1px solid #e8e8e7',
-        padding: isMobile ? '0.5rem 0.75rem' : '0.6rem 1.25rem',
+        borderBottom: '1px solid rgba(0,0,0,0.07)',
+        padding: isMobile ? '0.65rem 1rem' : '0.75rem 1.5rem',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.4rem',
+        gap: '0.5rem',
         zIndex: 50,
         overflowX: isMobile ? 'auto' : 'visible',
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
+        boxShadow: '0 1px 0 rgba(0,0,0,0.04)'
       }}>
         {/* Desktop Search (Hidden on Mobile, moved to first line in Navbar) */}
         {!isMobile && (
@@ -1738,9 +1761,10 @@ export default function MapSearch() {
                 setWaterSource('');
                 setRoadAccess('');
               }}
-              style={isMobile ? { height: '30px', fontSize: '0.74rem', padding: '0 0.5rem', color: '#ef4444', borderColor: '#fca5a5', background: '#fff5f5', fontWeight: 600 } : { color: '#ef4444', borderColor: '#fca5a5', background: '#fff5f5', fontWeight: 600 }}
+              style={isMobile ? { height: '30px', fontSize: '0.74rem', padding: '0 0.65rem', color: '#ef4444', borderColor: '#fca5a5', background: '#fff5f5', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' } : { color: '#ef4444', borderColor: '#fca5a5', background: '#fff5f5', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
             >
-              ✕ Clear
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Clear
             </button>
           </>
         )}
@@ -1752,9 +1776,9 @@ export default function MapSearch() {
         gridTemplateColumns: '1fr 1fr',
         flex: 1,
         overflow: 'hidden',
-        padding: '0 0.875rem 0.875rem 0.875rem',
-        gap: '0.875rem',
-        background: '#f0f0ef'
+        padding: '1rem 1.25rem 1.25rem',
+        gap: '1.25rem',
+        background: '#f4f4f2'
       }}>
         
         {/* LEFT COLUMN: Map Card */}
@@ -2001,85 +2025,78 @@ export default function MapSearch() {
           <div className="listings-card-col" style={{
           height: '100%',
           overflowY: 'auto',
-          padding: '1rem 20px 2rem',
+          padding: '0 4px 2.5rem',
           background: 'transparent',
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.75rem'
+          gap: '1.25rem'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '0.75rem', marginBottom: '0.5rem', width: '100%', boxSizing: 'border-box' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#111827', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                {selectedDistrict 
-                  ? (selectedCity ? `${selectedDistrict}, ${selectedCity} Lands For Sale` : `${selectedDistrict} Lands For Sale`)
-                  : 'Tamil Nadu Lands For Sale'
-                }
-              </h2>
-              <span style={{ fontSize: '0.8rem', color: '#111827', fontWeight: 700, fontFamily: "'Inter', sans-serif", marginTop: '0.15rem' }}>
-                {filteredProperties.length.toLocaleString()} results
+          {/* Panel Header */}
+          <div style={{ paddingBottom: '1rem', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+            <h2 style={{ margin: '0 0 0.2rem', fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.03em', lineHeight: 1.15 }}>
+              {selectedDistrict
+                ? (selectedCity ? `${selectedDistrict}, ${selectedCity}` : `${selectedDistrict}`)
+                : 'Tamil Nadu'
+              }
+            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>
+                {filteredProperties.length.toLocaleString()} {filteredProperties.length === 1 ? 'listing' : 'listings'} available
               </span>
-            </div>
-            
-            {/* Sort Dropdown */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.8rem', fontWeight: 700, color: '#006aff', cursor: 'pointer', fontFamily: "'Inter', sans-serif", marginTop: '3px' }}>
-              <span>Sort: Lands for You</span>
-              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="5 8 10 13 15 8" />
-              </svg>
             </div>
           </div>
 
           {loading ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {[1, 2, 3].map(i => (
-                <div key={i} className="skeleton" style={{ height: '110px', borderRadius: '14px' }} />
+                <div key={i} className="skeleton" style={{ height: '120px', borderRadius: '16px', animationDelay: `${i * 0.1}s` }} />
               ))}
             </div>
           ) : filteredProperties.length === 0 ? (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 1rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🌾</div>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem', fontWeight: 500, margin: '0 0 0.5rem' }}>
-                {selectedDistrict 
-                  ? `No lands listed in ${selectedCity || selectedDistrict} yet.`
-                  : 'No lands match your filters.'
-                }
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem 1.5rem', textAlign: 'center', animation: 'fadeIn 0.4s ease' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(15,23,42,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+              </div>
+              <p style={{ color: '#334155', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.4rem', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.01em' }}>
+                {selectedDistrict
+                  ? `No listings in ${selectedCity || selectedDistrict} yet`
+                  : 'No lands match your filters'}
               </p>
-              <p style={{ color: '#9ca3af', fontSize: '0.78rem', margin: '0 0 1.25rem' }}>Try adjusting or clearing your filters.</p>
+              <p style={{ color: '#94a3b8', fontSize: '0.8rem', margin: '0 0 1.75rem', lineHeight: 1.6 }}>Try widening your search or clearing filters.</p>
               <button
-                onClick={() => {
-                  handleMapBackgroundClick();
-                  setFilterType('');
-                  setMinPrice('');
-                  setMaxPrice('');
-                  setSearchTerm('');
-                }}
-                style={{
-                  background: '#2C2C2C',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '0.5rem 1.25rem',
-                  borderRadius: '99px',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  letterSpacing: '0.01em'
-                }}
+                onClick={() => { handleMapBackgroundClick(); setFilterType(''); setMinPrice(''); setMaxPrice(''); setSearchTerm(''); }}
+                style={{ background: '#0f172a', color: '#ffffff', border: 'none', padding: '0.6rem 1.5rem', borderRadius: '99px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.01em', transition: 'opacity 0.15s' }}
               >
-                Clear filters
+                Clear all filters
               </button>
             </div>
           ) : (
-            <div className="listings-grid">
-              {filteredProperties.map(p => (
-                <PropertyCard
-                  key={p.id}
-                  property={p}
-                  isWishlisted={wishlist.includes(p.id)}
-                  onToggleWishlist={toggleWishlist}
-                  isTogglingWishlist={togglingId === p.id}
-                  animationSetting={animationSetting}
-                />
-              ))}
+            <div style={{ animation: 'fadeIn 0.35s ease' }}>
+              <div className="listings-grid">
+                {filteredProperties.slice(0, visibleCount).map(p => (
+                  <PropertyCard
+                    key={p.id}
+                    property={p}
+                    isWishlisted={wishlist.includes(p.id)}
+                    onToggleWishlist={toggleWishlist}
+                    isTogglingWishlist={togglingId === p.id}
+                    animationSetting={animationSetting}
+                  />
+                ))}
+              </div>
+              {visibleCount < filteredProperties.length && (
+                <div style={{ textAlign: 'center', marginTop: '1.75rem' }}>
+                  <button
+                    onClick={() => setVisibleCount(prev => prev + 6)}
+                    style={{ padding: '0.65rem 2rem', background: '#ffffff', border: '1.5px solid rgba(0,0,0,0.12)', borderRadius: '99px', color: '#0f172a', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif", boxShadow: '0 2px 12px rgba(0,0,0,0.06)', transition: 'all 0.2s', letterSpacing: '-0.01em' }}
+                  >
+                    Load more listings
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -2178,21 +2195,11 @@ export default function MapSearch() {
                   </span>
                 </div>
                 {drawerState === 'expanded' && (
-                  <button 
-                    onClick={() => {
-                      setDrawerState('collapsed');
-                      setSelectedCity(null);
-                      window.dispatchEvent(new CustomEvent('blur-mobile-search'));
-                    }}
-                    style={{
-                      position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-                      width: '28px', height: '28px', borderRadius: '50%',
-                      background: '#f3f4f6', border: 'none', color: '#6b7280',
-                      fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}
+                  <button
+                    onClick={() => { setDrawerState('collapsed'); setSelectedCity(null); window.dispatchEvent(new CustomEvent('blur-mobile-search')); }}
+                    style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(0,0,0,0.06)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    ✕
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 )}
               </div>
@@ -2220,35 +2227,25 @@ export default function MapSearch() {
                     ))}
                   </div>
                 ) : filteredProperties.length === 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 1rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🌾</div>
-                    <p style={{ color: '#6b7280', fontSize: '0.875rem', fontWeight: 500, margin: '0 0 0.5rem' }}>
-                      No lands listed here yet.
-                    </p>
-                    <p style={{ color: '#9ca3af', fontSize: '0.78rem', margin: '0 0 1.25rem' }}>Try adjusting or clearing your filters.</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3.5rem 1.5rem', textAlign: 'center' }}>
+                    <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(15,23,42,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                      </svg>
+                    </div>
+                    <p style={{ color: '#334155', fontSize: '0.9rem', fontWeight: 700, margin: '0 0 0.35rem', fontFamily: "'Inter', sans-serif" }}>No listings here yet</p>
+                    <p style={{ color: '#94a3b8', fontSize: '0.78rem', margin: '0 0 1.5rem', lineHeight: 1.6 }}>Try adjusting your filters.</p>
                     <button
-                      onClick={() => {
-                        setDrawerState('collapsed');
-                        setSelectedCity(null);
-                        window.dispatchEvent(new CustomEvent('blur-mobile-search'));
-                      }}
-                      style={{
-                        background: '#2C2C2C',
-                        color: '#ffffff',
-                        border: 'none',
-                        padding: '0.5rem 1.25rem',
-                        borderRadius: '99px',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        cursor: 'pointer'
-                      }}
+                      onClick={() => { setDrawerState('collapsed'); setSelectedCity(null); window.dispatchEvent(new CustomEvent('blur-mobile-search')); }}
+                      style={{ background: '#0f172a', color: '#ffffff', border: 'none', padding: '0.55rem 1.5rem', borderRadius: '99px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
                     >
-                      Close drawer
+                      Close
                     </button>
                   </div>
                 ) : (
                     <div className="listings-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', paddingBottom: '2.5rem' }}>
-                      {filteredProperties.map(p => (
+                      {filteredProperties.slice(0, visibleCount).map(p => (
                         <PropertyCard
                           key={p.id}
                           property={p}
@@ -2258,6 +2255,27 @@ export default function MapSearch() {
                           animationSetting={animationSetting}
                         />
                       ))}
+                      {visibleCount < filteredProperties.length && (
+                        <div style={{ textAlign: 'center', marginTop: '0.5rem', width: '100%' }}>
+                          <button
+                            onClick={() => setVisibleCount(prev => prev + 6)}
+                            style={{
+                              width: '100%',
+                              padding: '0.65rem',
+                              background: '#ffffff',
+                              border: '1.5px solid #2C2C2C',
+                              borderRadius: '12px',
+                              color: '#2C2C2C',
+                              fontSize: '0.82rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              fontFamily: "'Inter', sans-serif"
+                            }}
+                          >
+                            Show More Lands
+                          </button>
+                        </div>
+                      )}
                     </div>
                 )}
               </>

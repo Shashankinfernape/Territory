@@ -4,7 +4,6 @@ import requests
 from datetime import datetime, timezone
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from duckduckgo_search import DDGS
 
 load_dotenv()
 client = MongoClient(os.getenv("MONGODB_URL"))

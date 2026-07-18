@@ -28,13 +28,23 @@ export interface Property {
   nearby_town?: string;
   distance_from_town_km?: number;
   taluk?: string;
+  is_edit_pending?: boolean;
+  original_details?: Record<string, any>;
+  rejection_info?: {
+    message: string;
+    type: 'NEW_PROPERTY_REJECTION' | 'EDIT_REJECTION' | 'DELETE_REJECTION';
+    timestamp: string;
+    rejected_details?: Record<string, any>;
+  };
 }
 
 export interface User {
   id: string;
+  email?: string;
   phone_number: string;
-  role: 'BUYER' | 'SELLER' | 'ADMIN';
+  role: 'BUYER' | 'USER' | 'SELLER' | 'ADMIN';
   full_name?: string;
+  is_seller_pending?: boolean;
 }
 
 export interface PlatformStats {
@@ -81,6 +91,7 @@ export interface AdminProperty {
   created_at?: string;
   documents?: DocumentItem[];
   images?: string[];
+  is_edit_pending?: boolean;
 }
 
 export const LAND_TYPES = [

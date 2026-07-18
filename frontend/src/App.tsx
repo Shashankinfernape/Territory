@@ -24,15 +24,54 @@ import MapSearch from './pages/buyer/MapSearch';
 import NotFound from './pages/NotFound';
 import SellGuide from './pages/SellGuide';
 import Settings from './pages/Settings';
+import PropertyPayment from './pages/buyer/PropertyPayment';
+import { useLanguage } from './contexts/LanguageContext';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+
+function TranslationRouteObserver() {
+  const location = useLocation();
+  const { language } = useLanguage();
+
+  useEffect(() => {
+    if (language === 'ta') {
+      const timer = setTimeout(() => {
+        try {
+          const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+          if (select) {
+            select.value = '';
+            select.dispatchEvent(new Event('change'));
+            setTimeout(() => {
+              select.value = 'ta';
+              select.dispatchEvent(new Event('change'));
+            }, 50);
+          }
+        } catch (err) {
+          console.error("Error re-triggering translate on route change:", err);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname, language]);
+
+  return null;
+}
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    const shown = sessionStorage.getItem('propit_splash_shown') === 'true';
+    const isMinimal = localStorage.getItem('propit_animation_setting') === 'minimal';
+    return !shown && !isMinimal;
+  });
 
   return (
     /* mode="sync" = crossfade dissolve: splash fades out while app fades in simultaneously */
     <AnimatePresence mode="sync">
       {showSplash ? (
-        <SplashAnimation key="splash" onComplete={() => setShowSplash(false)} />
+        <SplashAnimation key="splash" onComplete={() => {
+          sessionStorage.setItem('propit_splash_shown', 'true');
+          setShowSplash(false);
+        }} />
       ) : (
         <motion.div
           key="app-router-root"
@@ -42,6 +81,7 @@ function App() {
           className="min-h-screen"
         >
           <Router>
+            <TranslationRouteObserver />
             <Routes>
               <Route path="/" element={<Layout />}>
                 {/* Public Routes */}
@@ -55,6 +95,9 @@ function App() {
                 <Route path="help" element={<Help />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="sell-guide" element={<SellGuide />} />
+                <Route path="payment/:propertyId" element={
+                  <ProtectedRoute><PropertyPayment /></ProtectedRoute>
+                } />
 
                 {/* Protected: Unified Dashboard (BUY + SELL) */}
                 <Route path="dashboard/buyer" element={

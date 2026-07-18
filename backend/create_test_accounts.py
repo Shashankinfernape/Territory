@@ -75,6 +75,11 @@ def sign_in_firebase_user(email, password):
 def main():
     client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
     db = client[DB_NAME]
+    
+    mongo_auth_url = os.getenv("MONGODB_AUTH_URL", MONGO_URL)
+    auth_db_name = os.getenv("AUTH_DATABASE_NAME", "propit_auth")
+    auth_client = MongoClient(mongo_auth_url, serverSelectionTimeoutMS=5000)
+    auth_db = auth_client[auth_db_name]
 
     accounts = [
         {

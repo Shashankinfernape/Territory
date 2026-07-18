@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../lib/api';
 import type { Property } from '../../lib/types';
 import { formatPrice } from '../../lib/utils';
@@ -13,11 +13,12 @@ interface DetailedProperty extends Property {
 
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [prop, setProp] = useState<DetailedProperty | null>(null);
   const [loading, setLoading] = useState(true);
-  const [unlocking, setUnlocking] = useState(false);
   const [error, setError] = useState('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [paymentStatus, setPaymentStatus] = useState<'SUCCESS' | 'PENDING' | 'NONE'>('NONE');
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -36,11 +37,14 @@ export default function PropertyDetails() {
             owner_name: 'You (Seller)',
             owner_phone: localStorage.getItem('user_phone') || ''
           };
+          setPaymentStatus('SUCCESS');
         } else {
           const token = localStorage.getItem('token');
           if (token) {
             try {
               const checkRes = await api.get(`/payments/check-unlock/${id}`);
+              const statusVal = checkRes.data.status || (checkRes.data.unlocked ? 'SUCCESS' : 'NONE');
+              setPaymentStatus(statusVal);
               if (checkRes.data.unlocked) {
                 propData = {
                   ...propData,
@@ -94,23 +98,13 @@ export default function PropertyDetails() {
     fetchProperty();
   }, [id]);
 
-  const handleMockUnlock = async () => {
+  const handleStartUnlock = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       setError('Please sign in first to unlock owner contact information.');
       return;
     }
-    setUnlocking(true);
-    setError('');
-    try {
-      const res = await api.post('/payments/mock-unlock', { property_id: id });
-      setProp(prev => prev ? { ...prev, unlocked: true, owner_name: res.data.owner_name, owner_phone: res.data.owner_phone } : null);
-    } catch (err: any) {
-      console.error(err);
-      setError('Transaction validation failed. Please try again.');
-    } finally {
-      setUnlocking(false);
-    }
+    navigate(`/payment/${id}`);
   };
 
   if (loading) return (
@@ -139,13 +133,16 @@ export default function PropertyDetails() {
     <div className="fade-in" style={{ minHeight: '100vh', padding: '2rem 1.5rem' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         
-        <Link to="/" style={{
-          color: '#2C2C2C', textDecoration: 'none', fontWeight: 500, fontSize: '0.875rem',
-          display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginBottom: '1.5rem',
-          letterSpacing: '-0.2px'
-        }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            color: '#2C2C2C', background: 'none', border: 'none', padding: 0, fontWeight: 500, fontSize: '0.875rem',
+            display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginBottom: '1.5rem',
+            letterSpacing: '-0.2px', cursor: 'pointer', fontFamily: 'inherit'
+          }}
+        >
           &larr; Back to listings
-        </Link>
+        </button>
 
         {/* Two-Column Classified Layout */}
         <div className="details-grid">
@@ -368,7 +365,7 @@ export default function PropertyDetails() {
             {/* Unlock Contact Verification Box */}
             <div style={{ background: '#ffffff', borderRadius: '12px', padding: '1.75rem', color: '#2C2C2C', boxShadow: 'rgba(36, 36, 36, 0.05) 0px 4px 8px 0px', border: '1px solid #e5e7eb' }}>
               
-              {prop.unlocked ? (
+              {prop.unlocked || paymentStatus === 'SUCCESS' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                   <span className="badge-verified" style={{ alignSelf: 'flex-start' }}>OWNER CONTACT</span>
                   <div>
@@ -384,6 +381,28 @@ export default function PropertyDetails() {
                     Deed survey sketches and FMB diagrams have been unlocked for download in your secure vault.
                   </p>
                 </div>
+              ) : paymentStatus === 'PENDING' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  <span className="badge-verified" style={{ alignSelf: 'flex-start', background: '#eab308' }}>VERIFYING PAYMENT</span>
+                  <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.05rem', fontWeight: 600, color: '#854d0e', margin: 0 }}>
+                    Payment Pending Review
+                  </h3>
+                  <p style={{ fontSize: '0.8125rem', color: '#713f12', lineHeight: 1.5, letterSpacing: '-0.2px' }}>
+                    Your transaction details have been submitted. Once verified by our administrators, owner contact info and property deeds will unlock here.
+                  </p>
+                  <div style={{ height: '1px', background: '#fef08a', margin: '0.5rem 0' }} />
+                  <span style={{ fontSize: '0.75rem', color: '#a16207' }}>Usually takes 2-4 hours</span>
+                </div>
+              ) : prop.status === 'SOLD_OUT' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', textAlign: 'center' }}>
+                  <span style={{ alignSelf: 'center', background: '#7c3aed', color: '#ffffff', borderRadius: '9999px', padding: '0.2rem 0.65rem', fontSize: '0.7rem', fontWeight: 700 }}>SOLD OUT</span>
+                  <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.125rem', fontWeight: 600, color: '#7c3aed', margin: 0 }}>
+                    Property Sold Out
+                  </h3>
+                  <p style={{ fontSize: '0.8125rem', color: '#6b7280', lineHeight: 1.5 }}>
+                    This listing is no longer accepting payments or inquiries because it has been marked as sold out.
+                  </p>
+                </div>
               ) : (
                 <>
                   <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem', color: '#2C2C2C', letterSpacing: '0.01em' }}>
@@ -396,12 +415,11 @@ export default function PropertyDetails() {
                   {error && <div className="error-box" style={{ marginBottom: '1rem', fontSize: '0.8125rem' }}>{error}</div>}
 
                   <button
-                    onClick={handleMockUnlock}
-                    disabled={unlocking}
+                    onClick={handleStartUnlock}
                     className="btn-primary"
                     style={{ width: '100%', padding: '0.75rem', fontSize: '0.875rem', borderRadius: '9999px', fontWeight: 500 }}
                   >
-                    {unlocking ? 'Acquiring payment token...' : 'Pay ₹500 & View Contact'}
+                    Pay ₹500 & View Contact
                   </button>
 
                   <p style={{ fontSize: '0.75rem', color: '#898989', marginTop: '1rem', textAlign: 'center', letterSpacing: '-0.2px' }}>

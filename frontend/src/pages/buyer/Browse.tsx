@@ -56,7 +56,7 @@ const SORT_OPTIONS = [
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
-  const [visibleCount, setVisibleCount] = useState(12);
+  const [visibleCount, setVisibleCount] = useState(6);
   const [recommendations, setRecommendations] = useState<Property[]>([]);
   const [recLabel, setRecLabel] = useState<string>('Recommended for You');
   const [loading, setLoading] = useState(true);
@@ -164,7 +164,7 @@ export default function Browse() {
       else if (sortBy === 'price_desc') data = [...data].sort((a, b) => b.price - a.price);
       else if (sortBy === 'views') data = [...data].sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0));
       setProperties(data);
-      setVisibleCount(12);
+      setVisibleCount(6);
     } catch { /* silent */ }
     finally { setLoading(false); }
   }, [searchTerm, filterType, filterDistrict, filterTaluk, filterMinPrice, filterMaxPrice, filterMinArea, filterMaxArea, filterWaterSource, filterRoadAccess, sortBy]);
@@ -456,7 +456,7 @@ export default function Browse() {
             {visibleCount < properties.length && (
               <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
                 <button 
-                  onClick={() => setVisibleCount(prev => prev + 12)}
+                  onClick={() => setVisibleCount(prev => prev + 6)}
                   style={{
                     padding: '0.6rem 1.5rem',
                     background: 'rgba(255,255,255,0.75)',

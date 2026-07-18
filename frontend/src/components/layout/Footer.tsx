@@ -16,7 +16,7 @@ export default function Footer() {
                   <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
                 </svg>
               </div>
-              <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '0.9rem', fontWeight: 600, color: '#2C2C2C', letterSpacing: '0.01em' }}>TERRITORY</span>
+              <span className="notranslate" style={{ fontFamily: "'Poppins', sans-serif", fontSize: '0.9rem', fontWeight: 600, color: '#2C2C2C', letterSpacing: '0.01em' }}>TERRITORY</span>
             </div>
             <p style={{ fontSize: '0.875rem', lineHeight: 1.6, color: '#6b7280', maxWidth: '210px', letterSpacing: '-0.2px' }}>
               Deed-verified land transactions across Tamil Nadu. Direct from owners.
@@ -47,7 +47,7 @@ export default function Footer() {
           <div>
             <h4 style={{ fontSize: '0.75rem', fontWeight: 600, color: '#898989', marginBottom: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contact</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-              <span style={{ fontSize: '0.875rem', color: '#6b7280', letterSpacing: '-0.2px' }}>support@territory.in</span>
+              <span style={{ fontSize: '0.875rem', color: '#6b7280', letterSpacing: '-0.2px' }}>support@<span className="notranslate">territory</span>.in</span>
               <span style={{ fontSize: '0.875rem', color: '#6b7280', letterSpacing: '-0.2px' }}>+91 98765 43210</span>
               <span style={{ fontSize: '0.875rem', color: '#6b7280', letterSpacing: '-0.2px' }}>Chennai, Tamil Nadu</span>
             </div>
@@ -57,7 +57,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
           <span style={{ fontSize: '0.8125rem', color: '#898989', letterSpacing: '-0.2px' }}>
-            © {new Date().getFullYear()} Territory. All rights reserved.
+            © {new Date().getFullYear()} <span className="notranslate">Territory</span>. All rights reserved.
           </span>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             {['Privacy policy', 'Terms of service'].map(t => (
