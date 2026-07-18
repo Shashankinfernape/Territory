@@ -889,12 +889,12 @@ export default function MapSearch() {
   const { animationSetting } = useSettings();
 
   useEffect(() => {
-    fetch('/tamilnadu_city_divisions.json?v=39')
+    fetch('/tamilnadu_city_divisions.json?v=43')
       .then(res => res.json())
       .then(data => setCityDivisions(data))
       .catch(err => console.error('Failed to load city divisions:', err));
 
-    fetch('/tamilnadu_geojson.json?v=39')
+    fetch('/tamilnadu_geojson.json?v=43')
       .then(res => res.json())
       .then(data => setGeoJsonData(data))
       .catch(err => console.error('Failed to load district boundaries:', err));
