@@ -50,7 +50,7 @@ export default function Help() {
             Help Center
           </h1>
           <p style={{ color: '#6b7280', fontSize: '0.9375rem', margin: 0, letterSpacing: '-0.2px' }}>
-            Everything you need to know about Territory
+            Everything you need to know about <span className="notranslate">Territory</span>
           </p>
         </div>
 

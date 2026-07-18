@@ -322,6 +322,7 @@ export default function SplashAnimation({ onComplete }: SplashAnimationProps) {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.65, ease: [0.4, 0, 1, 1] }}
+          className="notranslate"
           style={{
             position: "fixed", inset: 0, zIndex: 9999,
             display: "flex", flexDirection: "column",

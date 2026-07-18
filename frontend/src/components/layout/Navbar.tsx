@@ -3,11 +3,13 @@ import { api, clearToken } from '../../lib/api';
 import { useState, useEffect, useRef } from 'react';
 import { auth } from '../../lib/firebase';
 import { signOut } from 'firebase/auth';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { language, setLanguage, t } = useLanguage();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
@@ -118,7 +120,7 @@ export default function Navbar() {
   const isActive = (path: string) => location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
 
   return (
-    <nav className={`navbar${scrolled ? ' scrolled' : ''}`}>
+    <nav className={`navbar notranslate${scrolled ? ' scrolled' : ''}`}>
       <div className="navbar-container">
 
         {/* Left: Brand */}
@@ -191,36 +193,41 @@ export default function Navbar() {
 
         {/* Center: Menu links */}
         <div className="navbar-center">
-          <div className="nav-menu">
-            <Link to="/" className={`nav-menu-link${location.pathname === '/' ? ' active' : ''}`}>
-              Home
+          <div className="nav-menu" style={language === 'ta' ? { gap: '0.85rem' } : {}}>
+            <Link to="/" className={`nav-menu-link${location.pathname === '/' ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
+              {t("Home")}
             </Link>
-            <Link to="/browse" className={`nav-menu-link${isActive('/browse') ? ' active' : ''}`}>
-              Buy
+            <Link to="/browse" className={`nav-menu-link${isActive('/browse') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
+              {t("Buy")}
             </Link>
             {!loggedIn && (
-              <Link to="/sell-guide" className={`nav-menu-link${isActive('/sell-guide') ? ' active' : ''}`}>
-                Sell
+              <Link to="/sell-guide" className={`nav-menu-link${isActive('/sell-guide') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
+                {t("Sell")}
               </Link>
             )}
-            <Link to="/map" className={`nav-menu-link${isActive('/map') ? ' active' : ''}`}>
-              Map View
+            {loggedIn && role !== 'SELLER' && role !== 'ADMIN' && (
+              <Link to="/sell-guide" className={`nav-menu-link${isActive('/sell-guide') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
+                {t("Sell")}
+              </Link>
+            )}
+            <Link to="/map" className={`nav-menu-link${isActive('/map') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
+              {t("Map View")}
             </Link>
             {loggedIn && (
-              <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} className={`nav-menu-link${isActive('/dashboard') ? ' active' : ''}`}>
-                Dashboard
+              <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} className={`nav-menu-link${isActive('/dashboard') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
+                {t("Dashboard")}
               </Link>
             )}
             {loggedIn && (
-              <Link to="/wishlist" className={`nav-menu-link${isActive('/wishlist') ? ' active' : ''}`}>
-                Wishlist
+              <Link to="/wishlist" className={`nav-menu-link${isActive('/wishlist') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
+                {t("Wishlist")}
               </Link>
             )}
-            <Link to="/help" className={`nav-menu-link${isActive('/help') ? ' active' : ''}`}>
-              Help
+            <Link to="/help" className={`nav-menu-link${isActive('/help') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
+              {t("Help")}
             </Link>
-            <Link to="/contact" className={`nav-menu-link${isActive('/contact') ? ' active' : ''}`}>
-              Contact
+            <Link to="/contact" className={`nav-menu-link${isActive('/contact') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
+              {t("Contact")}
             </Link>
           </div>
         </div>
@@ -229,6 +236,29 @@ export default function Navbar() {
         <div className="navbar-right" ref={dropdownRef} style={isMobileMap ? { flex: 'none' } : {}}>
           {/* Desktop Right Actions */}
           <div className="desktop-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'ta' : 'en')}
+              style={{
+                background: 'transparent',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                padding: '0.35rem 0.65rem',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: '#2C2C2C',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.15s ease',
+                boxSizing: 'border-box'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(0, 0, 0, 0.03)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              {language === 'en' ? 'தமிழ்' : 'English'}
+            </button>
             {loggedIn ? (
               <>
                 <Link to="/wishlist" className="nav-link-item" title="Wishlist" style={{
@@ -270,15 +300,13 @@ export default function Navbar() {
                   </Link>
                 )}
 
-                {/* Sell Land pill — always visible for logged-in users, goes directly to upload form */}
                 {(role === 'SELLER' || role === 'ADMIN') && (
                   <Link
                     to="/dashboard/seller/upload"
                     className="btn-olx-sell"
                     style={{ gap: '0.25rem' }}
                   >
-                    <span style={{ fontSize: '1rem', fontWeight: 900 }}>+</span>
-                    <span>Sell</span>
+                    <span>{t("Sell")}</span>
                   </Link>
                 )}
 
@@ -328,38 +356,36 @@ export default function Navbar() {
                           {role === 'ADMIN' ? 'Administrator' : 'Member'}
                         </span>
                       </div>
-                      <Link to="/" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Home</Link>
-                      <Link to="/browse" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Browse Listings</Link>
-                      <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>My Dashboard</Link>
-                      <Link to="/help" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Help Center</Link>
-                      <Link to="/settings" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Settings</Link>
-                      <Link to="/contact" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>Contact Support</Link>
+                      <Link to="/" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>{t("Home")}</Link>
+                      <Link to="/browse" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>{t("Browse Listings")}</Link>
+                      <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>{t("My Dashboard")}</Link>
+                      <Link to="/help" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>{t("Help Center")}</Link>
+                      <Link to="/settings" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>{t("Settings")}</Link>
+                      <Link to="/contact" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>{t("Contact Support")}</Link>
                       <div style={{ height: '1px', background: '#FDFBF7', margin: '0.3rem 0' }} />
-                      <button onClick={handleLogout} style={{ width: '100%', padding: '0.55rem 0.8rem', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 500, fontSize: '0.8125rem', textAlign: 'left', cursor: 'pointer', borderRadius: '8px', fontFamily: 'inherit' }}>Logout</button>
+                      <button onClick={handleLogout} style={{ width: '100%', padding: '0.55rem 0.8rem', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 500, fontSize: '0.8125rem', textAlign: 'left', cursor: 'pointer', borderRadius: '8px', fontFamily: 'inherit' }}>{t("Logout")}</button>
                     </div>
                   )}
                 </div>
               </>
             ) : (
               <>
-                <Link to="/login" state={{ mode: 'login' }} style={{ fontSize: '0.875rem', fontWeight: 500, color: '#4b5563', textDecoration: 'none' }}>Sign in</Link>
+                <Link to="/login" state={{ mode: 'login' }} style={{ fontSize: '0.875rem', fontWeight: 500, color: '#4b5563', textDecoration: 'none' }}>{t("Sign in")}</Link>
                 <Link to="/login" state={{ mode: 'register' }} className="btn-pill-dark" style={{ textDecoration: 'none' }}>
-                  <span>Get started</span>
+                  <span>{t("Get started")}</span>
                 </Link>
               </>
             )}
 
           </div>
 
-          {/* Mobile Sell Button (Visible on Home, Browse, and Map pages in Mobile View) */}
           {isMobile && (role === 'SELLER' || role === 'ADMIN') && (location.pathname === '/' || location.pathname === '/browse' || location.pathname === '/map') && (
             <Link
               to="/dashboard/seller/upload"
               className="btn-olx-sell"
               style={{ gap: '0.15rem', marginRight: '0.15rem' }}
             >
-              <span style={{ fontSize: '0.95rem', fontWeight: 900 }}>+</span>
-              <span>Sell</span>
+              <span>{t("Sell")}</span>
             </Link>
           )}
 
@@ -389,6 +415,9 @@ export default function Navbar() {
                 <Link to="/" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Home</Link>
                 <Link to="/browse" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Buy</Link>
                 {!loggedIn && (
+                  <Link to="/sell-guide" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Sell</Link>
+                )}
+                {loggedIn && role !== 'SELLER' && role !== 'ADMIN' && (
                   <Link to="/sell-guide" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Sell</Link>
                 )}
                 <Link to="/map" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Map View</Link>

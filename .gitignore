@@ -5,3 +5,6 @@ node_modules/
 .DS_Store
 backend/uploads/
 node-v20/
+mongodb_data/
+backend/backend.log
+*.log

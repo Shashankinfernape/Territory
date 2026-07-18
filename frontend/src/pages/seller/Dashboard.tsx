@@ -22,6 +22,8 @@ interface SellerStats {
 const statusStyle = (status: string): React.CSSProperties => {
   if (status === 'ACTIVE') return { background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0' };
   if (status === 'REJECTED') return { background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca' };
+  if (status === 'SOLD_OUT') return { background: '#f3e8ff', color: '#7c3aed', border: '1px solid #ddd6fe' };
+  if (status === 'DELETE_REQUESTED') return { background: '#fef2f2', color: '#b91c1c', border: '1px solid #fca5a5' };
   return { background: '#fef9c3', color: '#a16207', border: '1px solid #fde68a' };
 };
 
@@ -29,25 +31,65 @@ export default function Dashboard() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [stats, setStats] = useState<SellerStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [cancelDeleteConfirmId, setCancelDeleteConfirmId] = useState<string | null>(null);
   const displayName = localStorage.getItem('display_name') || 'Seller';
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const [propsRes, statsRes] = await Promise.all([
-          api.get<Property[]>('/properties/seller/me'),
-          api.get<SellerStats>('/properties/seller/me/stats'),
-        ]);
-        setProperties(propsRes.data);
-        setStats(statsRes.data);
-      } catch (error) {
-        console.error('Failed to fetch seller data', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
-  }, []);
+  const fetchAll = async () => {
+    try {
+      const [propsRes, statsRes] = await Promise.all([
+        api.get<Property[]>('/properties/seller/me'),
+        api.get<SellerStats>('/properties/seller/me/stats'),
+      ]);
+      setProperties(propsRes.data);
+      setStats(statsRes.data);
+    } catch (error) {
+      console.error('Failed to fetch seller data', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchAll(); }, []);
+
+  const handleToggleSoldOut = async (id: string) => {
+    setActionLoading(id + '_sold');
+    try {
+      await api.patch(`/properties/${id}/sold-out`);
+      await fetchAll();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'Failed to update status');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRequestDelete = async (id: string) => {
+    setDeleteConfirmId(null);
+    setActionLoading(id + '_del');
+    try {
+      await api.post(`/properties/${id}/request-delete`);
+      await fetchAll();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'Failed to request deletion');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCancelDelete = async (id: string) => {
+    setCancelDeleteConfirmId(null);
+    setActionLoading(id + '_cancel');
+    try {
+      await api.delete(`/properties/${id}/request-delete`);
+      await fetchAll();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'Failed to cancel delete request');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const totalViews = properties.reduce((sum, p) => sum + p.view_count, 0);
   const totalUnlocks = stats?.total_unlocks ?? 0;
@@ -57,33 +99,27 @@ export default function Dashboard() {
     {
       label: 'Total Listings',
       value: loading ? '—' : properties.length,
-      icon: (
-        <svg width="20" height="20" fill="none" stroke="#1a6b45" strokeWidth="1.8" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M3 12h18M3 17h18" />
-        </svg>
-      ),
+      icon: (<svg width="20" height="20" fill="none" stroke="#1a6b45" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M3 12h18M3 17h18" /></svg>),
     },
     {
       label: 'Total Views',
       value: loading ? '—' : totalViews.toLocaleString('en-IN'),
-      icon: (
-        <svg width="20" height="20" fill="none" stroke="#1a6b45" strokeWidth="1.8" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-      ),
+      icon: (<svg width="20" height="20" fill="none" stroke="#1a6b45" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>),
     },
     {
       label: 'Contact Unlocks',
       value: loading ? '—' : totalUnlocks,
       sub: `₹${totalRevenue.toLocaleString('en-IN')} earned`,
-      icon: (
-        <svg width="20" height="20" fill="none" stroke="#1a6b45" strokeWidth="1.8" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
+      icon: (<svg width="20" height="20" fill="none" stroke="#1a6b45" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>),
     },
   ];
+
+  const btnBase: React.CSSProperties = {
+    display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+    fontSize: '0.75rem', fontWeight: 600, border: '1.5px solid',
+    borderRadius: '7px', padding: '0.3rem 0.7rem', cursor: 'pointer',
+    transition: 'all 0.15s ease', fontFamily: 'inherit', background: 'transparent',
+  };
 
   return (
     <div style={{ background: '#FDFBF7', minHeight: '100vh', padding: '2.5rem 1.5rem' }}>
@@ -111,8 +147,6 @@ export default function Dashboard() {
               letterSpacing: '0.04em', textTransform: 'uppercase',
               transition: 'all 0.15s ease',
             }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#2d2d2d'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#2C2C2C'; }}
           >
             <span style={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1 }}>+</span>
             <span>List New Property</span>
@@ -124,30 +158,35 @@ export default function Dashboard() {
           {statCards.map((card) => (
             <div key={card.label} style={{
               background: '#ffffff', borderRadius: '14px', padding: '1.5rem',
-              border: '1px solid rgba(0,0,0,0.06)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                 <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   {card.label}
                 </span>
-                <div style={{
-                  width: '36px', height: '36px', borderRadius: '10px',
-                  background: 'rgba(26,107,69,0.08)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(26,107,69,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {card.icon}
                 </div>
               </div>
-              <p style={{ fontSize: '2rem', fontWeight: 800, color: '#2C2C2C', margin: 0, lineHeight: 1 }}>
-                {card.value}
-              </p>
-              {card.sub && (
-                <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.35rem', fontWeight: 500 }}>
-                  {card.sub}
-                </p>
-              )}
+              <p style={{ fontSize: '2rem', fontWeight: 800, color: '#2C2C2C', margin: 0, lineHeight: 1 }}>{card.value}</p>
+              {card.sub && (<p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.35rem', fontWeight: 500 }}>{card.sub}</p>)}
             </div>
+          ))}
+        </div>
+
+        {/* Legend */}
+        <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.06)', padding: '0.75rem 1.25rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Status Guide:</span>
+          {[
+            { label: 'Active', bg: '#dcfce7', color: '#15803d' },
+            { label: 'Pending Review', bg: '#fef9c3', color: '#a16207' },
+            { label: 'Sold Out', bg: '#f3e8ff', color: '#7c3aed' },
+            { label: 'Delete Requested', bg: '#fef2f2', color: '#b91c1c' },
+            { label: 'Rejected', bg: '#fee2e2', color: '#dc2626' },
+          ].map(s => (
+            <span key={s.label} style={{ background: s.bg, color: s.color, borderRadius: '9999px', padding: '0.2rem 0.65rem', fontSize: '0.7rem', fontWeight: 700 }}>
+              {s.label}
+            </span>
           ))}
         </div>
 
@@ -163,14 +202,9 @@ export default function Dashboard() {
           </div>
 
           {loading ? (
-            <div style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af', fontSize: '0.9rem' }}>
-              Loading your listings…
-            </div>
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af', fontSize: '0.9rem' }}>Loading your listings…</div>
           ) : properties.length === 0 ? (
             <div style={{ padding: '3.5rem', textAlign: 'center' }}>
-              <svg style={{ margin: '0 auto 1rem', display: 'block', color: '#d1d5db' }} width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
               <p style={{ color: '#6b7280', fontWeight: 500, marginBottom: '0.5rem' }}>No properties listed yet.</p>
               <Link to="/dashboard/seller/upload" style={{ color: '#1a6b45', fontWeight: 600, fontSize: '0.875rem', textDecoration: 'none' }}>
                 List your first property →
@@ -209,6 +243,16 @@ export default function Dashboard() {
                           #{listing.id.slice(-8).toUpperCase()}
                           {listing.type && <span style={{ marginLeft: '0.5rem', fontFamily: 'inherit', fontSize: '0.68rem', color: '#b0b8c4' }}>· {listing.type}</span>}
                         </div>
+                        {listing.status === 'DELETE_REQUESTED' && (
+                          <div style={{ fontSize: '0.68rem', color: '#b91c1c', marginTop: '0.2rem', fontWeight: 600 }}>
+                            ⏳ Awaiting admin approval for deletion
+                          </div>
+                        )}
+                        {listing.status === 'PENDING_VERIFICATION' && (
+                          <div style={{ fontSize: '0.68rem', color: '#a16207', marginTop: '0.2rem', fontWeight: 600 }}>
+                            ⏳ Awaiting admin review
+                          </div>
+                        )}
                       </td>
 
                       {/* Status */}
@@ -219,7 +263,7 @@ export default function Dashboard() {
                           fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.04em',
                           textTransform: 'uppercase', display: 'inline-block',
                         }}>
-                          {listing.status}
+                          {listing.status.replace('_', ' ')}
                         </span>
                       </td>
 
@@ -234,23 +278,79 @@ export default function Dashboard() {
 
                       {/* Actions */}
                       <td style={{ padding: '1rem 1.25rem', verticalAlign: 'middle', textAlign: 'right' }}>
-                        <Link
-                          to={`/dashboard/seller/edit/${listing.id}`}
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
-                            fontSize: '0.8rem', fontWeight: 600, color: '#2C2C2C',
-                            textDecoration: 'none', border: '1.5px solid #e5e7eb',
-                            borderRadius: '8px', padding: '0.35rem 0.85rem',
-                            transition: 'all 0.15s ease',
-                          }}
-                          onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = '#2C2C2C'; el.style.background = '#2C2C2C'; el.style.color = '#ffffff'; }}
-                          onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = '#e5e7eb'; el.style.background = 'transparent'; el.style.color = '#2C2C2C'; }}
-                        >
-                          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                          Edit
-                        </Link>
+                        <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                          {/* Edit — not allowed when delete pending or sold out in review */}
+                          {listing.status !== 'DELETE_REQUESTED' && (
+                            <Link
+                              to={`/dashboard/seller/edit/${listing.id}`}
+                              style={{
+                                ...btnBase,
+                                borderColor: '#e5e7eb', color: '#2C2C2C', textDecoration: 'none',
+                              }}
+                              onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = '#2C2C2C'; el.style.background = '#2C2C2C'; el.style.color = '#ffffff'; }}
+                              onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = '#e5e7eb'; el.style.background = 'transparent'; el.style.color = '#2C2C2C'; }}
+                            >
+                              <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                              Edit
+                            </Link>
+                          )}
+
+                          {/* Sold Out Toggle — only for ACTIVE or SOLD_OUT */}
+                          {(listing.status === 'ACTIVE' || listing.status === 'SOLD_OUT') && (
+                            <button
+                              onClick={() => handleToggleSoldOut(listing.id)}
+                              disabled={actionLoading === listing.id + '_sold'}
+                              style={{
+                                ...btnBase,
+                                borderColor: listing.status === 'SOLD_OUT' ? '#7c3aed' : '#9ca3af',
+                                color: listing.status === 'SOLD_OUT' ? '#7c3aed' : '#6b7280',
+                                opacity: actionLoading === listing.id + '_sold' ? 0.6 : 1,
+                              }}
+                              title={listing.status === 'SOLD_OUT' ? 'Mark as Active again' : 'Mark as Sold Out'}
+                            >
+                              {listing.status === 'SOLD_OUT' ? (
+                                <>
+                                  <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                  </svg>
+                                  Relist
+                                </>
+                              ) : (
+                                <>
+                                  <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  Sold Out
+                                </>
+                              )}
+                            </button>
+                          )}
+
+                          {/* Delete Request */}
+                          {listing.status === 'DELETE_REQUESTED' ? (
+                            <button
+                              onClick={() => setCancelDeleteConfirmId(listing.id)}
+                              disabled={actionLoading === listing.id + '_cancel'}
+                              style={{ ...btnBase, borderColor: '#f97316', color: '#f97316' }}
+                            >
+                              Cancel Request
+                            </button>
+                          ) : listing.status !== 'PENDING_VERIFICATION' ? (
+                            <button
+                              onClick={() => setDeleteConfirmId(listing.id)}
+                              disabled={actionLoading === listing.id + '_del'}
+                              style={{ ...btnBase, borderColor: '#fca5a5', color: '#dc2626' }}
+                              title="Request admin to delete this property"
+                            >
+                              <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                              Delete
+                            </button>
+                          ) : null}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -259,8 +359,50 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-
       </div>
+
+      {/* Delete Confirm Modal */}
+      {deleteConfirmId && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', zIndex: 200 }}>
+          <div style={{ background: '#fff', borderRadius: '14px', padding: '1.75rem', maxWidth: '420px', width: '100%', boxShadow: '0 12px 40px rgba(0,0,0,0.12)' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2C2C2C', margin: '0 0 0.5rem 0' }}>Request Property Deletion?</h2>
+            <p style={{ fontSize: '0.85rem', color: '#6b7280', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+              This will send a deletion request to the admin. Your listing will be marked as <strong>"Delete Requested"</strong> and hidden from the marketplace. 
+              The property will be permanently deleted only after admin approval. You can cancel this request anytime before approval.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => setDeleteConfirmId(null)} style={{ ...btnBase, borderColor: '#e5e7eb', color: '#6b7280', padding: '0.5rem 1rem' }}>Cancel</button>
+              <button
+                onClick={() => handleRequestDelete(deleteConfirmId)}
+                style={{ ...btnBase, background: '#dc2626', borderColor: '#dc2626', color: '#fff', padding: '0.5rem 1.25rem' }}
+              >
+                Yes, Request Deletion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Delete Confirm Modal */}
+      {cancelDeleteConfirmId && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', zIndex: 200 }}>
+          <div style={{ background: '#fff', borderRadius: '14px', padding: '1.75rem', maxWidth: '420px', width: '100%', boxShadow: '0 12px 40px rgba(0,0,0,0.12)' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2C2C2C', margin: '0 0 0.5rem 0' }}>Cancel Delete Request?</h2>
+            <p style={{ fontSize: '0.85rem', color: '#6b7280', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+              This will cancel the pending deletion request and restore your property to <strong>Active</strong> status on the marketplace.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => setCancelDeleteConfirmId(null)} style={{ ...btnBase, borderColor: '#e5e7eb', color: '#6b7280', padding: '0.5rem 1rem' }}>Go Back</button>
+              <button
+                onClick={() => handleCancelDelete(cancelDeleteConfirmId)}
+                style={{ ...btnBase, background: '#f97316', borderColor: '#f97316', color: '#fff', padding: '0.5rem 1.25rem' }}
+              >
+                Yes, Cancel Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

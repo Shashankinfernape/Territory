@@ -1,3 +1,8 @@
+import util from 'node:util'
+if (!(util as any).styleText) {
+  (util as any).styleText = (_format: any, text: any) => text
+}
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -10,6 +15,7 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       }
-    }
+    },
+    allowedHosts: true
   }
 })

@@ -20,11 +20,14 @@ auth.onIdTokenChanged(async (user) => {
 });
 
 import { SettingsProvider } from './contexts/SettingsContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SettingsProvider>
-      <App />
+      <LanguageProvider>
+        <App />
+      </LanguageProvider>
     </SettingsProvider>
   </StrictMode>,
 )

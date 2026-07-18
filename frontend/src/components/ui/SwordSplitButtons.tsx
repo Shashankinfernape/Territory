@@ -1,15 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
+import { useLanguage } from '../../contexts/LanguageContext';
 import './SwordSplitButtons.css';
 
 export default function SwordSplitButtons() {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const leftRef    = useRef<HTMLAnchorElement>(null);
   const rightRef   = useRef<HTMLAnchorElement>(null);
   const cutMarkRef = useRef<HTMLDivElement>(null);
   const sparkRef   = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
+
+  const handleSellClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('user_role');
+    if (!token) {
+      navigate('/login', { state: { mode: 'register' } });
+    } else if (role === 'SELLER' || role === 'ADMIN') {
+      navigate('/dashboard/seller');
+    } else {
+      // Logged-in buyer → show promotion request page
+      navigate('/sell-guide');
+    }
+  };
 
   useEffect(() => {
     const w  = wrapperRef.current;
@@ -80,12 +97,14 @@ export default function SwordSplitButtons() {
 
   return (
     <div className="sword-split-wrapper" ref={wrapperRef}>
-      <Link to="/map" className="sword-left" ref={leftRef}>Buy Land</Link>
+      <Link to="/browse" className="sword-left" ref={leftRef}>{t("Buy Land")}</Link>
 
       <div className="sword-cut-mark" ref={cutMarkRef} />
       <div className="sword-spark"    ref={sparkRef}   />
 
-      <Link to="/login?mode=register&role=SELLER" className="sword-right" ref={rightRef}>Sell Land</Link>
+      <a href="/sell-guide" className="sword-right" ref={rightRef} onClick={handleSellClick}>
+        {t("Buy Land") === "Buy Land" ? "Sell Land" : t("Sell Land")}
+      </a>
     </div>
   );
 }

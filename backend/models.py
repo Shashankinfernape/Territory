@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 from bson import ObjectId
 
@@ -102,6 +102,7 @@ class UserResponse(BaseModel):
     phone_number: Optional[str] = None
     role: str
     full_name: Optional[str] = None
+    is_seller_pending: Optional[bool] = None
 
 
 # ---------------------------------------------------------------------------
@@ -167,3 +168,18 @@ class PropertyResponse(PropertyCreate):
     seller_id: str
     status: str
     view_count: int
+    is_edit_pending: Optional[bool] = False
+    original_details: Optional[Dict[str, Any]] = None
+    rejection_info: Optional[Dict[str, Any]] = None
+
+
+class BecomeSellerRequest(BaseModel):
+    phone_number: str
+
+    @field_validator("phone_number")
+    @classmethod
+    def phone_must_be_10_digits(cls, v: str) -> str:
+        if not v.isdigit() or len(v) != 10:
+            raise ValueError("phone_number must be exactly 10 digits")
+        return v
+
