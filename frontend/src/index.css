@@ -1224,3 +1224,24 @@ select.form-input option {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Map Tile Contrast Adjustment */
+.leaflet-tile-pane { filter: brightness(0.85) contrast(1.1) saturate(1.1); }
+
+/* Remove Leaflet default white background box from taluk tooltips */
+.leaflet-tooltip.city-division-label {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Hide taluks during cinematic map flights to prevent SVG ghosting */
+.taluk-polygon {
+  animation: delayFadeIn 0.5s forwards;
+}
+
+@keyframes delayFadeIn {
+  0% { opacity: 0; }
+  80% { opacity: 0; }
+  100% { opacity: 1; }
+}

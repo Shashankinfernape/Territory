@@ -1,19 +1,19 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Tooltip, Polygon, GeoJSON, useMapEvents, CircleMarker } from 'react-leaflet';
+import { MapContainer, Pane, TileLayer, Marker, Tooltip, Polygon, GeoJSON, useMapEvents, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { api, getToken } from '../../lib/api';
 import type { Property } from '../../lib/types';
 import { useSettings } from '../../contexts/SettingsContext';
 import { PropertyCard } from '../../components/ui/PropertyCard';
-import { TAMIL_NADU_GEOJSON as OFFLINE_GEOJSON } from '../../components/common/tamilnadu_geojson';
 
 
 
-// Styled Google Maps Tile Server (Hides all roads, highways, and place labels)
-const MAP_TILES = 'https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t:0|s.e:l|p.v:off,s.t:3|p.v:off';
+
+// Styled Google Maps Tile Server (Satellite View)
+const MAP_TILES = 'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}';
 
 // Tamil Nadu center coordinates
 const TN_CENTER: [number, number] = [11.1271, 78.6569];
@@ -114,13 +114,46 @@ const normalizeName = (name: string): string => {
 
 // Official 38 districts of Tamil Nadu
 const TAMIL_NADU_DISTRICTS = [
-  "Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri",
-  "Dindigul", "Erode", "Kallakurichi", "Kancheepuram", "Kanniyakumari", "Karur",
-  "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris",
-  "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivagangai",
-  "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli (Trichy)", "Tirunelveli",
-  "Tirupattur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore",
-  "Viluppuram", "Virudhunagar"
+  'Ariyalur',
+  'Chengalpattu',
+  'Chennai',
+  'Coimbatore',
+  'Cuddalore',
+  'Dharmapuri',
+  'Dindigul',
+  'Erode',
+  'Kallakurichi',
+  'Kancheepuram',
+  'Kanniyakumari',
+  'Karaikal (UT)',
+  'Karur',
+  'Krishnagiri',
+  'Madurai',
+  'Mayiladuthurai',
+  'Nagapattinam',
+  'Namakkal',
+  'Nilgiris',
+  'Perambalur',
+  'Puducherry (UT)',
+  'Pudukkottai',
+  'Ramanathapuram',
+  'Ranipet',
+  'Salem',
+  'Sivagangai',
+  'Tenkasi',
+  'Thanjavur',
+  'Theni',
+  'Thoothukudi',
+  'Tiruchirappalli (Trichy)',
+  'Tirunelveli',
+  'Tirupattur',
+  'Tiruppur',
+  'Tiruvallur',
+  'Tiruvannamalai',
+  'Tiruvarur',
+  'Vellore',
+  'Viluppuram',
+  'Virudhunagar'
 ];
 
 // Thorough mapping of all districts to their curated major/big cities
@@ -303,8 +336,15 @@ const DISTRICT_CITIES: Record<string, MajorCity[]> = {
   [normalizeName("Virudhunagar")]: [
     { name: "Virudhunagar", coords: [9.5872, 77.9570] },
     { name: "Sivakasi", coords: [9.4533, 77.8016] }
-  ]
-};
+  ],
+
+  'Puducherry (UT)': [
+    { name: 'Puducherry', coords: [11.9416, 79.8083] },
+    { name: 'Ozhukarai', coords: [11.9567, 79.7997] }
+  ],
+  'Karaikal (UT)': [
+    { name: 'Karaikal', coords: [10.9254, 79.8380] }
+  ],};
 
 
 
@@ -314,9 +354,9 @@ function MapFlyController({ center, zoom, bounds }: { center: [number, number]; 
   const map = useMap();
   useEffect(() => {
     if (bounds) {
-      map.fitBounds(bounds, { animate: true, duration: 1.0 });
+      map.fitBounds(bounds, { animate: true, duration: 0.5 });
     } else {
-      map.setView(center, zoom, { animate: true, duration: 1.0 });
+      map.setView(center, zoom, { animate: true, duration: 0.5 });
     }
   }, [center, zoom, bounds, map]);
   return null;
@@ -827,12 +867,7 @@ function CustomSelect({
               touchAction: 'pan-y'
             }}
           >
-            <style>{`
-              .custom-select-menu::-webkit-scrollbar { width: 6px !important; display: block !important; }
-              .custom-select-menu::-webkit-scrollbar-track { background: transparent !important; }
-              .custom-select-menu::-webkit-scrollbar-thumb { background: #d4cfc8 !important; border-radius: 99px !important; }
-              .custom-select-menu::-webkit-scrollbar-thumb:hover { background: #b8b2a9 !important; }
-            `}</style>
+            
             {optionsList}
           </div>
         ),
@@ -847,15 +882,27 @@ export default function MapSearch() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [visibleCount, setVisibleCount] = useState(6);
   const [loading, setLoading] = useState(true);
-  const [geoJsonData, setGeoJsonData] = useState<any | null>(OFFLINE_GEOJSON);
+  const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
+  const [outlineData, setOutlineData] = useState<any | null>(null);
   const [cityDivisions, setCityDivisions] = useState<any>({});
+  const [isMapMoving, setIsMapMoving] = useState(false);
   const { animationSetting } = useSettings();
 
   useEffect(() => {
-    fetch('/tamilnadu_city_divisions.json?v=3')
+    fetch('/tamilnadu_city_divisions.json?v=39')
       .then(res => res.json())
       .then(data => setCityDivisions(data))
       .catch(err => console.error('Failed to load city divisions:', err));
+
+    fetch('/tamilnadu_geojson.json?v=39')
+      .then(res => res.json())
+      .then(data => setGeoJsonData(data))
+      .catch(err => console.error('Failed to load district boundaries:', err));
+
+    fetch('/tamilnadu_outline.json?v=2')
+      .then(res => res.json())
+      .then(data => setOutlineData(data))
+      .catch(err => console.error('Failed to load outline data:', err));
   }, []);
 
   // Wishlist states
@@ -1190,27 +1237,7 @@ export default function MapSearch() {
     setDragY(null);
   };
 
-  // Fetch updated 38-district GeoJSON from GitHub raw link (CORS enabled)
-  useEffect(() => {
-    const fetchGeoJson = async () => {
-      try {
-        const res = await fetch('https://raw.githubusercontent.com/datta07/INDIAN-SHAPEFILES/master/STATES/TAMIL%20NADU/TAMIL%20NADU_DISTRICTS.geojson');
-        if (!res.ok) throw new Error("Network response not ok");
-        const data = await res.json();
-        
-        // Normalize properties so Dist_Name is guaranteed to be mapped cleanly
-        data.features.forEach((feature: any) => {
-          const props = feature.properties;
-          props.Dist_Name = props.dtname || props.dist || props.district || props.Dist_Name || props.DISTRICT || props.NAME_2;
-        });
-        setGeoJsonData(data);
-      } catch (err) {
-        console.warn("Fallback to offline 32-district GeoJSON:", err);
-        setGeoJsonData(OFFLINE_GEOJSON);
-      }
-    };
-    fetchGeoJson();
-  }, []);
+    // Using our mathematically perfected OFFLINE_GEOJSON which directly syncs with city divisions.
 
   // Fetch approved active properties
   useEffect(() => {
@@ -1415,7 +1442,7 @@ export default function MapSearch() {
     if (!geoJsonData) return null;
     
     // GeoJSON coords are [lng, lat]. Use full world bounds so the dark mask
-    // covers EVERYTHING no matter how far the user pans — no blue tiles ever.
+    // covers EVERYTHING no matter how far the user pans – no blue tiles ever.
     const worldBounds = [
       [-180, -90],
       [ 180, -90],
@@ -1426,6 +1453,7 @@ export default function MapSearch() {
     
     const holes: any[] = [];
     
+    // Cut a hole for each district.
     geoJsonData.features.forEach((feature: any) => {
       const geom = feature.geometry;
       if (geom.type === 'Polygon') {
@@ -1436,14 +1464,19 @@ export default function MapSearch() {
         });
       }
     });
-    
+
     return {
-      type: 'Feature',
-      properties: { isMask: true },
-      geometry: {
-        type: 'Polygon',
-        coordinates: [worldBounds, ...holes]
-      }
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Polygon',
+            coordinates: [worldBounds, ...holes]
+          }
+        }
+      ]
     } as any;
   }, [geoJsonData]);
 
@@ -1457,11 +1490,16 @@ export default function MapSearch() {
     const distName = feature.properties.Dist_Name || '';
     const isSelected = selectedDistrict && normalizeName(distName) === normalizeName(selectedDistrict);
     return {
-      color: isSelected ? '#eab308' : 'rgba(16, 16, 16, 0.15)',
-      weight: isSelected ? 3.5 : 1.5,
-      fillColor: isSelected ? '#facc15' : 'transparent',
-      fillOpacity: isSelected ? 0.05 : 0,
-      transition: 'all 0.18s ease-out'
+      stroke: isSelected,
+      color: '#fde047',
+      weight: isSelected ? 2 : 0,
+      opacity: isSelected ? 1 : 0,
+      dashArray: '',
+      lineCap: 'round',
+      lineJoin: 'round',
+      fillColor: isSelected ? '#fde047' : 'transparent',
+      fillOpacity: isSelected ? 0.15 : 0,
+      
     };
   };
 
@@ -1473,10 +1511,13 @@ export default function MapSearch() {
         const isSelected = selectedDistrict && normalizeName(distName) === normalizeName(selectedDistrict);
         if (!isSelected) {
           e.target.setStyle({
-            color: '#eab308',
-            weight: 2,
-            fillColor: '#facc15',
-            fillOpacity: 0.05
+            stroke: true,
+            color: '#fde047',
+            weight: 1.5,
+            opacity: 0.8,
+            dashArray: '',
+            fillColor: '#fde047',
+            fillOpacity: 0.12
           });
         }
       },
@@ -1485,8 +1526,11 @@ export default function MapSearch() {
         const isSelected = selectedDistrict && normalizeName(distName) === normalizeName(selectedDistrict);
         if (!isSelected) {
           e.target.setStyle({
-            color: 'rgba(16, 16, 16, 0.15)',
-            weight: 1.5,
+            stroke: false,
+            color: 'transparent',
+            weight: 0,
+            opacity: 0,
+            dashArray: '',
             fillColor: 'transparent',
             fillOpacity: 0
           });
@@ -1675,6 +1719,32 @@ export default function MapSearch() {
         .navbar {
           margin-bottom: 4px !important;
         }
+      `}</style>
+      <style>{`
+          .district-tooltip {
+            background: #2C2C2C !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 4px !important;
+            font-weight: 700 !important;
+          }
+          
+          /* Force ALL Leaflet tooltips to be completely transparent without boxes or arrows */
+          .leaflet-tooltip {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+          }
+          .leaflet-tooltip::before, .leaflet-tooltip::after {
+            display: none !important;
+          }
+          
+          .map-zoom-controls {portant;
+          border-radius: 4px !important;
+          font-weight: 700 !important;
+          font-size: 0.72rem !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+          padding: 4px 8px !important;
       `}</style>
       
 
@@ -1871,18 +1941,21 @@ export default function MapSearch() {
               </div>
             )}
             <MapContainer
-              center={mapCenter}
-              zoom={mapZoom}
-              zoomControl={false}
-              maxBounds={[[4, 64], [25, 92]]}
-              minZoom={6}
-              maxZoom={14}
+        style={{ background: '#0b1120', width: '100%', height: '100%', borderRadius: 'inherit' }}
+        center={mapCenter}
+        zoom={mapZoom}
+        zoomControl={false}
+        maxBounds={[[4, 64], [25, 92]]}
+        minZoom={6}
+        maxZoom={14}
               zoomAnimation={true}
               zoomAnimationThreshold={4}
               fadeAnimation={true}
               markerZoomAnimation={true}
-              preferCanvas={false}
-              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
+              doubleClickZoom={true}
+              dragging={true}
+              className="map-container"
             >
             {/* Fly to active center or bounds */}
             <MapFlyController center={mapCenter} zoom={mapZoom} bounds={selectedBounds} />
@@ -1898,32 +1971,39 @@ export default function MapSearch() {
               keepBuffer={8}
               updateWhenIdle={false}
               updateWhenZooming={false}
+              className="map-tiles"
             />
 
             {/* Permanent dark mask outside Tamil Nadu — pre-rendered far beyond viewport */}
             {maskGeoJson && (
-              <GeoJSON
-                key="tn-gta-mask"
-                data={maskGeoJson}
-                pathOptions={{
-                  fillColor: '#090c15',
-                  fillOpacity: 0.76,
-                  color: 'transparent',
-                  weight: 0,
-                  renderer: maskRenderer
-                }}
-                interactive={false}
-              />
+              <Pane name="maskPane" style={{ zIndex: 400 }}>
+                <GeoJSON
+                  key="tn-gta-mask"
+                  data={maskGeoJson}
+                  pathOptions={{
+                    fillColor: '#090c15',
+                    fillOpacity: 0.76,
+                    fillRule: 'evenodd',
+                    stroke: false,
+                    color: 'transparent',
+                    weight: 0,
+                    renderer: maskRenderer
+                  }}
+                  interactive={false}
+                />
+              </Pane>
             )}
 
             {/* Tamil Nadu Districts GeoJSON boundaries */}
             {geoJsonData && (
-              <GeoJSON
-                key={selectedDistrict || 'tn-districts-terrain'}
-                data={geoJsonData}
-                style={getFeatureStyle}
-                onEachFeature={onEachFeature}
-              />
+              <Pane name="districtPane" style={{ zIndex: 410 }}>
+                <GeoJSON
+                  key={selectedDistrict || 'tn-districts-terrain'}
+                  data={geoJsonData}
+                  style={getFeatureStyle}
+                  onEachFeature={onEachFeature}
+                />
+              </Pane>
             )}
           
             {/* District Name Labels rendered as desaturated text on the map */}
@@ -1939,10 +2019,10 @@ export default function MapSearch() {
                     className: 'district-map-label',
                     html: `<div style="
                       font-family: 'Inter', sans-serif;
-                      font-size: 0.72rem;
+                      font-size: 0.75rem;
                       font-weight: 800;
-                      color: #374151;
-                      text-shadow: -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff;
+                      color: #ffffff;
+                      text-shadow: 0px 2px 6px rgba(0,0,0,1), 0px 0px 3px rgba(0,0,0,1);
                       text-align: center;
                       white-space: nowrap;
                       text-transform: uppercase;
@@ -1967,50 +2047,55 @@ export default function MapSearch() {
               const center = bounds.isValid() ? bounds.getCenter() : null;
               
               return (
-                <div key={`city-div-wrapper-${div.name}-${idx}`}>
-                  <Polygon
-                    positions={div.polygons}
-                    pathOptions={{
-                      color: isHighlighted ? '#eab308' : 'rgba(16, 16, 16, 0.22)',
-                      weight: isHighlighted ? 2.5 : 1.25,
-                      fillColor: '#facc15', // premium yellow wash for all divisions in selected district
-                      fillOpacity: isHighlighted ? 0.35 : 0.04 // soft wash for unhighlighted, solid highlight for selected
-                    }}
-                    eventHandlers={{
-                      click: (e) => {
-                        L.DomEvent.stopPropagation(e);
-                        handleCityChange(div.name);
-                      }
-                    }}
-                  />
-                  {center && (
-                    <CircleMarker
-                      center={center}
-                      radius={0}
-                      pathOptions={{ stroke: false, fill: false }}
-                      interactive={false}
-                    >
-                      <Tooltip
-                        permanent
-                        direction="center"
-                        className="city-division-tooltip"
+                  <Pane name={`talukPane-${div.name}`} style={{ zIndex: 420 }}>
+                    <Polygon
+                      positions={div.polygons}
+                      pathOptions={{
+                        color: '#fde047',
+                        weight: isHighlighted ? 1.5 : 0.7,
+                        fillColor: '#fde047', // premium yellow wash for all divisions in selected district
+                        fillOpacity: isHighlighted ? 0.35 : 0.04,
+                        className: 'taluk-polygon' // soft wash for unhighlighted, solid highlight for selected
+                      }}
+                      eventHandlers={{
+                        click: (e) => {
+                          L.DomEvent.stopPropagation(e);
+                          handleCityChange(div.name);
+                        }
+                      }}
+                    />
+                    {center && (
+                      <CircleMarker
+                        center={center}
+                        radius={0}
+                        pathOptions={{ stroke: false, fill: false }}
                       >
-                        <span style={{
-                          fontFamily: "'Inter', sans-serif",
-                          fontSize: '0.65rem',
-                          fontWeight: 800,
-                          color: isHighlighted ? '#b45309' : '#4b5563',
-                          textShadow: '-1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.04em',
-                          pointerEvents: 'none'
-                        }}>
-                          {div.name}
-                        </span>
-                      </Tooltip>
-                    </CircleMarker>
-                  )}
-                </div>
+                        <Tooltip 
+                          direction="center" 
+                          permanent 
+                          className="city-division-tooltip"
+                          opacity={1}
+                        >
+                          <div style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: '0.65rem',
+                            fontWeight: isHighlighted ? 800 : 700,
+                            color: isHighlighted ? '#fde047' : '#e5e7eb',
+                            textShadow: '0px 2px 6px rgba(0,0,0,1), 0px 0px 3px rgba(0,0,0,1)',
+                            textAlign: 'center',
+                            whiteSpace: 'nowrap',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.04em',
+                            pointerEvents: 'none', // Allow clicking through the text to the polygon
+                            transition: 'all 0.2s ease-in-out',
+                            transform: isHighlighted ? 'scale(1.15)' : 'scale(1)'
+                          }}>
+                            {div.name}
+                          </div>
+                        </Tooltip>
+                      </CircleMarker>
+                    )}
+                  </Pane>
               );
             })}
             </MapContainer>
