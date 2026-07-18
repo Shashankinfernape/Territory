@@ -637,7 +637,7 @@ export default function AdminDashboard() {
             }
           }
         `}</style>
-+
+
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '0.75rem' }}>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Admin Control Panel</h1>
           <span className="badge-premium" style={{ border: '1px solid #ff3b30', color: '#ff3b30', background: 'rgba(255,59,48,0.06)', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', textTransform: 'uppercase' }}>System Console</span>
