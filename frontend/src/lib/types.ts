@@ -6,6 +6,7 @@ export interface DocumentItem {
 export interface Property {
   id: string;
   seller_id: string;
+  seller_name?: string;
   city: string;
   district: string;
   state: string;

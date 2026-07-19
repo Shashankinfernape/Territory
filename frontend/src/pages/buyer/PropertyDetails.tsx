@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../lib/api';
 import type { Property } from '../../lib/types';
 import { formatPrice } from '../../lib/utils';
@@ -14,6 +15,7 @@ interface DetailedProperty extends Property {
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [prop, setProp] = useState<DetailedProperty | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -370,7 +372,18 @@ export default function PropertyDetails() {
                   <span className="badge-verified" style={{ alignSelf: 'flex-start' }}>OWNER CONTACT</span>
                   <div>
                     <p style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Landowner Name</p>
-                    <p style={{ fontSize: '1.0625rem', fontWeight: 600, color: '#2C2C2C', letterSpacing: '-0.2px' }}>{prop.owner_name || 'Landowner'}</p>
+                    <p style={{ fontSize: '1.0625rem', fontWeight: 600, color: '#2C2C2C', letterSpacing: '-0.2px' }}>
+                      {user?.role === 'ADMIN' ? (
+                        <span 
+                          onClick={() => navigate(`/dashboard/admin?view_user=${prop.seller_id}`)}
+                          style={{ cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}
+                        >
+                          {prop.owner_name || 'Landowner'}
+                        </span>
+                      ) : (
+                        <>{prop.owner_name || 'Landowner'}</>
+                      )}
+                    </p>
                   </div>
                   <div>
                     <p style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Contact Number</p>

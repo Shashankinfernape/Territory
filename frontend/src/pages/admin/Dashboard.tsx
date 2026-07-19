@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../lib/api';
 import UserProfileViewer from './UserProfileViewer';
 import type { Property } from '../../lib/types';
@@ -116,7 +116,8 @@ interface DeleteRequestProperty {
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
-  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const [viewingUserId, setViewingUserId] = useState<string | null>(searchParams.get('view_user') || null);
   const [users, setUsers] = useState<User[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -372,6 +373,7 @@ export default function AdminDashboard() {
     p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (p.city || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
     (p.district || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (p.seller_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     shortId(p.seller_id).toLowerCase().includes(searchQuery.toLowerCase()) ||
     (p.type || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -393,6 +395,7 @@ export default function AdminDashboard() {
     p.status === 'PENDING_VERIFICATION' && !p.is_edit_pending &&
     ((p.city || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
      (p.district || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+     (p.seller_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
      shortId(p.seller_id).toLowerCase().includes(searchQuery.toLowerCase()) ||
      (p.type || '').toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -401,6 +404,7 @@ export default function AdminDashboard() {
     p.status === 'PENDING_VERIFICATION' && p.is_edit_pending &&
     ((p.city || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
      (p.district || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+     (p.seller_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
      shortId(p.seller_id).toLowerCase().includes(searchQuery.toLowerCase()) ||
      (p.type || '').toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -914,7 +918,7 @@ export default function AdminDashboard() {
                               style={{ background: 'rgba(0,122,255,0.06)', color: '#007aff', cursor: 'pointer', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem', textDecoration: 'underline' }}
                               title="Click to view seller details"
                             >
-                              {shortId(p.seller_id)}
+                              {p.seller_name || shortId(p.seller_id)}
                             </span>
                           </td>
                           <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a', fontWeight: 800 }}>
@@ -1107,7 +1111,7 @@ export default function AdminDashboard() {
                           style={{ background: 'rgba(0,122,255,0.06)', color: '#007aff', cursor: 'pointer', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem', textDecoration: 'underline' }}
                           title="Click to view seller details"
                         >
-                          {shortId(p.seller_id)}
+                          {p.seller_name || shortId(p.seller_id)}
                         </span>
                       </td>
                       <td style={{ padding: '1rem 1.5rem' }}>
@@ -1372,7 +1376,7 @@ export default function AdminDashboard() {
                         title="Click to view seller details"
                       >
                         <span style={{ background: 'rgba(0,122,255,0.06)', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
-                          {shortId(p.seller_id)}
+                          {p.seller_name || shortId(p.seller_id)}
                         </span>
                       </td>
                       <td style={{ padding: '1rem 1.5rem' }}>
@@ -1538,7 +1542,7 @@ export default function AdminDashboard() {
                             title="Click to view seller details"
                           >
                             <span style={{ background: 'rgba(0,122,255,0.06)', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
-                              {shortId(p.seller_id)}
+                              {p.seller_name || shortId(p.seller_id)}
                             </span>
                           </td>
                           <td style={{ padding: '1rem 1.5rem' }}>
@@ -1696,6 +1700,7 @@ export default function AdminDashboard() {
                   ) : deleteRequests.filter(p =>
                     (p.city || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                     (p.district || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    (p.seller_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                     shortId(p.seller_id).toLowerCase().includes(searchQuery.toLowerCase())
                   ).map(p => (
                     <tr key={p.id} style={{ borderBottom: '1px solid rgba(15, 23, 42, 0.06)', transition: 'background 0.15s' }}
@@ -1716,7 +1721,7 @@ export default function AdminDashboard() {
                           style={{ background: 'rgba(0,122,255,0.06)', color: '#007aff', cursor: 'pointer', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem', textDecoration: 'underline' }}
                           title="Click to view seller details"
                         >
-                          {shortId(p.seller_id)}
+                          {p.seller_name || shortId(p.seller_id)}
                         </span>
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a' }}>

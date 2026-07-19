@@ -146,11 +146,26 @@ async def get_user_full_profile(user_id: str, db=Depends(get_db), auth_db=Depend
 @router.get("/properties", response_model=List[Dict[str, Any]])
 async def get_all_properties(db=Depends(get_db), auth_db=Depends(get_auth_db), current_admin=Depends(get_current_admin)):
     properties = []
+    seller_ids = set()
     cursor = db.properties.find({})
     async for document in cursor:
         doc = {k: v for k, v in document.items() if k != "_id"}
         doc["id"] = str(document["_id"])
+        if doc.get("seller_id"):
+            seller_ids.add(doc["seller_id"])
         properties.append(doc)
+        
+    seller_map = {}
+    if seller_ids:
+        users_cursor = auth_db.users.find({"_id": {"$in": list(seller_ids)}})
+        async for user in users_cursor:
+            seller_map[str(user["_id"])] = user.get("full_name") or user.get("email") or "Unknown Seller"
+            
+    for prop in properties:
+        sid = prop.get("seller_id")
+        if sid and sid in seller_map:
+            prop["seller_name"] = seller_map[sid]
+            
     return properties
 
 
