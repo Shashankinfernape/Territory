@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { auth } from '../../lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function Navbar() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { language, setLanguage, t } = useLanguage();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const { user, role } = useAuth();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -28,10 +30,9 @@ export default function Navbar() {
     setSearchParams(newParams);
   };
 
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [role, setRole] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [displayName, setDisplayName] = useState<string | null>(null);
+  const loggedIn = !!user;
+  const avatarUrl = auth.currentUser?.photoURL || null;
+  const displayName = user?.full_name || auth.currentUser?.displayName || user?.email || null;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -73,20 +74,6 @@ export default function Navbar() {
   }, [role]);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        setLoggedIn(true);
-        setRole(localStorage.getItem('user_role'));
-        setAvatarUrl(user.photoURL);
-        setDisplayName(user.displayName || user.email);
-      } else {
-        setLoggedIn(false); setRole(null); setAvatarUrl(null); setDisplayName(null);
-      }
-    });
-
-    const checkRole = () => setRole(localStorage.getItem('user_role'));
-    window.addEventListener('storage', checkRole);
-
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
@@ -101,8 +88,6 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      unsubscribe();
-      window.removeEventListener('storage', checkRole);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -111,7 +96,6 @@ export default function Navbar() {
   const handleLogout = async () => {
     try { await signOut(auth); } catch (e) { console.error(e); }
     clearToken();
-    setLoggedIn(false); setRole(null); setAvatarUrl(null); setDisplayName(null);
     setDropdownOpen(false);
     setMobileMenuOpen(false);
     navigate('/');

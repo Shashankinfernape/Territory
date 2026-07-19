@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../lib/api';
+import UserProfileViewer from './UserProfileViewer';
 import type { Property } from '../../lib/types';
 
 type Tab = 'overview' | 'users' | 'properties' | 'transactions' | 'trending' | 'seller_approvals' | 'property_approvals' | 'property_edits' | 'questions' | 'pending_payments' | 'qr_management' | 'delete_requests';
@@ -113,7 +114,9 @@ interface DeleteRequestProperty {
   }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -181,7 +184,7 @@ export default function AdminDashboard() {
   // Custom delete confirmation modals
   const [deleteTargetUser, setDeleteTargetUser] = useState<string | null>(null);
   const [deleteTargetProperty, setDeleteTargetProperty] = useState<string | null>(null);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const BACKEND_ROOT = import.meta.env.VITE_API_ROOT || 'http://localhost:8000';
 
@@ -638,11 +641,16 @@ export default function AdminDashboard() {
           }
         `}</style>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Admin Control Panel</h1>
-          <span className="badge-premium" style={{ border: '1px solid #ff3b30', color: '#ff3b30', background: 'rgba(255,59,48,0.06)', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', textTransform: 'uppercase' }}>System Console</span>
-        </div>
+        {!viewingUserId && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Admin Control Panel</h1>
+            <span className="badge-premium" style={{ border: '1px solid #ff3b30', color: '#ff3b30', background: 'rgba(255,59,48,0.06)', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.5rem', textTransform: 'uppercase' }}>System Console</span>
+          </div>
+        )}
 
+        {viewingUserId ? (
+          <UserProfileViewer userId={viewingUserId} onClose={() => setViewingUserId(null)} />
+        ) : (
         <div className="admin-layout">
           {/* Sidebar Navigation */}
           <div className="admin-sidebar">
@@ -901,7 +909,11 @@ export default function AdminDashboard() {
                             {p.type && <div style={{ fontSize: '0.7rem', color: 'rgba(15,23,42,0.4)' }}>{p.type}</div>}
                           </td>
                           <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.5)', fontFamily: 'monospace' }}>
-                            <span style={{ background: '#f1f5f9', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                            <span 
+                              onClick={() => p.seller_id && setViewingUserId(p.seller_id)}
+                              style={{ background: 'rgba(0,122,255,0.06)', color: '#007aff', cursor: 'pointer', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem', textDecoration: 'underline' }}
+                              title="Click to view seller details"
+                            >
                               {shortId(p.seller_id)}
                             </span>
                           </td>
@@ -999,7 +1011,15 @@ export default function AdminDashboard() {
                           background: u.role === 'ADMIN' ? 'rgba(255,59,48,0.04)' : u.role === 'SELLER' ? 'rgba(0,122,255,0.04)' : 'rgba(15, 32, 66, 0.05)'
                         }}>{u.role}</span>
                       </td>
-                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.7)' }}>{u.full_name ?? '-'}</td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.7)' }}>
+                        <span 
+                          onClick={() => setViewingUserId(u.id)}
+                          style={{ cursor: 'pointer', color: '#007aff', textDecoration: 'underline' }}
+                          title="View full profile"
+                        >
+                          {u.full_name ?? '-'}
+                        </span>
+                      </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.5)' }}>
                         {u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN') : '-'}
                       </td>
@@ -1082,7 +1102,11 @@ export default function AdminDashboard() {
                         {p.type && <div style={{ fontSize: '0.7rem', color: 'rgba(15,23,42,0.4)' }}>{p.type}</div>}
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.5)', fontFamily: 'monospace' }}>
-                        <span style={{ background: '#f1f5f9', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                        <span 
+                          onClick={() => p.seller_id && setViewingUserId(p.seller_id)}
+                          style={{ background: 'rgba(0,122,255,0.06)', color: '#007aff', cursor: 'pointer', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem', textDecoration: 'underline' }}
+                          title="Click to view seller details"
+                        >
                           {shortId(p.seller_id)}
                         </span>
                       </td>
@@ -1229,8 +1253,7 @@ export default function AdminDashboard() {
                     >
                       <td 
                         onClick={() => {
-                          setActiveTab('users');
-                          setSearchQuery(u.id);
+                          setViewingUserId(u.id);
                         }}
                         style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#b8963e', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}
                         title="Click to view in Registered Users"
@@ -1244,15 +1267,14 @@ export default function AdminDashboard() {
                           background: 'rgba(15, 32, 66, 0.05)'
                         }}>{u.role}</span>
                       </td>
-                      <td 
-                        onClick={() => {
-                          setActiveTab('users');
-                          setSearchQuery(u.id);
-                        }}
-                        style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#b8963e', cursor: 'pointer', textDecoration: 'underline' }}
-                        title="Click to view in Registered Users"
-                      >
-                        {u.full_name ?? '-'}
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#b8963e' }}>
+                        <span 
+                          onClick={() => setViewingUserId(u.id)}
+                          style={{ cursor: 'pointer', color: '#007aff', textDecoration: 'underline' }}
+                          title="View full profile"
+                        >
+                          {u.full_name ?? '-'}
+                        </span>
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
                         <span style={{ color: '#b8963e', fontWeight: 700 }}>{u.kyc_details?.status || 'PENDING'}</span>
@@ -1344,13 +1366,12 @@ export default function AdminDashboard() {
                       </td>
                       <td 
                         onClick={() => {
-                          setActiveTab('users');
-                          setSearchQuery(p.seller_id);
+                          setViewingUserId(p.seller_id);
                         }}
-                        style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#b8963e', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}
+                        style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#007aff', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}
                         title="Click to view seller details"
                       >
-                        <span style={{ background: '#f1f5f9', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                        <span style={{ background: 'rgba(0,122,255,0.06)', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
                           {shortId(p.seller_id)}
                         </span>
                       </td>
@@ -1511,13 +1532,12 @@ export default function AdminDashboard() {
                           </td>
                           <td 
                             onClick={() => {
-                              setActiveTab('users');
-                              setSearchQuery(p.seller_id);
+                              setViewingUserId(p.seller_id);
                             }}
-                            style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#b8963e', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}
+                            style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#007aff', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}
                             title="Click to view seller details"
                           >
-                            <span style={{ background: '#f1f5f9', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                            <span style={{ background: 'rgba(0,122,255,0.06)', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
                               {shortId(p.seller_id)}
                             </span>
                           </td>
@@ -1691,7 +1711,11 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.5)', fontFamily: 'monospace' }}>
-                        <span style={{ background: '#f1f5f9', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                        <span 
+                          onClick={() => p.seller_id && setViewingUserId(p.seller_id)}
+                          style={{ background: 'rgba(0,122,255,0.06)', color: '#007aff', cursor: 'pointer', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem', textDecoration: 'underline' }}
+                          title="Click to view seller details"
+                        >
                           {shortId(p.seller_id)}
                         </span>
                       </td>
@@ -1749,11 +1773,25 @@ export default function AdminDashboard() {
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
-                        <div style={{ fontWeight: 600, color: '#0f172a' }}>{tx.buyer_name !== 'Unknown' ? tx.buyer_name : tx.buyer_phone}</div>
+                        <div style={{ fontWeight: 600, color: '#0f172a' }}>
+                          <span 
+                            onClick={() => tx.buyer_id && setViewingUserId(tx.buyer_id)}
+                            style={{ cursor: tx.buyer_id ? 'pointer' : 'default', color: tx.buyer_id ? '#007aff' : 'inherit', textDecoration: tx.buyer_id ? 'underline' : 'none' }}
+                          >
+                            {tx.buyer_name !== 'Unknown' ? tx.buyer_name : tx.buyer_phone}
+                          </span>
+                        </div>
                         {tx.buyer_name !== 'Unknown' && <div style={{ fontSize: '0.75rem', color: 'rgba(15, 23, 42, 0.4)', fontFamily: 'monospace' }}>{tx.buyer_phone}</div>}
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>
-                        <div style={{ fontWeight: 600, color: '#0f172a' }}>{tx.seller_name !== 'Unknown' ? tx.seller_name : tx.seller_phone}</div>
+                        <div style={{ fontWeight: 600, color: '#0f172a' }}>
+                          <span 
+                            onClick={() => tx.seller_id && setViewingUserId(tx.seller_id)}
+                            style={{ cursor: tx.seller_id ? 'pointer' : 'default', color: tx.seller_id ? '#007aff' : 'inherit', textDecoration: tx.seller_id ? 'underline' : 'none' }}
+                          >
+                            {tx.seller_name !== 'Unknown' ? tx.seller_name : tx.seller_phone}
+                          </span>
+                        </div>
                         {tx.seller_name !== 'Unknown' && <div style={{ fontSize: '0.75rem', color: 'rgba(15, 23, 42, 0.4)', fontFamily: 'monospace' }}>{tx.seller_phone}</div>}
                       </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15, 23, 42, 0.7)' }}>
@@ -1822,7 +1860,14 @@ export default function AdminDashboard() {
                       onMouseEnter={e => (e.currentTarget.style.background = 'rgba(15,23,42,0.015)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
-                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{q.full_name || 'Google User'}</td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
+                        <span 
+                          onClick={() => q.user_id && setViewingUserId(q.user_id)} 
+                          style={{ cursor: q.user_id ? 'pointer' : 'default', color: q.user_id ? '#007aff' : 'inherit', textDecoration: q.user_id ? 'underline' : 'none' }}
+                        >
+                          {q.full_name || 'Google User'}
+                        </span>
+                      </td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15, 23, 42, 0.7)' }}>{q.email}</td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#0f172a', fontFamily: 'monospace' }}>{q.phone_number}</td>
                       <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(15,23,42,0.5)' }}>
@@ -1917,11 +1962,10 @@ export default function AdminDashboard() {
                     >
                       <td 
                         onClick={() => {
-                          setActiveTab('users');
-                          setSearchQuery(p.buyer_id);
+                          setViewingUserId(p.buyer_id);
                         }}
                         style={{ padding: '1.25rem 1.5rem', fontSize: '0.85rem', cursor: 'pointer' }}
-                        title="Click to view in Registered Users"
+                        title="Click to view full profile"
                       >
                         <div style={{ fontWeight: 700, color: '#b8963e', textDecoration: 'underline' }}>{p.buyer_name}</div>
                         <div style={{ fontSize: '0.75rem', color: 'rgba(15, 23, 42, 0.6)', marginTop: '0.15rem' }}>{p.buyer_email}</div>
@@ -1949,11 +1993,10 @@ export default function AdminDashboard() {
                       </td>
                       <td 
                         onClick={() => {
-                          setActiveTab('users');
-                          setSearchQuery(p.owner_id);
+                          setViewingUserId(p.owner_id);
                         }}
                         style={{ padding: '1.25rem 1.5rem', fontSize: '0.85rem', cursor: 'pointer' }}
-                        title="Click to view in Registered Users"
+                        title="Click to view full profile"
                       >
                         <div style={{ fontWeight: 600, color: '#b8963e', textDecoration: 'underline' }}>{p.owner_name}</div>
                         <div style={{ fontSize: '0.75rem', color: 'rgba(15, 23, 42, 0.6)', marginTop: '0.15rem' }}>{p.owner_email}</div>
@@ -2212,7 +2255,8 @@ export default function AdminDashboard() {
         })()}
 
           </div> {/* End .admin-content */}
-        </div> {/* End .admin-layout */}
+        </div>
+        )} {/* End .admin-layout or UserProfileViewer */}
 
         {/* Docs Verification Modal */}
         {viewDocsFor && (

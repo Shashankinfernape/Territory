@@ -1,68 +1,163 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, setToken } from '../../lib/api';
+import { api, setToken, clearToken } from '../../lib/api';
 import { auth } from '../../lib/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useLanguage } from '../../contexts/LanguageContext';
+import SamsungAddressScreen from './SamsungAddressScreen';
+import { AnimatePresence, motion } from 'framer-motion';
+
 
 const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: 'select_account' });
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [step, setStep] = useState<1 | 2>(1);
+  const [tempData, setTempData] = useState<any>(null);
+  const [tempToken, setTempToken] = useState<string | null>(null);
+  const [savingAddress, setSavingAddress] = useState(false);
   const navigate = useNavigate();
   const { t } = useLanguage();
 
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError('');
+    // Scrub any stale local tokens before starting a new flow!
+    clearToken();
     try {
       const result = await signInWithPopup(auth, provider);
       if (result) {
-        const token = await result.user.getIdToken();
-        setToken(token);
+        let token = await result.user.getIdToken();
+        setTempToken(token);
 
-        const userRes = await api.post('/auth/google-login', {
-          uid: result.user.uid,
-          email: result.user.email,
-          full_name: result.user.displayName,
-          photo_url: result.user.photoURL,
-        });
+        try {
+          const userRes = await api.post('/auth/google-login', {
+            uid: result.user.uid,
+            email: result.user.email,
+            full_name: result.user.displayName,
+            photo_url: result.user.photoURL,
+          });
 
-        const { id: userId, role: userRole } = userRes.data;
-        localStorage.setItem('user_role', userRole);
-        localStorage.setItem('user_id', userId);
-        window.dispatchEvent(new Event('storage'));
-
-        if (userRole === 'ADMIN') navigate('/dashboard/admin');
-        else navigate('/');
+          // User exists!
+          const { id: userId, role: userRole, address } = userRes.data;
+          
+          if (address && Object.keys(address).length > 0) {
+            // Already has address, log them in fully
+            setToken(token);
+            navigate('/');
+            return;
+          } else {
+            // User exists but has no address
+            setTempData({
+              userId: userId,
+              role: userRole,
+              existingAddress: address || {},
+              isNewUser: false
+            });
+            setStep(2);
+          }
+        } catch (apiErr: any) {
+          if (apiErr.response && apiErr.response.status === 404) {
+            // New user! Go to Step 2 to gather address before creating
+            setTempData({
+              isNewUser: true,
+              googleData: {
+                uid: result.user.uid,
+                email: result.user.email,
+                full_name: result.user.displayName,
+                photo_url: result.user.photoURL,
+              }
+            });
+            setStep(2);
+          } else {
+            throw apiErr;
+          }
+        }
       }
     } catch (err: any) {
-      console.error(err);
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError(err.response?.data?.detail || err.message || 'Sign in failed. Please try again.');
-      }
+      console.error('Login error:', err);
+      setError(t('Failed to connect to Territory. Please try again.'));
+      auth.signOut();
+      clearToken();
     } finally {
       setLoading(false);
     }
   };
 
+  const handleAddressSave = async (addressData: any) => {
+    setSavingAddress(true);
+    try {
+      let currentToken = tempToken;
+      if (auth.currentUser) {
+        currentToken = await auth.currentUser.getIdToken(true);
+        setTempToken(currentToken);
+      }
+
+      if (tempData.isNewUser) {
+        await api.post('/auth/google-signup', {
+          ...tempData.googleData,
+          address: addressData
+        });
+      } else {
+        await api.post(`/auth/me/address`, addressData, {
+          headers: { Authorization: `Bearer ${currentToken}` }
+        });
+      }
+      setToken(currentToken as string);
+      navigate('/');
+    } catch (err) {
+      console.error('Failed to save address:', err);
+      // The SamsungAddressScreen component handles its own error display
+    } finally {
+      setSavingAddress(false);
+    }
+  };
+
+  const handleAddressCancel = async () => {
+    await auth.signOut();
+    clearToken();
+    setStep(1);
+    setTempData(null);
+    setTempToken(null);
+  };
+
   return (
-    <div className="login-page-wrapper">
+    <div className="login-page-wrapper" style={{
+      minHeight: '100vh',
+      width: '100vw',
+      background: 'url(/auth-bg.jpg) no-repeat center center fixed',
+      backgroundSize: 'cover',
+      display: 'flex',
+      alignItems: step === 1 ? 'flex-start' : 'center',
+      justifyContent: 'center',
+      padding: '2rem',
+      paddingTop: step === 1 ? '6rem' : '2rem',
+      position: 'relative'
+    }}>
+      {/* Background Overlay */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'linear-gradient(135deg, rgba(232, 239, 230, 0.45) 0%, rgba(255, 255, 255, 0.55) 100%)',
+        backdropFilter: 'blur(3px)',
+        zIndex: 1
+      }}></div>
+
       <style>{`
-        .login-page-wrapper {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: calc(100vh - 100px);
-          padding: 2.5rem 1.5rem;
-          background: transparent;
-          font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+        .login-page-wrapper * {
+          z-index: 2;
         }
         .login-glass-card {
           display: flex;
           width: 100%;
-          max-width: 820px;
+          max-width: ${step === 2 ? '1250px' : '820px'};
+          min-height: auto;
+          transition: max-width 0.4s ease;
           background: rgba(255, 255, 255, 0.45);
           backdrop-filter: blur(28px);
           -webkit-backdrop-filter: blur(28px);
@@ -74,21 +169,28 @@ export default function Login() {
           box-shadow: 0 30px 70px rgba(44, 44, 44, 0.05), 0 10px 30px rgba(0, 0, 0, 0.015);
         }
         .login-card-left {
-          flex: 1.1;
-          padding: 3.5rem 3rem;
+          flex: ${step === 2 ? '0.6' : '1.1'};
+          padding: ${step === 2 ? '2rem 2rem' : '3.5rem 2rem'};
           background: rgba(253, 251, 247, 0.25);
           border-right: 1px solid rgba(44, 44, 44, 0.06);
-          display: flex;
+          display: ${step === 2 ? 'flex' : 'flex'};
           flex-direction: column;
           justify-content: space-between;
         }
         .login-card-right {
-          flex: 0.9;
-          padding: 3.5rem 3rem;
+          flex: ${step === 2 ? '0.8' : '0.9'};
+          padding: ${step === 2 ? '2rem 2.5rem' : '3.5rem 3rem'};
           display: flex;
           flex-direction: column;
-          justify-content: center;
+          justify-content: ${step === 2 ? 'center' : 'flex-start'};
           background: rgba(255, 255, 255, 0.15);
+        }
+        .stepper-container {
+          display: flex;
+          justify-content: center;
+          margin-bottom: ${step === 2 ? '3rem' : '1.5rem'};
+          gap: 12px;
+          align-items: center;
         }
         .serial-num {
           font-family: 'Montserrat', sans-serif;
@@ -142,15 +244,34 @@ export default function Login() {
           line-height: 1.45;
         }
         @media (max-width: 768px) {
+          .login-page-wrapper {
+            padding: 1rem;
+            align-items: center;
+          }
           .login-glass-card {
             flex-direction: column;
             border-radius: 20px;
+            min-height: auto !important;
+            max-width: ${step === 2 ? '600px' : '420px'} !important;
+            width: 100%;
           }
           .login-card-left {
             display: none;
           }
           .login-card-right {
-            padding: 3rem 2rem;
+            padding: 1.5rem 1.5rem !important;
+            max-height: none !important;
+            overflow-y: visible !important;
+            justify-content: flex-start !important;
+          }
+          .stepper-container {
+            margin-bottom: 1.5rem !important;
+          }
+          .login-title {
+            font-size: 1.7rem;
+          }
+          .login-subtitle {
+            font-size: 0.8rem;
           }
         }
       `}</style>
@@ -202,28 +323,76 @@ export default function Login() {
 
         {/* RIGHT COLUMN - AUTHENTICATION FORM */}
         <div className="login-card-right">
-          <div>
-            <h3 className="login-title">{t("Sign in")}</h3>
-            <p className="login-subtitle">{t("Connect with Google to list or buy lands.")}</p>
+          {/* Elite Black & White Stepper UI */}
+          <div className="stepper-container">
+            <div style={{ 
+              width: '36px', height: '36px', borderRadius: '50%', 
+              border: '1px solid #1a1a1a',
+              background: step === 1 ? '#1a1a1a' : 'transparent', 
+              color: step === 1 ? '#fff' : '#1a1a1a', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', 
+              fontWeight: 500, fontSize: '15px', transition: 'all 0.3s ease' 
+            }}>1</div>
+            
+            <div style={{ width: '48px', height: '1px', background: '#1a1a1a', transition: 'all 0.3s ease' }}></div>
+            
+            <div style={{ 
+              width: '36px', height: '36px', borderRadius: '50%', 
+              border: '1px solid #1a1a1a',
+              background: step === 2 ? '#1a1a1a' : 'transparent', 
+              color: step === 2 ? '#fff' : '#1a1a1a', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', 
+              fontWeight: 500, fontSize: '15px', transition: 'all 0.3s ease' 
+            }}>2</div>
           </div>
 
-          {error && (
-            <div style={{
-              width: '100%',
-              background: 'rgba(239, 68, 68, 0.05)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              color: '#ef4444',
-              borderRadius: '12px',
-              padding: '0.75rem 1rem',
-              fontSize: '0.8rem',
-              marginBottom: '1.5rem',
-              textAlign: 'center',
-              fontWeight: 500,
-              boxSizing: 'border-box'
-            }}>
-              {error}
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {step === 2 ? (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+              >
+                <SamsungAddressScreen 
+                  initialData={tempData}
+                  onSave={handleAddressSave}
+                  onCancel={handleAddressCancel}
+                  isSaving={savingAddress}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'flex-start' }}
+              >
+                <div>
+                  <h3 className="login-title">{t("Sign in")}</h3>
+                  <p className="login-subtitle">{t("Connect with Google to list or buy lands.")}</p>
+                </div>
+
+                {error && (
+                  <div className="error-message" style={{
+                    width: '100%',
+                    background: 'rgba(239, 68, 68, 0.05)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    color: '#ef4444',
+                    borderRadius: '12px',
+                    padding: '0.75rem 1rem',
+                    fontSize: '0.8rem',
+                    marginBottom: '1.5rem',
+                    textAlign: 'center',
+                    fontWeight: 500,
+                    boxSizing: 'border-box'
+                  }}>
+                    {error}
+                  </div>
+                )}
 
           {/* Premium Google Sign-In Button */}
           <button
@@ -273,14 +442,15 @@ export default function Login() {
             {loading ? t("Connecting...") : t("Continue with Google")}
           </button>
 
-
-
-          <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.72rem', color: '#898989', margin: 0, lineHeight: 1.5 }}>
-              {t("By signing in, you agree to Territory's")} <br />
-              <a href="#" style={{ color: '#4a5d23', textDecoration: 'none', fontWeight: 600 }}>{t("Terms of Service")}</a> {t("and")} <a href="#" style={{ color: '#4a5d23', textDecoration: 'none', fontWeight: 600 }}>{t("Privacy Policy")}</a>.
-            </p>
-          </div>
+                <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
+                  <p className="login-terms" style={{ fontSize: '0.72rem', color: '#898989', margin: 0, lineHeight: 1.5 }}>
+                    {t("By signing in, you agree to Territory's")} <br />
+                    <a href="#" style={{ color: '#4a5d23', textDecoration: 'none', fontWeight: 600 }}>{t("Terms of Service")}</a> {t("and")} <a href="#" style={{ color: '#4a5d23', textDecoration: 'none', fontWeight: 600 }}>{t("Privacy Policy")}</a>.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

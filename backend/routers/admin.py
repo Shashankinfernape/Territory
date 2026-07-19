@@ -61,6 +61,88 @@ async def get_all_users(db=Depends(get_db), auth_db=Depends(get_auth_db), curren
     return users
 
 
+@router.get("/users/{user_id}/full-profile", response_model=Dict[str, Any])
+async def get_user_full_profile(user_id: str, db=Depends(get_db), auth_db=Depends(get_auth_db), current_admin=Depends(get_current_admin)):
+    # 1. Fetch User Profile
+    user_doc = await auth_db.users.find_one({"_id": user_id})
+    if not user_doc:
+        # Fallback for older records if they used ObjectId
+        if ObjectId.is_valid(user_id):
+            user_doc = await auth_db.users.find_one({"_id": ObjectId(user_id)})
+        if not user_doc:
+            raise HTTPException(status_code=404, detail="User not found")
+    
+    profile = {
+        "id": str(user_doc["_id"]),
+        "email": user_doc.get("email"),
+        "phone_number": user_doc.get("phone_number"),
+        "alternate_number": user_doc.get("alternate_number"),
+        "role": user_doc.get("role"),
+        "full_name": user_doc.get("full_name"),
+        "kyc_details": user_doc.get("kyc_details"),
+        "address": user_doc.get("address"),
+        "saved_addresses": user_doc.get("saved_addresses", []),
+        "created_at": user_doc.get("created_at"),
+        "photo_url": user_doc.get("photo_url"),
+        "photoURL": user_doc.get("photoURL"),
+        "profile_picture": user_doc.get("profile_picture"),
+        "avatar_url": user_doc.get("avatar_url"),
+        "picture": user_doc.get("picture")
+    }
+    # 2. Fetch Listed Properties (where seller_id == user_id)
+    listed_properties = []
+    cursor = db.properties.find({"seller_id": user_id})
+    async for prop in cursor:
+        doc = {k: v for k, v in prop.items() if k != "_id"}
+        doc["id"] = str(prop["_id"])
+        listed_properties.append(doc)
+
+    # 3. Fetch Bought Properties (where buyer_id == user_id in transactions with status SUCCESS)
+    bought_properties = []
+    pipeline = [
+        {"$match": {"buyer_id": user_id, "status": "SUCCESS"}},
+        {
+            "$lookup": {
+                "from": "properties",
+                "let": {"prop_id_str": "$property_id"},
+                "pipeline": [
+                    {"$addFields": {"id_str": {"$toString": "$_id"}}},
+                    {"$match": {"$expr": {"$eq": ["$id_str", "$$prop_id_str"]}}},
+                ],
+                "as": "property_info",
+            }
+        }
+    ]
+    
+    async for tx in db.transactions.aggregate(pipeline):
+        prop_info = tx.get("property_info", [])
+        if prop_info:
+            prop = prop_info[0]
+            doc = {k: v for k, v in prop.items() if k != "_id"}
+            doc["id"] = str(prop["_id"])
+            doc["transaction_date"] = tx.get("created_at")
+            doc["transaction_amount"] = tx.get("amount")
+            bought_properties.append(doc)
+
+    # 4. Fetch Wishlist Properties
+    wishlist_ids = user_doc.get("wishlist", [])
+    wishlist_properties = []
+    for pid in wishlist_ids:
+        if ObjectId.is_valid(pid):
+            prop = await db.properties.find_one({"_id": ObjectId(pid)})
+            if prop:
+                doc = {k: v for k, v in prop.items() if k != "_id"}
+                doc["id"] = str(prop["_id"])
+                wishlist_properties.append(doc)
+
+    return {
+        "profile": profile,
+        "listed_properties": listed_properties,
+        "bought_properties": bought_properties,
+        "wishlist_properties": wishlist_properties,
+    }
+
+
 @router.get("/properties", response_model=List[Dict[str, Any]])
 async def get_all_properties(db=Depends(get_db), auth_db=Depends(get_auth_db), current_admin=Depends(get_current_admin)):
     properties = []

@@ -45,6 +45,25 @@ class DocumentItem(BaseModel):
 # ---------------------------------------------------------------------------
 # Auth models
 # ---------------------------------------------------------------------------
+import uuid
+
+class Address(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    first_name: str
+    last_name: str
+    mobile_number: str
+    alternate_number: Optional[str] = None
+    email: str
+    pincode: str
+    flat_house_no: str
+    floor: str
+    street_locality: str
+    city: str
+    district: str
+    state: str
+    landmark: Optional[str] = None
+    address_type: str  # Home, Work, Neighbour
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -67,6 +86,10 @@ class GoogleLoginRequest(BaseModel):
     full_name: Optional[str] = None
     photo_url: Optional[str] = None
 
+class GoogleSignupRequest(GoogleLoginRequest):
+    address: Address
+
+
 
 class UserCreate(BaseModel):
     uid: str
@@ -75,6 +98,8 @@ class UserCreate(BaseModel):
     role: str = "USER"
     full_name: Optional[str] = None
     kyc_details: Optional[KYCDetails] = None
+    address: Optional[Address] = None
+    saved_addresses: List[Address] = []
 
     @field_validator("phone_number")
     @classmethod
@@ -92,7 +117,10 @@ class UserInDB(MongoInsertBase):
     phone_number: Optional[str] = None
     role: str
     full_name: Optional[str] = None
+    photo_url: Optional[str] = None
     kyc_details: Optional[KYCDetails] = None
+    address: Optional[dict] = None
+    saved_addresses: List[dict] = []
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -102,6 +130,9 @@ class UserResponse(BaseModel):
     phone_number: Optional[str] = None
     role: str
     full_name: Optional[str] = None
+    photo_url: Optional[str] = None
+    address: Optional[Address] = None
+    saved_addresses: List[Address] = []
     is_seller_pending: Optional[bool] = None
 
 

@@ -30,12 +30,14 @@ api.interceptors.response.use(
 
 export const setToken = (token: string): void => {
   localStorage.setItem('token', token);
+  window.dispatchEvent(new Event('local-auth-changed'));
 };
 
 export const clearToken = (): void => {
   localStorage.removeItem('token');
   localStorage.removeItem('user_role');
   localStorage.removeItem('user_phone');
+  window.dispatchEvent(new Event('local-auth-changed'));
 };
 
 export const getToken = (): string | null => {

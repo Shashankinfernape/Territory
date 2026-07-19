@@ -883,9 +883,9 @@ export default function MapSearch() {
   const [visibleCount, setVisibleCount] = useState(6);
   const [loading, setLoading] = useState(true);
   const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
-  const [outlineData, setOutlineData] = useState<any | null>(null);
+  const [_outlineData, setOutlineData] = useState<any | null>(null);
   const [cityDivisions, setCityDivisions] = useState<any>({});
-  const [isMapMoving, setIsMapMoving] = useState(false);
+  const [_isMapMoving, _setIsMapMoving] = useState(false);
   const { animationSetting } = useSettings();
 
   useEffect(() => {
@@ -1488,15 +1488,15 @@ export default function MapSearch() {
   // GeoJSON style handler
   const getFeatureStyle = (feature: any) => {
     const distName = feature.properties.Dist_Name || '';
-    const isSelected = selectedDistrict && normalizeName(distName) === normalizeName(selectedDistrict);
+    const isSelected = Boolean(selectedDistrict && normalizeName(distName) === normalizeName(selectedDistrict));
     return {
       stroke: isSelected,
       color: '#fde047',
       weight: isSelected ? 2 : 0,
       opacity: isSelected ? 1 : 0,
       dashArray: '',
-      lineCap: 'round',
-      lineJoin: 'round',
+      lineCap: 'round' as const,
+      lineJoin: 'round' as const,
       fillColor: isSelected ? '#fde047' : 'transparent',
       fillOpacity: isSelected ? 0.15 : 0,
       
@@ -1508,7 +1508,7 @@ export default function MapSearch() {
     layer.on({
       mouseover: (e: any) => {
         const distName = feature.properties.Dist_Name || '';
-        const isSelected = selectedDistrict && normalizeName(distName) === normalizeName(selectedDistrict);
+        const isSelected = Boolean(selectedDistrict && normalizeName(distName) === normalizeName(selectedDistrict));
         if (!isSelected) {
           e.target.setStyle({
             stroke: true,
@@ -2041,7 +2041,7 @@ export default function MapSearch() {
               );
             })}
 
-            {selectedDistrict && activeCityDivisions.map((div: any, idx: number) => {
+            {selectedDistrict && activeCityDivisions.map((div: any, _idx: number) => {
               const isHighlighted = selectedCity && normalizeName(div.name) === normalizeName(selectedCity);
               const bounds = L.polygon(div.polygons).getBounds();
               const center = bounds.isValid() ? bounds.getCenter() : null;
