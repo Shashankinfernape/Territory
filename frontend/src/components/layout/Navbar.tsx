@@ -253,8 +253,8 @@ export default function Navbar() {
                   transition: 'background 0.15s ease',
                   boxSizing: 'border-box'
                 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isActive('/wishlist') ? '#2C2C2C' : '#6b7280'} strokeWidth="2">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  <svg width="14" height="14" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill={isActive('/wishlist') ? '#ffffff' : 'none'} stroke={isActive('/wishlist') ? '#2C2C2C' : '#6b7280'} strokeWidth="2.2" />
                   </svg>
                 </Link>
 
@@ -334,12 +334,12 @@ export default function Navbar() {
                       background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px',
                       boxShadow: 'rgba(36,36,36,0.05) 0px 4px 8px 0px', zIndex: 999, padding: '0.3rem'
                     }}>
-                      <div style={{ padding: '0.6rem 0.8rem', borderBottom: '1px solid #FDFBF7' }}>
-                        <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#2C2C2C' }}>{displayName}</p>
+                      <Link to="/settings?view=contact" state={{ fromProfile: true }} onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.6rem 0.8rem', borderBottom: '1px solid #FDFBF7', textDecoration: 'none', cursor: 'pointer' }}>
+                        <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#2C2C2C', margin: 0 }}>{displayName}</p>
                         <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#6b7280', marginTop: '0.15rem', display: 'block', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
                           {role === 'ADMIN' ? 'Administrator' : 'Member'}
                         </span>
-                      </div>
+                      </Link>
                       <Link to="/" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>{t("Home")}</Link>
                       <Link to="/browse" onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>{t("Browse Listings")}</Link>
                       <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setDropdownOpen(false)} style={{ display: 'block', padding: '0.55rem 0.8rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.8125rem', borderRadius: '8px' }}>{t("My Dashboard")}</Link>
@@ -406,13 +406,45 @@ export default function Navbar() {
                 )}
                 <Link to="/map" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Map View</Link>
                 {loggedIn && (
-                  <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Dashboard</Link>
-                )}
-                {loggedIn && (
-                  <Link to="/wishlist" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Wishlist</Link>
+                  <>
+                    <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Dashboard</Link>
+                    <Link to="/wishlist" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Wishlist</Link>
+                    <Link to="/settings" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Settings</Link>
+                  </>
                 )}
                 <Link to="/help" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Help</Link>
                 <Link to="/contact" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Contact</Link>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 1rem' }}>
+                  <span style={{ color: '#2C2C2C', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Language</span>
+                  <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: '8px', padding: '3px', gap: '2px' }}>
+                    <button 
+                      onClick={() => { if (language !== 'en') { setLanguage('en'); setMobileMenuOpen(false); } }}
+                      style={{ 
+                        padding: '0.3rem 0.7rem', borderRadius: '6px', border: 'none', cursor: language === 'en' ? 'default' : 'pointer',
+                        background: language === 'en' ? '#ffffff' : 'transparent', 
+                        color: language === 'en' ? '#2C2C2C' : '#6b7280', 
+                        fontWeight: 600, fontSize: '0.75rem', 
+                        boxShadow: language === 'en' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      English
+                    </button>
+                    <button 
+                      onClick={() => { if (language !== 'ta') { setLanguage('ta'); setMobileMenuOpen(false); } }}
+                      style={{ 
+                        padding: '0.3rem 0.7rem', borderRadius: '6px', border: 'none', cursor: language === 'ta' ? 'default' : 'pointer',
+                        background: language === 'ta' ? '#ffffff' : 'transparent', 
+                        color: language === 'ta' ? '#2C2C2C' : '#6b7280', 
+                        fontWeight: 600, fontSize: '0.75rem', 
+                        boxShadow: language === 'ta' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      தமிழ்
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div style={{ height: '1px', background: '#f0efee', margin: '0.2rem 0' }} />
@@ -420,7 +452,7 @@ export default function Navbar() {
               {/* SECTION 3 (Auth display / Actions) */}
               {loggedIn ? (
                 <div style={{ padding: '0.35rem 0.5rem 0.5rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', background: '#f9fafb', borderRadius: '10px' }}>
+                  <Link to="/settings?view=contact" state={{ fromProfile: true }} onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', background: '#f9fafb', borderRadius: '10px', textDecoration: 'none', cursor: 'pointer' }}>
                     <div style={{ width: '36px', height: '36px', borderRadius: '50%', overflow: 'hidden', background: '#2C2C2C', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '0.8rem' }}>
                       {avatarUrl ? (
                         <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -432,9 +464,15 @@ export default function Navbar() {
                       <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#2C2C2C', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</p>
                       <span style={{ fontSize: '0.68rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.02em' }}>{role === 'ADMIN' ? 'Admin' : 'Member'}</span>
                     </div>
-                  </div>
-                  <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.6rem 0.5rem', color: '#4b5563', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 600 }}>My Dashboard</Link>
-                  <Link to="/wishlist" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.6rem 0.5rem', color: '#4b5563', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 600 }}>Wishlist</Link>
+                  </Link>
+                  {role === 'ADMIN' && (
+                    <Link to="/dashboard/admin" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.5rem', color: '#4b5563', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 600 }}>
+                      <span>Admin Notifications</span>
+                      {adminNotifications > 0 && (
+                        <span style={{ background: '#ff3b30', color: '#fff', fontSize: '0.6rem', fontWeight: 800, padding: '0.1rem 0.4rem', borderRadius: '10px' }}>{adminNotifications}</span>
+                      )}
+                    </Link>
+                  )}
                   <button onClick={handleLogout} style={{ width: '100%', padding: '0.75rem', background: 'transparent', border: 'none', color: '#dc2626', fontWeight: 700, fontSize: '0.88rem', textAlign: 'center', cursor: 'pointer', borderRadius: '10px', fontFamily: 'inherit', marginTop: '0.2rem' }}>Logout</button>
                 </div>
               ) : (

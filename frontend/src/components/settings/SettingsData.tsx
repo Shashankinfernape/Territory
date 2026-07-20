@@ -1,9 +1,28 @@
+interface SettingsDataProps {
+  onBack?: () => void;
+}
 
-
-export default function SettingsData() {
+export default function SettingsData({ onBack }: SettingsDataProps) {
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", padding: '1rem 2rem' }}>
-      <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#2C2C2C', marginBottom: '1.5rem' }}>Data & Storage</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        {onBack && (
+          <button onClick={onBack} style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: '36px', height: '36px', borderRadius: '50%',
+            background: '#f0f0f0', border: '1.5px solid #2C2C2C',
+            fontWeight: 'bold', fontSize: '1rem',
+            cursor: 'pointer', transition: 'background-color 0.15s ease',
+            flexShrink: 0, padding: 0, color: '#2C2C2C'
+          }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#e4e4e4'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+          >
+            &larr;
+          </button>
+        )}
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#2C2C2C', margin: 0 }}>Data & Storage</h2>
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', borderRadius: '12px', background: '#f9fafb', border: '1px solid #e5e7eb' }}>
           <div>

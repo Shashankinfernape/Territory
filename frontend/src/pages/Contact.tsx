@@ -105,7 +105,7 @@ export default function Contact() {
               <textarea id="contact-message" className="form-input" required rows={4} placeholder="Describe your issue or question…"
                 style={{ resize: 'vertical', fontFamily: 'inherit' }} />
             </div>
-            <button id="contact-submit" type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>
+            <button id="contact-submit" type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem', backgroundColor: '#000', color: '#fff' }}>
               Send Message
             </button>
           </form>

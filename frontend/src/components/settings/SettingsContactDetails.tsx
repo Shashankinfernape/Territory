@@ -52,7 +52,11 @@ const emptyAddress: AddressData = {
   address_type: 'Home',
 };
 
-export default function SettingsContactDetails() {
+interface SettingsContactDetailsProps {
+  onBack?: () => void;
+}
+
+export default function SettingsContactDetails({ onBack }: SettingsContactDetailsProps) {
   const [addresses, setAddresses] = useState<AddressData[]>([]);
   const [activeAddressId, setActiveAddressId] = useState<string | null>(null);
   const [mode, setMode] = useState<'saved' | 'new'>('saved');
@@ -181,7 +185,22 @@ export default function SettingsContactDetails() {
           padding: '24px 28px', 
         }}>
           
-          <div style={{ marginBottom: '20px' }}>
+          <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {onBack && (
+              <button onClick={onBack} style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: '36px', height: '36px', borderRadius: '50%',
+                background: '#f0f0f0', border: '1.5px solid #2C2C2C',
+                fontWeight: 'bold', fontSize: '1rem',
+                cursor: 'pointer', transition: 'background-color 0.15s ease',
+                flexShrink: 0, padding: 0, color: '#2C2C2C'
+              }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#e4e4e4'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+              >
+                &larr;
+              </button>
+            )}
             <h2 style={{ 
               fontFamily: "'SamsungOne', 'Inter', 'Roboto', sans-serif",
               fontSize: '18px', 
@@ -190,7 +209,7 @@ export default function SettingsContactDetails() {
               letterSpacing: '-0.2px',
               color: '#000000', 
               margin: 0 
-            }}>1. Contact Details</h2>
+            }}>Contact Details</h2>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -288,7 +307,24 @@ export default function SettingsContactDetails() {
 
   return (
     <div style={{ padding: '0', fontFamily: "'SamsungOne', sans-serif" }}>
-      <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '2rem' }}>Contact Details</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+        {onBack && (
+          <button onClick={onBack} style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: '36px', height: '36px', borderRadius: '50%',
+            background: '#f0f0f0', border: '1.5px solid #2C2C2C',
+            fontWeight: 'bold', fontSize: '1rem',
+            cursor: 'pointer', transition: 'background-color 0.15s ease',
+            flexShrink: 0, padding: 0, color: '#2C2C2C'
+          }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#e4e4e4'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+          >
+            &larr;
+          </button>
+        )}
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Contact Details</h2>
+      </div>
 
       {/* Radio Switcher */}
       <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
@@ -333,12 +369,13 @@ export default function SettingsContactDetails() {
       </h3>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem 3rem', maxWidth: '800px' }}>
-        <SamsungTextField label="First Name*" value={formData.first_name} onChange={(e: any) => handleChange('first_name', e.target.value)} error={errors.first_name} />
-        <SamsungTextField label="Last Name*" value={formData.last_name} onChange={(e: any) => handleChange('last_name', e.target.value)} error={errors.last_name} />
+        <SamsungTextField label="First Name*" value={formData.first_name} onChange={(e: any) => handleChange('first_name', e.target.value)} onClear={() => handleChange('first_name', '')} error={errors.first_name} />
+        <SamsungTextField label="Last Name*" value={formData.last_name} onChange={(e: any) => handleChange('last_name', e.target.value)} onClear={() => handleChange('last_name', '')} error={errors.last_name} />
         <SamsungTextField 
             label="Mobile Number*" 
             value={formData.mobile_number} 
             onChange={(e: any) => handleChange('mobile_number', e.target.value)} 
+            onClear={() => handleChange('mobile_number', '')}
             error={errors.mobile_number}
             type="tel"
             maxLength={10}
@@ -347,22 +384,24 @@ export default function SettingsContactDetails() {
             label="Alternate Number (Optional)" 
             value={formData.alternate_number || ''} 
             onChange={(e: any) => handleChange('alternate_number', e.target.value)} 
+            onClear={() => handleChange('alternate_number', '')}
             type="tel"
             maxLength={10}
           />
         
         <div style={{ gridColumn: '1 / -1' }}>
-          <SamsungTextField label="Email Address*" type="email" value={formData.email} onChange={(e: any) => handleChange('email', e.target.value)} error={errors.email} />
+          <SamsungTextField label="Email Address*" type="email" value={formData.email} onChange={(e: any) => handleChange('email', e.target.value)} onClear={() => handleChange('email', '')} error={errors.email} />
         </div>
         
         <SamsungTextField 
             label="Pincode*" 
             value={formData.pincode} 
             onChange={(e: any) => handleChange('pincode', e.target.value)} 
+            onClear={() => handleChange('pincode', '')}
             error={errors.pincode}
             maxLength={6}
           /> 
-        <SamsungTextField label="Flat/House No*" value={formData.flat_house_no} onChange={(e: any) => handleChange('flat_house_no', e.target.value)} error={errors.flat_house_no} />
+        <SamsungTextField label="Flat/House No*" value={formData.flat_house_no} onChange={(e: any) => handleChange('flat_house_no', e.target.value)} onClear={() => handleChange('flat_house_no', '')} error={errors.flat_house_no} />
         
         <div style={{ position: 'relative', zIndex: 1000 }}>
           {(!STANDARD_FLOORS.includes(formData.floor) && formData.floor !== '') ? (
@@ -384,13 +423,13 @@ export default function SettingsContactDetails() {
             />
           )}
         </div>
-        <SamsungTextField label="Street/Locality*" value={formData.street_locality} onChange={(e: any) => handleChange('street_locality', e.target.value)} error={errors.street_locality} />
+        <SamsungTextField label="Street/Locality*" value={formData.street_locality} onChange={(e: any) => handleChange('street_locality', e.target.value)} onClear={() => handleChange('street_locality', '')} error={errors.street_locality} />
         
-        <SamsungTextField label="City*" value={formData.city} onChange={(e: any) => handleChange('city', e.target.value)} error={errors.city} />
-        <SamsungTextField label="State*" value={formData.state} onChange={(e: any) => handleChange('state', e.target.value)} error={errors.state} />
+        <SamsungTextField label="City*" value={formData.city} onChange={(e: any) => handleChange('city', e.target.value)} onClear={() => handleChange('city', '')} error={errors.city} />
+        <SamsungTextField label="State*" value={formData.state} onChange={(e: any) => handleChange('state', e.target.value)} onClear={() => handleChange('state', '')} error={errors.state} />
         
-        <SamsungTextField label="District*" value={formData.district} onChange={(e: any) => handleChange('district', e.target.value)} error={errors.district} />
-        <SamsungTextField label="Landmark" value={formData.landmark} onChange={(e: any) => handleChange('landmark', e.target.value)} error={errors.landmark} />
+        <SamsungTextField label="District*" value={formData.district} onChange={(e: any) => handleChange('district', e.target.value)} onClear={() => handleChange('district', '')} error={errors.district} />
+        <SamsungTextField label="Landmark" value={formData.landmark} onChange={(e: any) => handleChange('landmark', e.target.value)} onClear={() => handleChange('landmark', '')} error={errors.landmark} />
       </div>
 
       <div style={{ marginTop: '40px', marginBottom: '40px' }}>

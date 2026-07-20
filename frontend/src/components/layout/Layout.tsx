@@ -4,7 +4,7 @@ import Footer from './Footer';
 
 export default function Layout() {
   const { pathname } = useLocation();
-  const isMapPage = pathname === '/map';
+  const hideFooter = pathname === '/map' || pathname === '/settings';
 
   return (
     <div className="min-h-screen flex flex-col text-gray-900 font-sans">
@@ -12,7 +12,7 @@ export default function Layout() {
       <main className="flex-grow">
         <Outlet />
       </main>
-      {!isMapPage && <Footer />}
+      {!hideFooter && <Footer />}
     </div>
   );
 }

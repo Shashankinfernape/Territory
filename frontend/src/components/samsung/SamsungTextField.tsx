@@ -51,7 +51,7 @@ export default function SamsungTextField({ label, error, onClear, className = ''
                e.preventDefault();
                onClear();
             }}
-            className="absolute right-0 bottom-[8px] flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#999999] hover:bg-[#777777] transition-colors"
+            className="absolute right-0 bottom-[10px] flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#999999] hover:bg-[#777777] transition-colors"
           >
             <svg width="8" height="8" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M1 1L13 13M1 13L13 1" stroke="white" strokeWidth="2" strokeLinecap="round"/>
