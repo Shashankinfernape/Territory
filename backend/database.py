@@ -6,7 +6,10 @@ from firebase_admin import credentials
 
 load_dotenv()
 
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+MONGODB_URL = os.getenv("MONGODB_URL")
+if not MONGODB_URL:
+    raise ValueError("MONGODB_URL environment variable is not set. Local data connections are disabled.")
+    
 DATABASE_NAME = os.getenv("DATABASE_NAME", "propit")
 
 MONGODB_AUTH_URL = os.getenv("MONGODB_AUTH_URL", MONGODB_URL)

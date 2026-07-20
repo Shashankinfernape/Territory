@@ -184,6 +184,9 @@ export default function Navbar() {
             <Link to="/browse" className={`nav-menu-link${isActive('/browse') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
               {t("Buy")}
             </Link>
+            <Link to="/map" className={`nav-menu-link${isActive('/map') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
+              {t("Map View")}
+            </Link>
             {!loggedIn && (
               <Link to="/sell-guide" className={`nav-menu-link${isActive('/sell-guide') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
                 {t("Sell")}
@@ -194,9 +197,6 @@ export default function Navbar() {
                 {t("Sell")}
               </Link>
             )}
-            <Link to="/map" className={`nav-menu-link${isActive('/map') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
-              {t("Map View")}
-            </Link>
             {loggedIn && (
               <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} className={`nav-menu-link${isActive('/dashboard') ? ' active' : ''}`} style={language === 'ta' ? { fontSize: '0.92rem', fontWeight: 600, padding: '0.35rem 0.5rem' } : {}}>
                 {t("Dashboard")}
@@ -398,13 +398,13 @@ export default function Navbar() {
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <Link to="/" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Home</Link>
                 <Link to="/browse" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Buy</Link>
+                <Link to="/map" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Map View</Link>
                 {!loggedIn && (
                   <Link to="/sell-guide" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Sell</Link>
                 )}
                 {loggedIn && role !== 'SELLER' && role !== 'ADMIN' && (
                   <Link to="/sell-guide" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Sell</Link>
                 )}
-                <Link to="/map" onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Map View</Link>
                 {loggedIn && (
                   <>
                     <Link to={role === 'ADMIN' ? '/dashboard/admin' : (role === 'SELLER' ? '/dashboard/seller' : '/dashboard/buyer')} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.65rem 1rem', color: '#2C2C2C', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, fontFamily: "'Inter', sans-serif" }}>Dashboard</Link>

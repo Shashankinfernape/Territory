@@ -1,1 +1,0 @@
-import os; from pymongo import MongoClient; from dotenv import load_dotenv; load_dotenv(); client = MongoClient(os.getenv('MONGODB_URL')); db = client[os.getenv('DATABASE_NAME')]; props = list(db.properties.find().sort('created_at', -1).limit(5)); print([{**p, '_id': str(p['_id'])} for p in props])  
