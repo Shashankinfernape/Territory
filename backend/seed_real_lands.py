@@ -10,25 +10,19 @@ client = MongoClient(os.getenv("MONGODB_URL"))
 db = client[os.getenv("DATABASE_NAME")]
 properties_col = db["properties"]
 
-TN_DISTRICT_CITIES = {
-    "Coimbatore": ["Pollachi", "Mettupalayam", "Valparai", "Kinathukadavu", "Sulur", "Singanallur"],
-    "Chennai": ["Adyar", "Velachery", "Tambaram", "Guindy", "Taramani", "Mylapore"],
-    "Madurai": ["Usilampatti", "Melur", "Thirumangalam", "Vadipatti", "Avaniapuram"],
-    "Salem": ["Attur", "Mettur", "Omalur", "Edappadi", "Sankagiri"],
-    "Tiruchirappalli (Trichy)": ["Srirangam", "Manapparai", "Lalgudi", "Thiruverumbur", "Musiri"],
-    "Tirunelveli": ["Ambasamudram", "Tenkasi", "Nanguneri", "Radhapuram", "Valliyur"],
-    "Erode": ["Gobichettipalayam", "Bhavani", "Sathyamangalam", "Perundurai", "Anthiyur"],
-    "Vellore": ["Gudiyatham", "Katpadi", "Pernambut", "Anaicut"],
-    "Thoothukudi": ["Kovilpatti", "Tiruchendur", "Vilathikulam", "Srivaikuntam", "Kayathar"],
-    "Dindigul": ["Palani", "Kodaikanal", "Oddanchatram", "Vedasandur", "Natham"],
-    "Thanjavur": ["Kumbakonam", "Pattukkottai", "Papanasam", "Orathanadu", "Peravurani"],
-    "Ranipet": ["Arakkonam", "Arcot", "Walajapet", "Nemili", "Sholinghur"],
-    "Virudhunagar": ["Sivakasi", "Rajapalayam", "Srivilliputhur", "Aruppukkottai", "Sattur"],
-    "Karur": ["Kulithalai", "Aravakurichi", "Krishnarayapuram", "Kadavur", "Pugalur"],
-    "Nilgiris": ["Ooty", "Coonoor", "Kotagiri", "Gudalur", "Kundah", "Panthalur"],
-    "Krishnagiri": ["Hosur", "Denkanikottai", "Pochampalli", "Uthangarai", "Shoolagiri"],
-    "Kanniyakumari": ["Nagercoil", "Padmanabhapuram", "Thuckalay", "Kuzhithurai", "Marthandam"]
-}
+import json
+
+def load_district_cities():
+    path = os.path.join(os.path.dirname(__file__), "..", "frontend", "public", "tamilnadu_city_divisions.json")
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    
+    district_cities = {}
+    for dist, taluks in data.items():
+        district_cities[dist] = [t["name"] for t in taluks]
+    return district_cities
+
+TN_DISTRICT_CITIES = load_district_cities()
 
 DOCS = [
     {"type": "Patta", "url": "/uploads/documents/5aa6736462d44a049d7340a2df0e9a2a.pdf"},
@@ -63,8 +57,8 @@ def download_lorem_images(keywords, prefix, target_count=45):
 
 def main():
     print("Starting massive unique image download via LoremFlickr...")
-    farm_paths = download_lorem_images("farmland,agriculture", "unique_farm", 45)
-    plot_paths = download_lorem_images("land,field", "unique_plot", 45)
+    farm_paths = download_lorem_images("india,agriculture,farm", "unique_farm", 45)
+    plot_paths = download_lorem_images("india,land,plot", "unique_plot", 45)
     
     if len(farm_paths) < 45 or len(plot_paths) < 45:
         print("Warning: Didn't get enough images, but continuing with what we have.")
@@ -81,7 +75,7 @@ def main():
     for i in range(15):
         dist = random.choice(list(TN_DISTRICT_CITIES.keys()))
         city = random.choice(TN_DISTRICT_CITIES[dist])
-        taluk = f"{city} Taluk"
+        taluk = city
         p_type = random.choice(["Agricultural Land", "Farm Land"])
         
         images = []
@@ -115,7 +109,7 @@ def main():
     for i in range(15):
         dist = random.choice(list(TN_DISTRICT_CITIES.keys()))
         city = random.choice(TN_DISTRICT_CITIES[dist])
-        taluk = f"{city} Taluk"
+        taluk = city
         p_type = random.choice(["Residential Plot", "Commercial Plot", "Flat Plot"])
         
         images = []

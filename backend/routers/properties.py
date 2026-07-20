@@ -66,7 +66,7 @@ async def get_properties(
         # Keyword search includes SOLD_OUT so buyers can find sold properties by keyword/location.
         # PENDING_VERIFICATION and REJECTED are still excluded from public search.
         query = {
-            "status": {"$in": ["ACTIVE", "SOLD_OUT"]},
+            "status": {"$in": ["ACTIVE", "SOLD_OUT", "DELETE_REQUESTED"]},
             "$or": [
                 {"city": {"$regex": search, "$options": "i"}},
                 {"district": {"$regex": search, "$options": "i"}},
@@ -77,8 +77,8 @@ async def get_properties(
             ]
         }
     else:
-        # Normal browsing: only show ACTIVE listings
-        query: dict = {"status": "ACTIVE"}
+        # Normal browsing: only show ACTIVE and DELETE_REQUESTED listings
+        query: dict = {"status": {"$in": ["ACTIVE", "DELETE_REQUESTED"]}}
         if type: query["type"] = type
         if city: query["city"] = {"$regex": city, "$options": "i"}
         if district: query["district"] = {"$regex": district, "$options": "i"}
